@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Form - Intranet</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+
+      <!-- Header -->
+      <div class="form-header">
+        <p>Colegio San Agustín de Hipona</p>
+        <h1>Portal Intranet</h1>
+      </div>
+
+      <!-- Formulario -->
+      <form class="form-box">
+        <div class="input-group">
+          <input type="email" id="email" class="input-field" placeholder=" " required>
+          <label for="email" class="floating-label">Dirección de Gmail</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" class="input-field" placeholder=" " required>
+          <label for="password" class="floating-label">Contraseña</label>
+          <div class="eye-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+
+        <div class="input-group checkbox-group">
+          <div class="form-col remember-me">
+            <input type="checkbox" id="remember-me-checkbox" class="checkbox-field">
+            <label for="remember-me-checkbox">Recuérdame</label>
+          </div>
+          <div class="form-col">
+            <a href="#" class="form-link">¿Olvidaste tu contraseña?</a>
+          </div>
+        </div>
+
+        <button type="submit" class="form-btn form-btn--submit">Iniciar sesión</button>
+      </form>
+
+      <!-- Divider -->
+      <div class="form-divider">
+        <p> Más sobre nosotros</p>
+      </div>
+
+      <!-- Redes sociales -->
+      <div class="form-bottom">
+        <div class="form-socials">
+            <a href="https://www.facebook.com/p/Colegio-San-Agust%C3%ADn-De-Hipona-100083565270696/?locale=es_LA" target="_blank" class="form-btn form-btn--social">
+                <img src="assets/facebook-1.svg" class="btn-icon" alt="Facebook">
+            </a>
+            <a href="https://www.instagram.com/colegio.agustin.de.hipona/?hl=es" target="_blank" class="form-btn form-btn--social">
+                <img src="assets/instagram-1-svgrepo-com.svg" class="btn-icon" alt="Instagram">
+            </a>
+            <a href="https://hipona.cl/" target="_blank" class="form-btn form-btn--social">
+                <img src="assets/google-color-svgrepo-com.svg" class="btn-icon" alt="Google">
+            </a>
+</div>
+
+
+        <p>¿No te funciona el correo/contraseña? 
+          <a href="#" class="form-link">Comunícate con nosotros</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
