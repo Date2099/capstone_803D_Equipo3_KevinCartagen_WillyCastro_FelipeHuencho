@@ -1,0 +1,87 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Form - Intranet</title>
+  <link rel="stylesheet" href="{% static 'css/loginStyle.css' %}">
+
+</head>
+<body>
+  <div class="main-wrapper">
+    
+    <div class="left-panel">
+      <div class="left-panel-content">
+        <img src="{% static 'img/logo.png' %}" alt="Logo Colegio San Agustín de Hipona" class="school-logo-large">
+        <h2 class="welcome-heading">Bienvenido al Portal Intranet</h2>
+        <p class="welcome-text">Accededsgs a toda la información y recursos de la comunidad del Colegio San Agustín de Hipona.</p>
+        <p class="copyright-text">© 2024 Colegio San Agustín de Hipona. Todos los derechos reservados.</p>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="form-container">
+        
+        <img style="width: 260px;"src="{% static 'img/logo.png' %}" alt="Logo Colegio San Agustín de Hipona" class="school-logo-small">
+
+        <div class="form-header">
+          <h1>Acceso Intranet</h1>
+          <p class="sub-header-text">¡Hola de nuevo! Ingresa con tu cuenta.</p>
+          <p class="create-account-text">¿No tienes cuenta? <a href="#" class="form-link">Solicita acceso aquí</a>.</p>
+        </div>
+
+        <form class="form-box" method="post">
+          <div class="input-group">
+            <input type="text" id="username" name="username" class="input-field" placeholder=" " required>
+            <label for="email" class="floating-label">Dirección de Gmail</label>
+          </div>
+
+          <div class="input-group">
+            <input type="password" id="password" name="password" class="input-field" placeholder=" " required>
+            <label for="password" class="floating-label">Contraseña</label>
+            <div class="eye-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+
+          <div class="input-group checkbox-group">
+            <div class="form-col remember-me">
+              <input type="checkbox" id="remember-me-checkbox" class="checkbox-field">
+              <label for="remember-me-checkbox">Recuérdame</label>
+            </div>
+            <div class="form-col">
+              <a href="#" class="form-link">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
+          {% csrf_token %}
+          <button type="submit" class="form-btn form-btn--submit">Iniciar sesión</button>
+        </form>
+
+        <div class="form-divider">
+          <p>Más sobre nosotros</p>
+        </div>
+
+        <div class="form-bottom">
+          <div class="form-socials">
+              <a href="https://www.facebook.com/p/Colegio-San-Agust%C3%ADn-De-Hipona-100083565270696/?locale=es_LA" target="_blank" class="form-btn form-btn--social">
+                  <img src="{% static 'img/facebook.svg' %}" class="btn-icon icon-invertible" alt="Facebook">
+              </a>
+              <a href="https://www.instagram.com/colegio.agustin.de.hipona/?hl=es" target="_blank" class="form-btn form-btn--social">
+                  <img src="{% static 'img/instagram.svg' %}" class="btn-icon icon-invertible" alt="Instagram">
+              </a>
+              <a href="https://hipona.cl/" target="_blank" class="form-btn form-btn--social">
+                  <img src="{% static 'img/google.svg' %}" class="btn-icon" alt="Página Web">
+              </a>
+          </div>
+
+          <p class="contact-text">¿No te funciona el correo/contraseña?
+            <a href="#" class="form-link">Comunícate con nosotros</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

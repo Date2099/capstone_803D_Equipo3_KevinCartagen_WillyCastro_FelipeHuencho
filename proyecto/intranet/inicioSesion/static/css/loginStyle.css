@@ -1,0 +1,386 @@
+/* Tipografía */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Colores basados en la web del colegio */
+:root {
+  --color-primary: #4A2B6D;      /* Azul/Violeta oscuro del menú y logo */
+  --color-secondary: #cba858;   /* Dorado del logo y botón "Informativo" */
+  --color-text-dark: #333;      /* Texto principal oscuro */
+  --color-text-light: #ffffff;   /* Texto claro para el panel izquierdo */
+  --color-background-card: #ffffff;/* Fondo blanco del formulario */
+  --color-border: #d1d1d1;      /* Color de borde suave */
+  --color-placeholder: #888;    /* Color para placeholders y etiquetas */
+  --color-link-hover: #DDAA00; /* Un dorado más brillante para enlaces hover */
+}
+
+/* Reset y Estilos Generales */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-image: url('DJI_0535.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: inherit;
+  filter: blur(10px) brightness(0.8);
+  z-index: -1;
+}
+
+.main-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  max-width: 1200px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+/* Panel Izquierdo (Imagen del Colegio) */
+.left-panel {
+  flex: 1;
+  background-image: linear-gradient(rgba(74, 43, 109, 0.65), rgba(74, 43, 109, 0.65)), url('DJI_0535.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.left-panel-content {
+  max-width: 400px;
+}
+
+.school-logo-large {
+  width: 260px;
+  height: auto;
+  margin-bottom: 25px;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.3));
+}
+
+.welcome-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.welcome-text {
+  font-size: 1.1rem;
+  font-weight: 300;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: auto;
+}
+
+.copyright-text {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  padding-top: 40px;
+}
+
+/* Panel Derecho (Formulario de Login) */
+.right-panel {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.school-logo-small {
+  display: none;
+}
+
+.form-header {
+  margin-bottom: 30px;
+}
+
+.form-header h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.sub-header-text {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.create-account-text {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.create-account-text .form-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.create-account-text .form-link:hover {
+  color: var(--color-secondary);
+  text-decoration: underline;
+}
+
+/* Formulario y Campos de Entrada */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-field {
+  width: 100%;
+  height: 50px;
+  padding: 0 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fafafa;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 43, 109, 0.15);
+}
+
+.floating-label {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-placeholder);
+  background-color: transparent;
+  padding: 0;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.input-field:focus ~ .floating-label,
+.input-field:not(:placeholder-shown) ~ .floating-label {
+  top: 0;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  background-color: rgba(250, 250, 250, 1);
+  padding: 0 5px;
+  left: 10px;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--color-placeholder);
+}
+
+.input-group.checkbox-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-top: -5px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+}
+
+input.checkbox-field {
+  width: 1em;
+  height: 1em;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.form-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.form-link:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+.form-btn--submit {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.form-btn--submit:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  transform: translateY(-3px);
+}
+
+/* Divisor */
+.form-divider {
+  margin: 30px 0;
+  position: relative;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+.form-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background-color: #e0e0e0;
+    z-index: 1;
+}
+.form-divider p {
+    background-color: transparent;
+    padding: 0 10px;
+    display: inline-block;
+    position: relative;
+    z-index: 2;
+}
+
+/* Redes Sociales y Parte Inferior */
+.form-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-socials {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.form-btn--social {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background-color: rgba(253, 253, 253, 0.8);
+  transition: all 0.3s ease;
+}
+
+.form-btn--social:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary); /* Sigue cambiando el fondo del círculo */
+  transform: translateY(-3px);
+}
+
+/* La regla para el filtro se ELIMINA aquí */
+/* .form-btn--social:hover .icon-invertible {
+  filter: brightness(0) invert(1);
+} */
+
+.btn-icon {
+  width: 24px;
+}
+
+
+.contact-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 850px) {
+  .main-wrapper {
+    flex-direction: column;
+    height: auto;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  body {
+    padding: 0;
+  }
+  
+  body::before {
+    display: none;
+  }
+
+  .left-panel {
+    display: none;
+  }
+
+  .right-panel {
+    width: 100%;
+    min-height: 100vh;
+    padding: 30px;
+    background-color: var(--color-background-card);
+    backdrop-filter: none;
+  }
+
+  .school-logo-small {
+    display: block;
+    width: 70px;
+    height: auto;
+    margin: 0 auto 20px;
+  }
+}
