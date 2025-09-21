@@ -41,7 +41,7 @@ En este apartado se planifica y organiza el trabajo a desarrollar en cada sprint
 Se definen tareas, responsables, prioridades y tiempos estimados para asegurar un avance ordenado del proyecto.  
 
 Puedes revisar el detalle en el siguiente documento:  
-[Planificación de Sprint planning](https://docs.google.com/spreadsheets/d/1g8LMkyLKWfw6ZZ--sP4orMh-G-sZOvR2/edit?gid=1393139069#gid=1393139069)  
+[Planificación de Sprint planning]([https://docs.google.com/spreadsheets/d/1g8LMkyLKWfw6ZZ--sP4orMh-G-sZOvR2/edit?gid=1393139069#gid=1393139069](https://docs.google.com/spreadsheets/d/1oxq627XYlFQhutUfNXIPEzLQ66uCWCAIddSAu-oitHU/edit?usp=sharing))  
 
 
 
