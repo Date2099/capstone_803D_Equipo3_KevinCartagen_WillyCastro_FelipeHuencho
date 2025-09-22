@@ -1,0 +1,371 @@
+/* --- PALETA DE COLORES Y FUENTE DEL COLEGIO --- */
+:root{
+  --color-primary: #4A2B6D;
+  --color-accent: #C99C2E;
+  --color-bg: #F5F6F8;
+  --color-card: #FFFFFF;
+  --color-muted: #6B7280;
+  --color-border: #E6E8EB;
+  --color-danger: #EF4444;
+  --sidebar-width: 260px;
+  --radius: 12px;
+  --glass: rgba(255,255,255,0.7);
+  --shadow-sm: 0 6px 18px rgba(15,23,42,0.06);
+  --shadow-md: 0 10px 30px rgba(15,23,42,0.08);
+  --transition: 200ms cubic-bezier(.2,.9,.2,1);
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Sidebar por defecto: desktop */
+#sidebar {
+  position: sticky;      /* Desktop: se pega al scroll */
+  top: 0;
+  left: 0;
+  height: 100vh;         /* ocupar todo el alto */
+  width: var(--sidebar-width);
+  transform: translateX(0);  /* sin desplazamiento desktop */
+  transition: transform 0.5s ease;
+  z-index: 1000;
+}
+
+/* Mobile: fixed + offscreen */
+@media (max-width:768px) {
+  #sidebar {
+    position: fixed;
+    height: 100%;
+    transform: translateX(calc(-1*var(--sidebar-width)));
+    box-shadow: 0 20px 50px rgba(2,6,23,0.2);
+  }
+  #sidebar:not(.closed) {
+    transform: translateX(0);
+  }
+}
+
+
+
+/* --- RESET Y GENERALES --- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font-sans);font-size:15px;background:linear-gradient(180deg,var(--color-bg) 0%,#f8fafc 100%);color:#0f172a;letter-spacing:0.1px}
+
+/* --- LAYOUT --- */
+.layout{display:flex;min-height:100vh;width:100%}
+
+/* --- SIDEBAR --- */
+.sidebar{
+  width:var(--sidebar-width);
+  background: linear-gradient(180deg,var(--color-primary), #3f2357);
+  color: #fff;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  transition: transform var(--transition), width var(--transition), box-shadow var(--transition);
+  flex-shrink:0;
+}
+.brand{display:flex;align-items:center;gap:.9rem;padding:1.2rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.06);font-weight:700;font-size:1.05rem}
+.brand-logo{width:44px;height:auto;border-radius:8px;box-shadow:var(--shadow-sm)}
+.profile{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--color-accent),#f59e0b);display:grid;place-items:center;color:#fff;font-weight:800}
+.profile-info div:first-child{font-weight:700}
+.profile-info .role{font-size:.82rem;color:rgba(255,255,255,.85)}
+.menu{padding:.6rem 0;overflow-y:auto;flex:1}
+.menu a{
+  display:flex;align-items:center;gap:.85rem;padding:.65rem 1.1rem;margin:.25rem .7rem;color:rgba(255,255,255,.95);
+  text-decoration:none;font-weight:600;border-radius:10px;transition:all var(--transition);
+}
+.menu a:hover{transform:translateX(4px);background:rgba(255,255,255,.06)}
+.menu a i{width:22px;text-align:center;opacity:.95}
+.menu a.active{background:var(--glass);color:var(--color-primary);font-weight:700;box-shadow:var(--shadow-sm)}
+details.menu-group{margin:.3rem .6rem}
+details summary{list-style:none;display:flex;align-items:center;gap:.85rem;padding:.7rem 1rem;color:rgba(255,255,255,.95);cursor:pointer;border-radius:10px}
+details summary:hover{background:rgba(255,255,255,.04)}
+.sub-menu{margin-top:.5rem;padding-left:2rem}
+.sub-menu a{display:block;padding:.45rem .6rem;color:rgba(255,255,255,.9);font-size:.95rem;border-radius:8px}
+.sub-menu a:hover{background:rgba(255,255,255,.03)}
+
+/* --- MAIN --- */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  height:68px;background:transparent;color:var(--color-muted);display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:10;
+  backdrop-filter: blur(4px);
+}
+.toggle{background-color:var(--color-card);border:0;color:var(--color-primary);font-size:1.1rem;padding:.5rem;border-radius:10px;cursor:pointer;box-shadow:var(--shadow-sm)}
+.topbar-title{font-weight:700;font-size:1.15rem;color:#0f172a}
+.topbar .spacer{flex:1}
+.icon-btn{position:relative;background:transparent;border:0;color:var(--color-muted);font-size:1.1rem;cursor:pointer;width:44px;height:44px;border-radius:10px;display:grid;place-items:center}
+.icon-btn:hover{background:rgba(15,23,42,0.03)}
+.icon-btn .dot{position:absolute;top:8px;right:8px;background:var(--color-danger);color:#fff;font-size:.65rem;border-radius:999px;padding:0 .35rem;line-height:1.2rem;border:2px solid var(--color-card)}
+.user-mini{display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:700}
+.avatar-mini{width:34px;height:34px;border-radius:50%;font-size:.95rem;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));display:grid;place-items:center;color:#fff}
+
+/* --- CONTENT --- */
+.content{padding:1.8rem;flex:1}
+.card{background:var(--color-card);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow-md);border:1px solid var(--color-border)}
+.card-title{margin:0 0 1rem 0;font-size:1.2rem;font-weight:700}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:1.25rem}
+.kpi{display:flex;align-items:center;gap:1rem;padding:.8rem;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfbfd)}
+.kpi-icon{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:1.4rem;flex-shrink:0;box-shadow:0 6px 18px rgba(74,43,109,0.08)}
+.kpi-icon.students{background:#FB923C}
+.kpi-icon.parents{background:#14B8A6}
+.kpi-icon.teachers{background:#F43F5E}
+.kpi-icon.revenue{background:var(--color-accent)}
+.kpi-info .num{font-size:1.8rem;font-weight:800}
+.kpi-info .label{color:var(--color-muted);font-weight:600}
+
+/* Chart card — estilo más limpio y profesional */
+.card.chart-card{
+  padding:0.85rem 1rem 1rem 1rem;
+  overflow:hidden;
+  position:relative;
+  border-radius:16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,252,0.98));
+  border: 1px solid rgba(14,22,44,0.04);
+  box-shadow: 0 10px 30px rgba(10,14,30,0.04);
+}
+
+/* Contenedor del canvas con separación para título */
+.card.chart-card .card-title{padding:12px 14px 6px 14px;margin:0;font-size:1.05rem;color:#0f172a}
+.chart-container{
+  position:relative;
+  height:320px;
+  max-height:420px;
+  padding:12px 14px 6px 14px;
+  background: linear-gradient(180deg, rgba(250,250,252,0.0), rgba(245,245,248,0.02));
+  border-radius:10px;
+}
+
+/* Forzar canvas a ocupar el contenedor y evitar overflow */
+.chart-container canvas{
+  width:100% !important;
+  height:100% !important;
+  display:block;
+}
+
+/* Suavizar ticks y leyendas */
+.chart-container .chartjs-render-monitor{
+  border-radius:8px;
+}
+
+/* COURSE GRID */
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem}
+.page-header h2{font-size:1.3rem;margin:0}
+.course-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.course-card{background:linear-gradient(180deg,#fff,#fbfbfd);border:1px solid var(--color-border);border-radius:12px;padding:1.15rem;cursor:pointer;transition:transform var(--transition),box-shadow var(--transition)}
+.course-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(15,23,42,0.06);border-color:rgba(74,43,109,0.12)}
+.course-card-icon{width:56px;height:56px;border-radius:10px;display:grid;place-items:center;font-size:1.25rem;margin-bottom:.85rem;background:rgba(74,43,109,0.06);color:var(--color-primary)}
+.course-card-info h4{font-size:1.05rem;margin:0;font-weight:700}
+.course-card-info p{font-size:.9rem;color:var(--color-muted);margin:.35rem 0 0 0}
+.course-card-stats{margin-top:1rem;padding-top:.8rem;border-top:1px dashed var(--color-border);font-size:.9rem;font-weight:700;color:var(--color-muted)}
+.btn{background:var(--color-primary);color:#fff;border:none;padding:.6rem .95rem;border-radius:10px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:.5rem;transition:all var(--transition)}
+.btn:hover{background:var(--color-accent);transform:translateY(-3px);box-shadow:0 8px 26px rgba(74,43,109,0.14)}
+.btn.btn-secondary{background:transparent;color:var(--color-primary);border:1px solid var(--color-border)}
+
+/* TABLES */
+.table-wrapper{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;background:transparent;border-radius:8px;overflow:hidden}
+.data-table th,.data-table td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--color-border);vertical-align:middle}
+.data-table th{background:linear-gradient(180deg,#fbfcfd,#fff);font-weight:700;color:var(--color-muted);font-size:.82rem;letter-spacing:.6px;text-transform:uppercase}
+.data-table tbody tr:hover{background:linear-gradient(90deg,rgba(74,43,109,0.02),rgba(74,43,109,0.01))}
+.user-cell{display:flex;align-items:center;gap:.75rem;font-weight:600}
+.avatar-cell{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));color:#fff;display:grid;place-items:center;font-weight:700}
+.status{padding:.28rem .6rem;border-radius:999px;font-size:.78rem;font-weight:800}
+.status.status-active{background:#D1FAE5;color:#065F46}
+.status.status-inactive{background:#FEE2E2;color:#7F1D1D}
+.action-buttons{display:flex;gap:.5rem}
+.action-btn{width:36px;height:36px;border-radius:50%;border:0;background:#F3F4F6;color:var(--color-muted);cursor:pointer;display:grid;place-items:center;transition:all var(--transition)}
+.action-btn:hover{transform:translateY(-3px);background:var(--color-primary);color:#fff}
+.action-btn.delete:hover{background:var(--color-danger)}
+
+/* FOOTER & RESPONSIVE */
+.footer{color:var(--color-muted);font-size:.85rem;padding:1.25rem;text-align:center;border-top:1px solid var(--color-border);background:transparent}
+@media (max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){.kpi-info .num{font-size:1.4rem}}
+@media (max-width:768px){
+  .sidebar{position:fixed;z-index:1000;transform:translateX(calc(-1*var(--sidebar-width)));width:var(--sidebar-width)}
+  .sidebar:not(.closed){transform:translateX(0);box-shadow:0 20px 50px rgba(2,6,23,0.2)}
+  .sidebar .menu{padding-bottom:4rem}
+  .user-mini span{display:none}
+  .kpi-grid{grid-template-columns:1fr}
+  .topbar{padding:0 .9rem}
+  .content{padding:1rem}
+}
+/* ...existing code... */
+
+/* Menú lateral — reemplazo para corregir orden y alineación */
+.menu {
+  padding: 0.8rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Estilo base compartido para enlaces y summary (misma anchura/márgenes) */
+.menu a,
+details.menu-group > summary {
+  position: relative;
+  width: calc(100% - 1.4rem);
+  margin: 0 .7rem;
+  padding: 0.7rem 1.05rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  background: transparent;
+  transition: all 220ms ease;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+/* Iconos: tamaño uniforme */
+.menu a i,
+details.menu-group > summary i {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.95);
+}
+
+/* Hover y foco */
+.menu a:hover,
+details.menu-group > summary:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 6px 12px rgba(2,6,23,0.06);
+}
+.menu a:hover i,
+details.menu-group > summary:hover i {
+  background: rgba(255,255,255,0.06);
+}
+
+/* Barra izquierda pequeña para active/hover */
+.menu a::before,
+details.menu-group > summary::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 6px;
+  background: transparent;
+  transition: background 220ms ease, width 220ms ease;
+}
+.menu a:hover::before,
+details.menu-group > summary:hover::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+}
+
+/* Estado activo */
+.menu a.active {
+  background: rgba(255,255,255,0.92);
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: 0 8px 22px rgba(74,43,109,0.06);
+}
+.menu a.active::before {
+  background: linear-gradient(180deg, var(--color-accent), rgba(74,43,109,0.85));
+  width: 6px;
+}
+
+/* Summary abierto/colapsado: caret */
+details.menu-group {
+  margin: 0;
+}
+details.menu-group > summary {
+  list-style: none;
+}
+details.menu-group > summary::after {
+  content: "";
+  margin-left: auto;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid rgba(255,255,255,0.75);
+  transform-origin: center;
+  transition: transform 180ms ease;
+  opacity: .9;
+}
+details[open] > summary {
+  background: rgba(255,255,255,0.04);
+}
+details[open] > summary::after {
+  transform: rotate(180deg);
+  border-top-color: rgba(255,255,255,0.95);
+}
+details.menu-group > summary::before { /* active indicator for group */
+  background: transparent;
+}
+
+/* Sub-menú: indentación clara, sin solapamientos */
+.sub-menu {
+  margin: 6px 0 6px 0;
+  padding-left: 56px; /* deja espacio para el icono */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sub-menu a {
+  padding: .5rem .85rem;
+  margin: 0 .6rem;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.92);
+  font-weight: 600;
+  background: transparent;
+  transition: background 180ms ease, transform 180ms ease;
+  width: calc(100% - 1.4rem);
+}
+.sub-menu a:hover {
+  background: rgba(255,255,255,0.03);
+  transform: translateX(6px);
+}
+.sub-menu a.active {
+  background: rgba(255,255,255,0.9);
+  color: var(--color-primary);
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(74,43,109,0.05);
+}
+
+/* Separador visual entre secciones si es necesario */
+.menu .group-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.03);
+  margin: 8px 12px;
+  border-radius: 2px;
+  opacity: .8;
+}
+
+/* Responsive: ajustar anchuras y espaciado */
+@media (max-width:768px){
+  .menu a, details.menu-group > summary { padding: .6rem .9rem; margin: .15rem .4rem; width: calc(100% - 1rem); }
+  .menu a i, details.menu-group > summary i { width:32px; height:32px; }
+  .sub-menu { padding-left: 48px; }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+.brand-logo { width: 40px; height: auto; }
+.profile {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}

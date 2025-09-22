@@ -1,0 +1,252 @@
+/* Tipografía */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+/* Colores basados en el diseño del login */
+:root {
+  --color-primary: #4A2B6D;
+  --color-secondary: #cba858;
+  --color-text-dark: #333;
+  --color-text-light: #ffffff;
+  --color-background-body: #f0f2f5;
+  --color-background-card: #ffffff;
+  --color-border: #d1d1d1;
+  --color-placeholder: #888;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* --- CAMBIO PRINCIPAL AQUÍ: FONDO DE PANTALLA --- */
+body {
+  /* Imagen de la biblioteca como fondo */
+  background-image: url('http://googleusercontent.com/image_collection/image_retrieval/3921057724805897748_0');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Fija el fondo para que no se mueva con el scroll */
+  
+  color: var(--color-text-dark);
+  position: relative; /* Necesario para el efecto de desenfoque */
+}
+
+/* Capa de superposición para el efecto de desenfoque y oscurecimiento */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0; 
+  left: 0;
+  right: 0; 
+  bottom: 0;
+  background: inherit;
+  filter: blur(8px) brightness(0.9);
+  z-index: -1;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 50px 20px;
+  min-height: 100vh;
+  align-items: flex-start;
+}
+
+.form-container {
+  background-color: rgba(255, 255, 255, 0.95); /* Fondo ligeramente translúcido */
+  backdrop-filter: blur(5px); /* Efecto cristalino */
+  padding: 40px 35px;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 224, 224, 0.5);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  text-align: center;
+}
+
+/* Header */
+.form-header {
+  margin-bottom: 30px;
+}
+
+.school-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 15px;
+}
+
+.form-header p {
+  color: var(--color-placeholder);
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.form-header h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Subtítulos para separar secciones */
+.form-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  text-align: left;
+  margin-top: 20px;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Formulario */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Input group */
+.input-group {
+  position: relative;
+}
+
+/* Filas de dos columnas */
+.input-row {
+  display: flex;
+  gap: 20px;
+}
+
+.input-row .input-group {
+  flex: 1;
+}
+
+.input-field {
+  width: 100%;
+  height: 50px;
+  padding: 0 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fafafa;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  text-align: left;
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 43, 109, 0.15);
+}
+
+/* Labels flotantes */
+.floating-label {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-placeholder);
+  background-color: #fafafa;
+  padding: 0 5px;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.input-field:focus ~ .floating-label,
+.input-field:not(:placeholder-shown) ~ .floating-label,
+input[type="date"] ~ .floating-label {
+  top: 0;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+}
+
+/* Estilo para el campo de fecha */
+input[type="date"] {
+  padding-top: 10px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Estilo para el select */
+select.input-field {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23888888%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 15px top 50%;
+  background-size: 12px;
+}
+select.input-field:required:invalid {
+  color: var(--color-placeholder);
+}
+select.input-field option {
+  color: var(--color-text-dark);
+}
+
+/* Botón submit */
+.form-btn--submit {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  padding: 14px;
+  margin-top: 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+}
+
+.form-btn--submit:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  transform: translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 0; /* Menos padding en los lados */
+  }
+
+  .form-container {
+    padding: 30px 20px;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .input-row {
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .form-header h1 {
+    font-size: 1.8rem;
+  }
+
+  body {
+    background-image: none; /* Quitamos la imagen en móvil para mejor rendimiento */
+    background-color: var(--color-background-body);
+  }
+
+  body::before {
+    display: none; /* Desactivamos el efecto en móvil */
+  }
+
+  .form-container {
+    background-color: var(--color-background-card); /* Fondo sólido en móvil */
+    backdrop-filter: none;
+  }
+}
