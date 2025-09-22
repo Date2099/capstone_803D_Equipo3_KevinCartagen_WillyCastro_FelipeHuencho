@@ -17,7 +17,7 @@ Este proyecto responde a la creciente necesidad de **digitalización de procesos
 - **Específicos:**  
   - Migrar los registros desde planillas a una **base de datos estructurada**.  
   - Desarrollar una **aplicación backend** que permita consultas y operaciones sobre la información.  
-  - Implementar funcionalidades para **gestión de alumnos, profesores, apoderados y pagos**.  
+  - Implementar funcionalidades para **gestión de alumnos, profesores, administradores y pagos**.  
   - Asegurar que el sistema sea **escalable, seguro y mantenible**.  
 
 
@@ -30,8 +30,7 @@ Este proyecto responde a la creciente necesidad de **digitalización de procesos
 
 
 ##  Funcionalidades  
-- **Alumnos:** Registro, edición, notas, asistencia y asignaturas.  
-- **Apoderados:** Visualización de información académica de sus hijas y pagos.  
+- **Alumnos:** Registro, edición, notas, asistencia, pago para apoderados y asignaturas.    
 - **Profesores:** Administración de cursos y registro de notas.  
 - **Administración:** Control de usuarios, pagos realizados y atrasados.  
 
