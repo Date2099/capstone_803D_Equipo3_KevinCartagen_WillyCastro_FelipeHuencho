@@ -1,0 +1,64 @@
+{% load static %}
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INTRANET | Panel Profesor</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/teacher_style.css' %}">
+</head>
+
+<body>
+<div class="layout">
+  <aside class="sidebar closed" id="sidebar">
+    <div class="brand"><i class="fa-solid fa-chalkboard-user"></i> Profesor</div>
+
+    <div class="profile">
+      <div class="avatar">JP</div>
+      <div style="min-width:0">
+        <div style="font-weight:800">Juan Pérez</div>
+        <div class="role" style="font-size:.85rem;opacity:.9">Matemáticas</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a class="active" href="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="estudiantes"><i class="fa-solid fa-user-graduate"></i> Estudiantes</a>
+      <a href="tareas"><i class="fa-solid fa-file-pen"></i> Tareas / Notas</a>
+      <a href="anuncios"><i class="fa-solid fa-bullhorn"></i> Anuncios</a>
+      <a href="calendario"><i class="fa-solid fa-calendar"></i> Calendario</a>
+      <a href="perfil"><i class="fa-solid fa-user-gear"></i> Perfil</a>
+    </nav>
+  </aside>
+
+  <section class="main">
+    <header class="topbar">
+      <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title">Panel Profesor</div>
+      <div class="spacer"></div>
+      <div class="user-mini">
+        <div class="avatar-mini" title="Profesor">JP</div>
+        <span style="font-weight:700;margin-left:.5rem">Juan Pérez</span>
+      </div>
+    </header>
+
+    <main class="content">
+      </main>
+
+    <footer class="footer">
+      Copyright © Colegio San Agustin de Hipona 2025
+    </footer>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/teacher_jss.js' %}"></script>
+
+</body>
+</html>

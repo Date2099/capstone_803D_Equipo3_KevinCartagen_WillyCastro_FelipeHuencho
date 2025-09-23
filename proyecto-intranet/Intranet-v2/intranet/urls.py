@@ -9,5 +9,6 @@ urlpatterns = [
     path('', LoginView.as_view(template_name='inicioSesion/login.html'), name='login'),
     path('studentView/', include('studentView.urls')),
     path('adminview/', include('adminView.urls')),
+    path('profesorView/', include('profesorView.urls')),
 
 ]

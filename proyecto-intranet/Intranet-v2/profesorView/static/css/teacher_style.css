@@ -1,0 +1,552 @@
+/* ...existing code... */
+/* Diseño moderno para el módulo Profesores */
+
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --primary:#3759a8;
+  --accent:#6d28d9;
+  --muted:#6b7280;
+  --border:rgba(15,23,42,0.06);
+  --radius:12px;
+  --sidebar-w:260px;
+  --shadow-sm:0 6px 18px rgba(10,14,30,0.06);
+  --shadow-md:0 12px 30px rgba(10,14,30,0.08);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+/* Reset */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font-sans);font-size:15px;background:linear-gradient(180deg,var(--bg),#f8fafc);color:#0b1220}
+
+/* Layout */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w);
+  background:linear-gradient(180deg,#2f2b4a,#3b2b6a);
+  color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding-bottom:1rem;
+  box-shadow:var(--shadow-md);
+}
+.brand{display:flex;align-items:center;gap:.85rem;padding:1.15rem 1rem;font-weight:700;font-size:1.05rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+.brand i{font-size:1.2rem;color:var(--accent)}
+.profile{display:flex;gap:0.85rem;align-items:center;padding:1rem;border-bottom:1px solid rgba(255,255,255,0.03)}
+.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#f59e0b);font-weight:800;color:#fff}
+.profile .role{font-size:.82rem;color:rgba(255,255,255,0.85)}
+
+/* Menu */
+.menu{padding:0.6rem 0;display:flex;flex-direction:column;gap:6px;margin-top:.4rem;overflow:auto}
+.menu a{
+  position:relative;
+  display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;margin:0 .6rem;border-radius:12px;color:rgba(255,255,255,0.95);text-decoration:none;font-weight:600;transition:all 180ms ease;
+  background:transparent;
+}
+.menu a i{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,0.03);font-size:1rem}
+.menu a:hover{transform:translateX(6px);background:rgba(255,255,255,0.04);box-shadow:var(--shadow-sm)}
+.menu a.active{background:#fff;color:var(--primary);font-weight:800;box-shadow:0 10px 30px rgba(13,37,82,0.06)}
+.menu a.active i{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:64px;display:flex;align-items:center;padding:0 1rem;gap:1rem;background:transparent;border-bottom:1px solid rgba(11,17,32,0.02)}
+.toggle{background:transparent;border:0;color:#374151;font-size:1.05rem;padding:.45rem;border-radius:10px;cursor:pointer}
+.topbar strong{font-size:1.05rem;color:#0b1220}
+.topbar .spacer{flex:1}
+.user-mini{display:flex;align-items:center;gap:.6rem}
+.user-mini img{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent))}
+
+/* Content */
+.content{padding:1.25rem}
+.card{background:var(--panel);border-radius:12px;padding:1rem;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+.chart-card{display:flex;flex-direction:column;gap:.6rem;padding:1rem;border-radius:14px;overflow:hidden}
+.chart-card #chart{width:100% !important;height:300px !important;display:block;border-radius:8px}
+
+/* Grid KPIs */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
+.kpi{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:12px;color:#fff;box-shadow:0 8px 26px rgba(13,37,82,0.04)}
+.kpi.students{background:linear-gradient(90deg,#4f46e5,#7c3aed)}
+.kpi.classes{background:linear-gradient(90deg,#0ea5a4,#06b6d4)}
+.kpi.tasks{background:linear-gradient(90deg,#f97316,#fb923c)}
+.kpi .num{font-size:1.6rem;font-weight:800}
+.kpi .label{opacity:.95;font-weight:600}
+
+/* Footer */
+.footer{padding:1rem;text-align:center;color:var(--muted);font-size:.9rem}
+
+/* Responsive */
+@media (max-width:900px){
+  .sidebar{width:220px}
+  .chart-card #chart{height:260px !important}
+}
+@media (max-width:700px){
+  .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);transition:transform .22s ease;z-index:50}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .layout{overflow-x:hidden}
+  .menu a{margin:0 .5rem}
+  .chart-card #chart{height:260px !important}
+}
+/* ...existing code... */
+/* ...existing code... */
+
+/* Estilos adicionales para UI funcional y profesional */
+
+/* Botones */
+.btn{
+  background: linear-gradient(90deg,var(--primary),var(--accent));
+  color:#fff;border:0;padding:.55rem .85rem;border-radius:10px;font-weight:700;cursor:pointer;
+  box-shadow: 0 8px 26px rgba(13,37,82,0.06);transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(13,37,82,0.08); }
+.btn:active{ transform:translateY(-1px); }
+.btn.btn-secondary{
+  background:transparent;color:var(--primary);border:1px solid rgba(55,89,168,0.12);box-shadow:none;font-weight:700;
+}
+
+/* Formularios, selects e inputs */
+input[type="text"], input[type="date"], input[type="number"], select, .grade-input {
+  background:#fff;border:1px solid var(--border);padding:.45rem .5rem;border-radius:8px;font-size:.95rem;
+  outline:none;transition:box-shadow .12s ease,border-color .12s ease;
+}
+input:focus, select:focus, .grade-input:focus{ box-shadow:0 6px 20px rgba(55,89,168,0.06); border-color: rgba(55,89,168,0.18); }
+
+/* Forzar look de grade inputs (overrides inline widths gracefully) */
+.grade-input{ width:64px !important; text-align:center; padding:.35rem; border-radius:8px; }
+
+/* Tabla de datos */
+.table-wrapper{ overflow-x:auto; border-radius:8px; }
+.data-table{ width:100%; border-collapse:collapse; background:transparent; min-width:640px; }
+.data-table th, .data-table td{ padding:.72rem .9rem; vertical-align:middle; border-bottom:1px solid var(--border); }
+.data-table thead th{ background:linear-gradient(180deg,#fbfcff,#fff); color:var(--muted); font-weight:800; font-size:.8rem; letter-spacing:.6px; text-transform:uppercase; }
+.data-table tbody tr:hover{ background:linear-gradient(90deg, rgba(55,89,168,0.02), rgba(74,43,109,0.01)); }
+.data-table td input.grade-input{ border:1px solid rgba(15,23,42,0.06); }
+
+/* Card title */
+.card h3, .card .card-title{ margin:0 0 .6rem 0; font-size:1.05rem; color:#0b1220; }
+
+/* Chart wrapper */
+.chart-wrap{ width:100%; height:320px; border-radius:10px; overflow:hidden; background:linear-gradient(180deg, rgba(99,102,241,0.02), rgba(59,130,246,0.01)); padding:10px; border:1px solid rgba(15,23,42,0.04); }
+.chart-wrap canvas{ width:100% !important; height:100% !important; display:block; }
+
+/* KPIs refinement */
+.kpi{ align-items:center; display:flex; gap:1rem; padding:1rem; }
+.kpi i{ font-size:1.6rem; opacity:.95; margin-right:6px; }
+.kpi .num{ font-size:1.5rem; font-weight:800; }
+.kpi .label{ font-size:.92rem; opacity:.95; }
+
+/* Calendar */
+#calendar{ width:100%; table-layout:fixed; border-collapse:collapse; }
+#calendar thead th{ text-align:left; padding:.6rem; font-weight:800; color:var(--muted); background:transparent; }
+#calendar tbody td{ min-height:84px; vertical-align:top; padding:.6rem; border-top:1px solid var(--border); }
+.cal-day div:first-child{ font-weight:700; color:var(--muted); }
+.cal-day .ev-item{ margin-top:6px; padding:6px 8px; border-radius:8px; font-size:.85rem; background:rgba(59,130,246,0.08); color:#0b1220; }
+
+/* Small helpers */
+.view-grades, .action-small { padding:.4rem .55rem; border-radius:8px; border:1px solid rgba(11,17,32,0.04); background:#fff; cursor:pointer; }
+.view-grades:hover, .action-small:hover{ box-shadow:0 8px 20px rgba(11,17,32,0.04); transform:translateY(-2px); }
+
+/* Responsive tweaks */
+@media (max-width:900px){
+  .chart-wrap{ height:260px }
+  .data-table{ min-width:520px }
+}
+@media (max-width:700px){
+  .chart-wrap{ height:220px }
+  .menu a{ padding:.55rem .8rem; margin:0 .45rem }
+  .grid{ grid-template-columns:1fr; gap:.6rem }
+}
+
+/* ...existing code... */
+/* Diseño moderno para el módulo Profesores (completo) */
+
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --primary:#3759a8;
+  --accent:#6d28d9;
+  --muted:#6b7280;
+  --border:rgba(15,23,42,0.06);
+  --radius:12px;
+  --sidebar-w:260px;
+  --shadow-sm:0 6px 18px rgba(10,14,30,0.06);
+  --shadow-md:0 12px 30px rgba(10,14,30,0.08);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+/* Reset */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font-sans);font-size:15px;background:linear-gradient(180deg,var(--bg),#f8fafc);color:#0b1220}
+
+/* Layout */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w);
+  background:linear-gradient(180deg,#2f2b4a,#3b2b6a);
+  color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding-bottom:1rem;
+  box-shadow:var(--shadow-md);
+}
+.brand{display:flex;align-items:center;gap:.85rem;padding:1.15rem 1rem;font-weight:700;font-size:1.05rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+.brand i{font-size:1.2rem;color:var(--accent)}
+.profile{display:flex;gap:0.85rem;align-items:center;padding:1rem;border-bottom:1px solid rgba(255,255,255,0.03)}
+.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#f59e0b);font-weight:800;color:#fff}
+.profile .role{font-size:.82rem;color:rgba(255,255,255,0.85)}
+
+/* Menu */
+.menu{padding:0.6rem 0;display:flex;flex-direction:column;gap:6px;margin-top:.4rem;overflow:auto}
+.menu a{
+  position:relative;
+  display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;margin:0 .6rem;border-radius:12px;color:rgba(255,255,255,0.95);text-decoration:none;font-weight:600;transition:all 180ms ease;
+  background:transparent;
+}
+.menu a i{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,0.03);font-size:1rem}
+.menu a:hover{transform:translateX(6px);background:rgba(255,255,255,0.04);box-shadow:var(--shadow-sm)}
+.menu a.active{background:#fff;color:var(--primary);font-weight:800;box-shadow:0 10px 30px rgba(13,37,82,0.06)}
+.menu a.active i{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:64px;display:flex;align-items:center;padding:0 1rem;gap:1rem;background:transparent;border-bottom:1px solid rgba(11,17,32,0.02)}
+.toggle{background:transparent;border:0;color:#374151;font-size:1.05rem;padding:.45rem;border-radius:10px;cursor:pointer}
+.topbar-title{font-weight:700}
+.topbar .spacer{flex:1}
+.user-mini{display:flex;align-items:center;gap:.6rem}
+.avatar-mini{width:36px;height:36px;border-radius:50%;font-size:.95rem;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff}
+
+/* Content */
+.content{padding:1.25rem}
+.card{background:var(--panel);border-radius:12px;padding:1rem;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+.chart-card{display:flex;flex-direction:column;gap:.6rem;padding:1rem;border-radius:14px;overflow:hidden}
+.chart-card #chart{width:100% !important;height:300px !important;display:block;border-radius:8px}
+
+/* Grid KPIs */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
+.kpi{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:12px;color:#fff;box-shadow:0 8px 26px rgba(13,37,82,0.04)}
+.kpi.students{background:linear-gradient(90deg,#4f46e5,#7c3aed)}
+.kpi.classes{background:linear-gradient(90deg,#0ea5a4,#06b6d4)}
+.kpi.tasks{background:linear-gradient(90deg,#f97316,#fb923c)}
+.kpi .num{font-size:1.6rem;font-weight:800}
+.kpi .label{opacity:.95;font-weight:600}
+
+/* Botones */
+.btn{
+  background: linear-gradient(90deg,var(--primary),var(--accent));
+  color:#fff;border:0;padding:.55rem .85rem;border-radius:10px;font-weight:700;cursor:pointer;
+  box-shadow: 0 8px 26px rgba(13,37,82,0.06);transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(13,37,82,0.08); }
+.btn:active{ transform:translateY(-1px); }
+.btn.btn-secondary{
+  background:transparent;color:var(--primary);border:1px solid rgba(55,89,168,0.12);box-shadow:none;font-weight:700;
+}
+
+/* Formularios, selects e inputs */
+input[type="text"], input[type="date"], input[type="number"], select, .grade-input, textarea {
+  background:#fff;border:1px solid var(--border);padding:.45rem .5rem;border-radius:8px;font-size:.95rem;
+  outline:none;transition:box-shadow .12s ease,border-color .12s ease;
+}
+input:focus, select:focus, .grade-input:focus, textarea:focus{ box-shadow:0 6px 20px rgba(55,89,168,0.06); border-color: rgba(55,89,168,0.18); }
+
+/* Forzar look de grade inputs */
+.grade-input{ width:64px !important; text-align:center; padding:.35rem; border-radius:8px; }
+
+/* Tabla de datos */
+.table-wrapper{ overflow-x:auto; border-radius:8px; }
+.data-table{ width:100%; border-collapse:collapse; background:transparent; min-width:640px; }
+.data-table th, .data-table td{ padding:.72rem .9rem; vertical-align:middle; border-bottom:1px solid var(--border); }
+.data-table thead th{ background:linear-gradient(180deg,#fbfcff,#fff); color:var(--muted); font-weight:800; font-size:.8rem; letter-spacing:.6px; text-transform:uppercase; }
+.data-table tbody tr:hover{ background:linear-gradient(90deg, rgba(55,89,168,0.02), rgba(74,43,109,0.01)); }
+.data-table td input.grade-input{ border:1px solid rgba(15,23,42,0.06); }
+
+/* Card title */
+.card h3, .card .card-title{ margin:0 0 .6rem 0; font-size:1.05rem; color:#0b1220; }
+
+/* Chart wrapper */
+.chart-wrap{ width:100%; height:320px; border-radius:10px; overflow:hidden; background:linear-gradient(180deg, rgba(99,102,241,0.02), rgba(59,130,246,0.01)); padding:10px; border:1px solid rgba(15,23,42,0.04); }
+.chart-wrap canvas{ width:100% !important; height:100% !important; display:block; }
+
+/* KPIs refinement */
+.kpi i{ font-size:1.6rem; opacity:.95; margin-right:6px; }
+.kpi .num{ font-size:1.5rem; font-weight:800; }
+.kpi .label{ font-size:.92rem; opacity:.95; }
+
+/* Calendar */
+#calendar{ width:100%; table-layout:fixed; border-collapse:collapse; }
+#calendar thead th{ text-align:left; padding:.6rem; font-weight:800; color:var(--muted); background:transparent; }
+#calendar tbody td{ min-height:84px; vertical-align:top; padding:.6rem; border-top:1px solid var(--border); }
+.cal-day div:first-child{ font-weight:700; color:var(--muted); }
+.cal-day .ev-item{ margin-top:6px; padding:6px 8px; border-radius:8px; font-size:.85rem; background:rgba(59,130,246,0.08); color:#0b1220; }
+
+/* Small helpers */
+.view-grades, .action-small { padding:.4rem .55rem; border-radius:8px; border:1px solid rgba(11,17,32,0.04); background:#fff; cursor:pointer; }
+.view-grades:hover, .action-small:hover{ box-shadow:0 8px 20px rgba(11,17,32,0.04); transform:translateY(-2px); }
+
+/* Perfil */
+.profile-card{ padding:1rem; border-radius:12px; display:block; box-shadow:var(--shadow-md); }
+.profile-avatar-big{
+  width:92px;height:92px;border-radius:16px;display:grid;place-items:center;
+  font-size:2rem;color:#fff;font-weight:900;margin-right:.6rem;
+  background:linear-gradient(135deg,var(--accent),#f59e0b);
+}
+.profile-field{ margin-top:6px; color:#374151; }
+.profile-field strong{ display:block; font-size:.9rem; color:#0b1220; margin-bottom:4px; }
+.profile-card input, .profile-card textarea{ width:100%; box-sizing:border-box; }
+
+/* Responsive */
+@media (max-width:900px){
+  .sidebar{width:220px}
+  .chart-card #chart{height:260px !important}
+  .chart-wrap{ height:260px }
+  .data-table{ min-width:520px }
+}
+@media (max-width:700px){
+  .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);transition:transform .22s ease;z-index:50}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .layout{overflow-x:hidden}
+  .menu a{margin:0 .5rem}
+  .chart-card #chart{height:260px !important}
+  .chart-wrap{ height:220px }
+  .menu a{ padding:.55rem .8rem; margin:0 .45rem }
+  .grid{ grid-template-columns:1fr; gap:.6rem }
+}
+
+/* ... (tu código CSS existente) ... */
+
+/* --- Estilos para Pop-over de Comentarios --- */
+.comment-popover {
+  position: absolute;
+  z-index: 10;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.comment-popover::before {
+  /* Pequeña flecha que apunta a la celda */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  transform: translateY(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-popover textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  resize: vertical; /* Permite cambiar el alto */
+}
+
+.comment-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.comment-popover-actions .btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+/* ... (tu código CSS existente) ... */
+
+/* --- Estilos para la Ventana Modal --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 18, 32, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--bg);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-md);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modal-body {
+  overflow-y: auto; /* Permite scroll si la lista de alumnos es larga */
+  padding-right: 1rem; /* Espacio para la barra de scroll */
+  margin-right: -1rem;
+}
+
+.modal-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.modal-student-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+/* ... (tu código CSS existente) ... */
+
+/* --- Estilos para la Nueva Vista de Notas por Asignatura --- */
+.course-accordion {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  background: var(--panel);
+}
+
+.course-accordion summary {
+  padding: 1rem 1.2rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-accordion summary:hover {
+  background: rgba(15,23,42,0.02);
+}
+
+.course-accordion[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.course-accordion .course-content {
+  padding: 1rem;
+}
+
+.view-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.view-controls .search-wrapper {
+  flex-grow: 1;
+  position: relative;
+}
+
+.view-controls .search-wrapper i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.view-controls input[type="search"] {
+  width: 100%;
+  padding-left: 36px;
+}
+/* ... (tu código CSS existente) ... */
+
+/* --- Mejoras Visuales para Tabla de Notas --- */
+
+/* 1. Centrar todas las cabeceras, excepto la de "Alumno" */
+.data-table th {
+  text-align: center;
+  vertical-align: middle;
+}
+.data-table th:first-child {
+  text-align: left;
+}
+
+/* 2. Centrar el contenido de todas las celdas, excepto la del nombre del alumno */
+.data-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+.data-table td:first-child {
+  text-align: left;
+}
+
+/* 3. Estilo principal para los campos de notas: los hace más notorios y limpios */
+.grade-input {
+  background-color: transparent;
+  border: 1px solid transparent; /* Sin borde por defecto */
+  border-radius: 8px;
+  font-weight: 700; /* Resalta el número de la nota */
+  font-size: 1rem;   /* Un poco más grande */
+  text-align: center;
+  width: 65px;       /* Ancho consistente */
+  padding: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* 4. Oculta las flechas de control en los campos numéricos para un look más limpio */
+.grade-input::-webkit-outer-spin-button,
+.grade-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.grade-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* 5. Al pasar el mouse o hacer clic, se revela que el campo es editable */
+.grade-input:hover {
+  background-color: #f7f7ff; /* Un fondo muy sutil */
+}
+.grade-input:focus {
+  background-color: #ffffff;
+  border: 1px solid var(--primary); /* Borde notorio al editar */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(55, 89, 168, 0.1);
+}
+
+/* 6. Estilo especial para la columna de promedios para diferenciarla */
+.data-table td[id*="avg-"] {
+  background-color: #f8fafc;
+  font-size: 1.05rem;
+}

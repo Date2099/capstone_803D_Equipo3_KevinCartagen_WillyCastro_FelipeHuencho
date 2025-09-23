@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'inicioSesion',
     'studentView',
     'adminView',
+    'profesorView',
 
 ]
 
