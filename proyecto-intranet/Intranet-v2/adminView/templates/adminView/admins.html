@@ -2,10 +2,11 @@
 
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>INTRANET | Panel de Administración</title>
+  <title>Panel de Administración</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
@@ -14,87 +15,88 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="{% static 'adminstyle/styleadmins.css' %}">
-
-
-
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'img/logo_V2-removebg-preview.png' %}">
 </head>
+
 <body>
   <div class="layout">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <img src="{% static 'adminstyle/logo2.png' %}" alt="Insignia Colegio" class="brand-logo">
+        <img src="{% static 'adminstyle/logo2.png' %} " alt="Insignia Colegio" class="brand-logo">
 
 
-
+        <!-- Nombre del administrador -->
         <span>Administración</span>
       </div>
       <div class="profile">
         <div class="avatar">SA</div>
         <div class="profile-info">
-          <div>Sr. Admin</div>
+          <div>Cristian Sepulveda</div>
           <div class="role">Administración</div>
         </div>
       </div>
+
+      <!--  
+        Funcionalidad para cuando tengamos la base de datos:
+        <div>{{ request.user.get_full_name }}</div>
+        <div class="role">{{ request.user.profile.role }}</div> 
+        -->
+      <!-- ... -->
+
       <nav class="menu">
         <a href="#" data-section="tablero" class="active"><i class="fa-solid fa-gauge"></i> <span>Tablero</span></a>
-        
+
         <details class="menu-group">
-          <summary><i class="fa-solid fa-user-graduate"></i> <span>Estudiantes</span></summary>
+          <summary><i class="fa-solid fa-book"></i> <span>Académico</span></summary>
           <div class="sub-menu">
+            <a href="#" data-section="agregar-alumno">Alumnos</a>
             <a href="#" data-section="estudiantes">Ver Cursos</a>
-            <a href="#" data-section="agregar-alumno">Agregar Alumno</a>
+            <a href="#" data-section="asignaturas">Asignaturas</a>
+            <a href="#" data-section="asistencias">Asistencias</a>
           </div>
         </details>
 
         <a href="#" data-section="profesores"><i class="fa-solid fa-chalkboard-user"></i> <span>Profesores</span></a>
-        
+
+
+
         <details class="menu-group">
-          <summary><i class="fa-solid fa-book"></i> <span>Académico</span></summary>
+          <summary><i class="fa-solid fa-wallet"></i> <span>Pagos</span></summary>
           <div class="sub-menu">
-            <a href="#" data-section="asignaturas">Asignaturas</a>
-            <a href="#" data-section="horarios">Horarios</a>
+            <a href="#" data-section="revision-pagos">Revisión de pagos</a>
           </div>
-        </details>
-        
-        <details class="menu-group">
-            <summary><i class="fa-solid fa-wallet"></i> <span>Pagos</span></summary>
-            <div class="sub-menu">
-              <a href="#" data-section="revision-pagos">Revisión de pagos</a>
-            </div>
         </details>
 
         <a href="#" data-section="comunicados"><i class="fa-solid fa-bullhorn"></i> <span>Comunicados</span></a>
         <a href="#" data-section="usuarios"><i class="fa-solid fa-user-gear"></i> <span>Usuarios</span></a>
+
+        <!--  Cerrar Sesión / aun no funciona pq no tenemos el logout aun-->
+        <a href="{% url 'logout' %}" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar
+            Sesión</span></a>
       </nav>
+
+
     </aside>
 
     <section class="main">
       <header class="topbar">
-        <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
+        <button class="toggle" id="toggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
         <div class="topbar-title" id="topbar-title">Panel de Control</div>
         <div class="spacer"></div>
-        <button class="icon-btn" title="Búsqueda"><i class="fa-solid fa-magnifying-glass"></i></button>
-        <button class="icon-btn" title="Notificaciones">
-          <i class="fa-regular fa-bell"></i><span class="dot">9</span>
-        </button>
-        <div class="user-mini">
-          <span>Sr. Admin</span>
-          <div class="avatar-mini">SA</div>
+        <div class="school-mini">
+          <span class="school-mini-name">Colegio San Agustín de Hipona</span>
+          <img src="{% static 'adminstyle/logo2.png' %}" alt="Insignia Colegio" class="school-mini-logo">
         </div>
       </header>
-
       <main class="content" id="main-content">
       </main>
-
       <footer class="footer">
         Copyright © Colegio San Agustín de Hipona 2025
       </footer>
     </section>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="{% static 'adminstyle/scriptadmins.js' %}"></script>
-  
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{% static 'adminstyle/scriptadmins.js' %}"></script>
 </body>
 </html>

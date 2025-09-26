@@ -1,25 +1,36 @@
-// SIDEBAR TOGGLE + RESPONSIVE
 const toggleBtn = document.getElementById('toggle');
 const sidebar = document.getElementById('sidebar');
 const mq = window.matchMedia("(max-width: 768px)");
 
+sidebar.style.transition = 'none';
+
+/* Slide bar para pc y celular de foma responsiva */
+
+// Función que actualiza el estado del sidebar según el ancho de pantalla.
+function updateSidebar() {
+  if (mq.matches) {
+    sidebar.classList.add('closed'); 
+  } else {
+    sidebar.classList.remove('closed'); 
+  }
+}
+
+// Ejecutamos inmediatamente para aplicar el estado inicial correcto
+updateSidebar();
+
+// Reactivamos la transición luego de un breve tiempo, y hacemos que sea lenta la transición
+setTimeout(() => {
+  sidebar.style.transition = '';
+}, 50);
+
+// Al hacer click en el menu de hamburguesa/toggle, alternamos el estado del sidebar
 toggleBtn.addEventListener('click', () => {
   sidebar.classList.toggle('closed');
 });
 
-function updateSidebar() {
-  if (mq.matches) {
-    sidebar.classList.add('closed');
-  } else {
-    sidebar.classList.remove('closed');
-  }
-}
-updateSidebar();
-mq.addEventListener('change', updateSidebar);
-
-// Cerrar sidebar al hacer click fuera, solo en mobile
+// En celular, si el usuario hace click fuera del sidebar y del botón se cierra
 document.addEventListener('click', (e) => {
-  if (!mq.matches) return; // solo móvil
+  if (!mq.matches) return; // sólo aplica en móvil
   const isClickInsideSidebar = sidebar.contains(e.target);
   const isClickToggleBtn = toggleBtn.contains(e.target);
   if (!isClickInsideSidebar && !isClickToggleBtn) {
@@ -27,14 +38,47 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// --- SISTEMA DE CONTENIDO DINÁMICO ---
+// Cuando cambie el ancho de la pantalla (rotación, resize), reevaluamos el estado.
+mq.addEventListener('change', updateSidebar);
+
+/* aqui podemos deslizar la barra lateral con el dedo en pantallas táctiles  */
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', (e) => {
+  if (!mq.matches) return; // solo móvil
+  touchStartX = e.touches[0].clientX;
+});
+
+document.addEventListener('touchend', (e) => {
+  if (!mq.matches) return; // solo móvil
+  touchEndX = e.changedTouches[0].clientX;
+  const swipeDistance = touchEndX - touchStartX;
+
+  // Swipe desde borde izquierdo (menos de 30px del borde) hacia la derecha: abrir sidebar
+  if (touchStartX < 200 && swipeDistance > 50) {
+    sidebar.classList.remove('closed');
+  }
+
+  // Swipe hacia la izquierda: cerrar sidebar
+  if (swipeDistance < -50) {
+    sidebar.classList.add('closed');
+  }
+  touchStartX = 0;
+  touchEndX = 0;
+});
+
+
+
+/* Navegacion y contenedores */
+
 const mainContent = document.getElementById('main-content');
 const menuLinks = document.querySelectorAll('.menu a[data-section]');
 const topbarTitle = document.getElementById('topbar-title');
-
 let adminChartInstance = null;
 
-// Datos de ejemplo para los alumnos por curso
+/* Datos de ejemplo para mostrar como quedaria (falta la bd) */
+
 const studentData = {
   'pk-a': [{ id: 'SAH-PK-001', name: 'Ana Contreras', parent: 'Luis Contreras', status: 'Activo' }],
   'k-a': [{ id: 'SAH-K-005', name: 'Benjamín Soto', parent: 'Carla Soto', status: 'Activo' }],
@@ -50,6 +94,8 @@ const studentData = {
     { id: 'SAH-4M-103', name: 'Hugo Salazar', parent: 'Mónica Salazar', status: 'Activo' }
   ]
 };
+
+/* Simulacion de contenido de tablero */
 
 const contentData = {
   'tablero': {
@@ -67,12 +113,13 @@ const contentData = {
       </div>
     `
   },
+
+ /*Simulacion de contenido de estudiantes*/
   'estudiantes': {
     title: 'Navegador de Cursos',
     html: `
       <div class="page-header">
         <h2>Navegador de Cursos</h2>
-        <button class="btn"><i class="fa-solid fa-plus"></i> Agregar Curso</button>
       </div>
       <div class="course-grid">
         <div class="course-card js-view-course" data-course-id="pk-a" data-course-name="Pre-Kinder A"><div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div><div class="course-card-info"><h4>Pre-Kinder A</h4><p>Prof. Jefa: Carmen Soto</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div></div>
@@ -92,90 +139,445 @@ const contentData = {
       </div>
     `
   },
+
+ /*Simulacion de contenido de la lista de alumnos*/
   'agregar-alumno': {
-    title: 'Agregar Alumno',
+    title: 'Listado de Alumnos',
     html: `
-      <h3 class="card-title">Agregar Alumno (datos brutos)</h3>
-      <div class="card">
-        <p>Formulario simulado (solo datos de ejemplo)</p>
-        <ul>
-          <li>Nombre: Juanito Pérez</li>
-          <li>RUT: 11.222.333-4</li>
-          <li>Curso: 1° Básico A</li>
-        </ul>
+    <div class="page-header">
+      <h2>Alumnos Registrados</h2>
+    </div>
+    <div class="card">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>RUT</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Apoderado</th>
+              <th>RUT Apoderado</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Comuna</th>
+              <th>Curso</th>
+              <th>Fecha Ingreso</th>
+              <th>Activo/Inactivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>11.222.333-4</td>
+              <td>Juanito</td>
+              <td>Pérez</td>
+              <td>Luis Pérez</td>
+              <td>11.111.111-1</td>
+              <td>luis.perez@mail.com</td>
+              <td>912345678</td>
+              <td>Santiago</td>
+              <td>1° Básico A</td>
+              <td>01/03/2023</td>
+              <td>Activo</td>
+            </tr>
+            <tr>
+              <td>22.333.444-5</td>
+              <td>María</td>
+              <td>González</td>
+              <td>Carmen González</td>
+              <td>22.222.222-2</td>
+              <td>carmen.g@mail.com</td>
+              <td>987654321</td>
+              <td>Providencia</td>
+              <td>2° Básico B</td>
+              <td>01/03/2023</td>
+              <td>Activo</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    `
+    </div>
+  `
   },
+ /*Simulacion de contenido de profesores*/
   'profesores': {
     title: 'Profesores',
     html: `
-      <h3 class="card-title">Listado de Profesores</h3>
-      <div class="card">
-        <div class="table-wrapper">
+    <h3 class="card-title">Listado de Profesores</h3>
+    <div class="card">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>RUT</th>
+              <th>Nombre</th>
+              <th>Curso</th>
+              <th>Asignatura</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>12.345.678-9</td>
+              <td>María González</td>
+              <td>1° Básico</td>
+              <td>Matemáticas</td>
+              <td>maria.g@colegio.cl</td>
+              <td>+56 9 1234 5678</td>
+            </tr>
+            <tr>
+              <td>23.456.789-0</td>
+              <td>Carlos Vega</td>
+              <td>2° Básico</td>
+              <td>Historia</td>
+              <td>carlos.v@colegio.cl</td>
+              <td>+56 9 8765 4321</td>
+            </tr>
+            <tr>
+              <td>34.567.890-1</td>
+              <td>Isabel Ríos</td>
+              <td>3° Básico</td>
+              <td>Lenguaje</td>
+              <td>isabel.r@colegio.cl</td>
+              <td>+56 9 9123 4567</td>
+            </tr>
+            <tr>
+              <td>45.678.901-2</td>
+              <td>Felipe Castro</td>
+              <td>4° Básico</td>
+              <td>Ciencias</td>
+              <td>felipe.c@colegio.cl</td>
+              <td>+56 9 9345 6789</td>
+            </tr>
+            <tr>
+              <td>56.789.012-3</td>
+              <td>Laura Moreno</td>
+              <td>5° Básico</td>
+              <td>Matemáticas</td>
+              <td>laura.m@colegio.cl</td>
+              <td>+56 9 9456 7890</td>
+            </tr>
+            <tr>
+              <td>67.890.123-4</td>
+              <td>Juan Torres</td>
+              <td>6° Básico</td>
+              <td>Historia</td>
+              <td>juan.t@colegio.cl</td>
+              <td>+56 9 9567 8901</td>
+            </tr>
+            <tr>
+              <td>78.901.234-5</td>
+              <td>Raúl Fernández</td>
+              <td>3° Medio</td>
+              <td>Matemáticas</td>
+              <td>raul.f@colegio.cl</td>
+              <td>+56 9 9678 9012</td>
+            </tr>
+            <tr>
+              <td>89.012.345-6</td>
+              <td>Carmen Rojas</td>
+              <td>3° Medio</td>
+              <td>Lenguaje</td>
+              <td>carmen.r@colegio.cl</td>
+              <td>+56 9 9789 0123</td>
+            </tr>
+            <tr>
+              <td>90.123.456-7</td>
+              <td>Eduardo Soto</td>
+              <td>3° Medio</td>
+              <td>Ciencias</td>
+              <td>eduardo.s@colegio.cl</td>
+              <td>+56 9 9890 1234</td>
+            </tr>
+            <tr>
+              <td>01.234.567-8</td>
+              <td>Paula Herrera</td>
+              <td>7° Básico</td>
+              <td>Arte</td>
+              <td>paula.h@colegio.cl</td>
+              <td>+56 9 9012 3456</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `
+  },
+ /*Simulacion de contenido de listado de asignaturas*/
+  'asignaturas': {
+    title: 'Listado de Asignaturas',
+    html: `
+    <h3 class="card-title">Listado de Asignaturas</h3>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Profesor Jefe</th>
+            <th>Asignaturas del curso</th>
+            <th>Cantidad de Alumnos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Kinder</td>
+            <td>Ana Morales</td>
+            <td>Lenguaje, Matemáticas, Arte</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td>1° Básico</td>
+            <td>Raúl Pérez</td>
+            <td>Matemáticas, Historia, Ciencias</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>2° Básico</td>
+            <td>Laura Díaz</td>
+            <td>Lenguaje, Matemáticas, Historia</td>
+            <td>19</td>
+          </tr>
+          <tr>
+            <td>3° Básico</td>
+            <td>Paula Herrera</td>
+            <td>Matemáticas, Lenguaje, Historia</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>4° Básico</td>
+            <td>María Silva</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>21</td>
+          </tr>
+          <tr>
+            <td>5° Básico</td>
+            <td>Laura Moreno</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>22</td>
+          </tr>
+          <tr>
+            <td>6° Básico</td>
+            <td>Raúl Soto</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>21</td>
+          </tr>
+          <tr>
+            <td>7° Básico</td>
+            <td>Laura Rojas</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>22</td>
+          </tr>
+          <tr>
+            <td>8° Básico</td>
+            <td>Paula Moreno</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>22</td>
+          </tr>
+          <tr>
+            <td>1° Medio</td>
+            <td>Raúl Moreno</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>24</td>
+          </tr>
+          <tr>
+            <td>2° Medio</td>
+            <td>Laura Fernández</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>24</td>
+          </tr>
+          <tr>
+            <td>3° Medio</td>
+            <td>Raúl Fernández</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>24</td>
+          </tr>
+          <tr>
+            <td>4° Medio</td>
+            <td>Laura Medina</td>
+            <td>Lenguaje, Matemáticas, Historia, Ciencias</td>
+            <td>25</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `
+  },
+ /*Simulacion de contenido de asistencias*/
+  'asistencias': {
+    title: 'Asistencias de Alumnos',
+    html: `
+    <h3 class="card-title">Asistencias de Alumnos</h3>
+    <div class="attendance-section">
+      <!-- Varias categorías (Prekínder, 1° Básico, etc.), cada una con su tabla -->
+      <!-- Aquí se muestran datos de ejemplo. En producción, reemplazar por fetch a la API. -->
+      <details class="attendance-category">
+        <summary>Prekínder</summary>
+        <div class="attendance-card">
           <table class="data-table">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Asignatura</th><th>Email</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>RUT</th>
+                <th>Promedio</th>
+                <th>Asistencia</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td>PF-001</td><td>María González</td><td>Matemáticas</td><td>maria.g@colegio.cl</td></tr>
-              <tr><td>PF-002</td><td>Carlos Vega</td><td>Historia</td><td>carlos.v@colegio.cl</td></tr>
-              <tr><td>PF-003</td><td>Isabel Ríos</td><td>Lenguaje</td><td>isabel.r@colegio.cl</td></tr>
+              <tr>
+                <td>Ana Pérez</td>
+                <td>12.345.678-9</td>
+                <td>6.5</td>
+                <td>95%</td>
+                <td>
+                  <button class="btn message-btn" data-contact="56912345678">
+                    <i class="fa-solid fa-envelope"></i> Mensaje
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `
+      </details>
+      <!-- poner hasta 4tomedio -->
+    </div>
+  `
   },
-  'asignaturas': {
-    title: 'Asignaturas',
-    html: `
-      <h3 class="card-title">Asignaturas</h3>
-      <div class="card">
-        <ul>
-          <li>Matemáticas</li>
-          <li>Lenguaje</li>
-          <li>Historia</li>
-          <li>Ciencias</li>
-        </ul>
-      </div>
-    `
-  },
-  'horarios': {
-    title: 'Horarios',
-    html: `
-      <h3 class="card-title">Horarios</h3>
-      <div class="card">
-        <p>Horario ejemplo: 08:00 - 12:30 (Lun-Vie)</p>
-      </div>
-    `
-  },
+
   'revision-pagos': {
     title: 'Revisión de Pagos',
     html: `
-      <h3 class="card-title">Revisión de Pagos</h3>
-      <div class="card">
-        <div class="table-wrapper">
+    <div class="payments-section">
+      <details class="payment-category">
+        <summary> Pagos Realizados</summary>
+        <div class="card">
           <table class="data-table">
-            <thead><tr><th>Alumno</th><th>Mes</th><th>Monto</th><th>Estado</th></tr></thead>
+            <thead>
+              <tr>
+                <th>RUT Apoderado</th>
+                <th>Apoderado</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td>Ana Contreras</td><td>Septiembre</td><td>$230.000</td><td><span class="status status-review">En revisión</span></td></tr>
-              <tr><td>Benjamín Soto</td><td>Septiembre</td><td>$230.000</td><td><span class="status status-paid">Pagado</span></td></tr>
+              <tr>
+                <td>12.345.678-9</td>
+                <td>Juan Pérez</td>
+                <td>12/09/2025</td>
+                <td>$50.000</td>
+              </tr>
+              <tr>
+                <td>11.222.333-4</td>
+                <td>María López</td>
+                <td>15/09/2025</td>
+                <td>$60.000</td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `
+      </details>
+      <details class="payment-category">
+        <summary> Pagos en Proceso</summary>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>RUT Apoderado</th>
+                <th>Apoderado</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>22.333.444-6</td>
+                <td>Pedro Torres</td>
+                <td>30/09/2025</td>
+                <td>$55.000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+      <details class="payment-category">
+        <summary> Pagos Atrasados</summary>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>RUT Apoderado</th>
+                <th>Apoderado</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>99.888.777-6</td>
+                <td>Laura González</td>
+                <td>05/09/2025</td>
+                <td>$70.000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  `
   },
+ /*Simulacion de contenido de comunicados*/
   'comunicados': {
     title: 'Comunicados',
     html: `
-      <h3 class="card-title">Comunicados</h3>
-      <div class="card">
-        <ul>
-          <li><strong>15/09/2025:</strong> Examen Final de Matemáticas.</li>
-          <li><strong>18/09/2025:</strong> Feriado - No hay clases.</li>
-        </ul>
+    <div class="card announcements-card">
+      <h3 class="card-title">Anuncios</h3>
+      <div class="announcement-create">
+        <h4>Crear Nuevo Anuncio</h4>
+        <div class="announcement-inputs">
+          <input id="new-an-title" type="text" placeholder="Título del anuncio" />
+          <textarea id="new-an-content" rows="4" placeholder="Contenido..."></textarea>
+          <div class="text-right">
+            <button id="add-announcement" class="btn">Publicar</button>
+          </div>
+        </div>
       </div>
-    `
+      <div class="announcement-filters-bottom">
+        <label for="course-filter">Curso:</label>
+        <select id="course-filter">
+          <option value="">Todos</option>
+          <option value="prekinder">Prekínder</option>
+          <option value="kinder">Kinder</option>
+          <option value="1basico">1° Básico</option>
+          <option value="2basico">2° Básico</option>
+          <option value="3basico">3° Básico</option>
+          <option value="4basico">4° Básico</option>
+          <option value="5basico">5° Básico</option>
+          <option value="6basico">6° Básico</option>
+          <option value="7basico">7° Básico</option>
+          <option value="8basico">8° Básico</option>
+          <option value="1medio">1° Medio</option>
+          <option value="2medio">2° Medio</option>
+          <option value="3medio">3° Medio</option>
+          <option value="4medio">4° Medio</option>
+        </select>
+        <label for="parent-filter">Para:</label>
+        <select id="parent-filter">
+          <option value="">Todos</option>
+        </select>
+        <label><input type="checkbox" id="has-email-filter"> Solo con correo</label>
+        <label><input type="checkbox" id="has-whatsapp-filter"> Solo WhatsApp</label>
+      </div>
+      <div class="announcement-list-section">
+        <h4>Anuncios Publicados</h4>
+        <div id="announcements-list">
+          <p>No hay anuncios publicados.</p>
+        </div>
+      </div>
+    </div>
+  `
   },
+ /*Simulacion de contenido de lista de usuarios*/
   'usuarios': {
     title: 'Usuarios',
     html: `
@@ -193,6 +595,7 @@ const contentData = {
       </div>
     `
   },
+ /*Simulacion de contenido de pagos*/
   'pagos': {
     title: 'Pagos',
     html: `
@@ -205,7 +608,7 @@ const contentData = {
   }
 };
 
-// Render chart for tablero (estético mejorado)
+/* Grafico del tablero del admin*/
 function renderAdminDashboardChart() {
   const canvas = document.getElementById('admin-chart');
   if (!canvas) return;
@@ -213,7 +616,7 @@ function renderAdminDashboardChart() {
     adminChartInstance.destroy();
   }
 
-  // asegurar que el contenedor tenga una altura explícita
+  // Forzamos una altura adecuada del contenedor para que Chart.js calcule bien.
   const container = canvas.closest('.chart-container');
   if (container) {
     container.style.height = '320px';
@@ -222,7 +625,7 @@ function renderAdminDashboardChart() {
 
   const ctx = canvas.getContext('2d');
 
-  // crear degradado dinámico según la altura actual
+  // Degradado vertical basado en la altura real del contenedor.
   const height = container ? Math.max(220, container.clientHeight) : 320;
   const grad = ctx.createLinearGradient(0, 0, 0, height);
   grad.addColorStop(0, 'rgba(106,58,143,0.95)');
@@ -288,13 +691,14 @@ function renderAdminDashboardChart() {
   });
 }
 
+/* tablas de alumnos por curso (simulacion)*/
 function renderStudentTable(courseId, courseName) {
   const students = studentData[courseId] || [];
   let rows = students.map(s => `
     <tr>
       <td>${s.id}</td>
       <td class="user-cell">
-        <div class="avatar" style="width:36px;height:36px;font-size:.85rem">${s.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div class="avatar" style="width:36px;height:36px;font-size:.85rem">${s.name.split(' ').map(n => n[0]).join('')}</div>
         <div>
           <div style="font-weight:600">${s.name}</div>
           <div style="font-size:.85rem;color:#6b7280">${s.parent}</div>
@@ -325,7 +729,7 @@ function renderStudentTable(courseId, courseName) {
   topbarTitle.textContent = `Alumnos — ${courseName}`;
 }
 
-// renderContent general
+/* secciones*/
 function renderContent(section) {
   const entry = contentData[section];
   if (!entry) {
@@ -339,44 +743,43 @@ function renderContent(section) {
   if (section === 'tablero') {
     renderAdminDashboardChart();
   }
-
-  // Añadir listeners para tarjetas de curso (si existen)
+  // Si existen tarjetas de curso en la sección, las activamos para que
+  // al hacer click cambien la vista a la tabla de alumnos del curso elegido.
   const courseCards = mainContent.querySelectorAll('.js-view-course');
   courseCards.forEach(card => {
     card.addEventListener('click', () => {
       const id = card.dataset.courseId;
       const name = card.dataset.courseName || card.querySelector('.course-card-info h4')?.textContent || 'Curso';
       renderStudentTable(id, name);
-      // actualizar active en menú
+      // Como cambiamos de vista, removemos el estado "active" del menú (si lo tuviera).
       document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
     });
   });
 }
 
-// Menu click listeners
+/*Interacciones del menu*/
 menuLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
     const sec = link.dataset.section;
     if (!sec) return;
-    // marcar activo
+    // estilo de "activo" en el menú
     menuLinks.forEach(l => l.classList.remove('active'));
     link.classList.add('active');
-    // abrir details padres si aplica
     const parentDetails = link.closest('details.menu-group');
     if (parentDetails) parentDetails.open = true;
     renderContent(sec);
-    // en mobile cerrar sidebar
+    // si estamos en celular, cerramos el sidebar tras elegir una sección
     if (mq.matches) sidebar.classList.add('closed');
   });
 });
 
-// Delegación para botones dentro del main (volver, ver, eliminar)
+/*Eventos*/ 
 mainContent.addEventListener('click', e => {
   const bt = e.target.closest('.js-back-to-courses');
   if (bt) {
     renderContent('estudiantes');
-    // re-mark menu active
+    // Marcamos "Estudiantes" como activo en el menú para mantener coherencia visual.
     menuLinks.forEach(l => l.classList.remove('active'));
     const estudiantesLink = document.querySelector('.menu a[data-section="estudiantes"]');
     if (estudiantesLink) estudiantesLink.classList.add('active');
@@ -394,12 +797,11 @@ mainContent.addEventListener('click', e => {
   if (delBtn) {
     const sid = delBtn.dataset.studentId;
     if (confirm('Eliminar alumno ' + sid + ' (simulado)?')) {
-      // aquí solo simulamos la eliminación del DOM
+      // Sólo removemos la fila del DOM como simulación. En producción, aquí
+      // iría una llamada al backend y, tras éxito, refrescar la tabla.
       delBtn.closest('tr').remove();
     }
     return;
   }
 });
-
-// Carga inicial
 renderContent('tablero');
