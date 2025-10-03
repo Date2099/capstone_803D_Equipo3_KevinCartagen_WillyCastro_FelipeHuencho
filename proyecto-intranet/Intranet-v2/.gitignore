@@ -1,0 +1,19 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Django
+*.sqlite3
+*.log
+*.pot
+*.py[cod]
+
+# Environment
+.env
+
+# Static files generados
+staticfiles/
+
+.env

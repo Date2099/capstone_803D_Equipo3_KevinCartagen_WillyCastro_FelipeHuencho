@@ -1,723 +1,331 @@
-/* --- PALETA DE COLORES Y FUENTE DEL COLEGIO --- */
-:root {
-  --color-primary: #4A2B6D;
-  --color-secondary: #cba858;
-  --color-text-dark: #374151;
-  --color-text-light: #f9fafb;
-  --color-background-body: #f3f4f6;
-  --color-background-card: #ffffff;
-  --color-border: #e5e7eb;
-  --color-placeholder: #9ca3af;
-  --sidebar-width: 250px;
+/* 
+  ================== SISTEMA DE DISEÑO ==================
+  Variables globales para no pelear con mil colores sueltos.
+  Si el colegio cambia paleta, venimos acá y el resto cae solo.
+*/
+:root{
+  /* Colores institucionales (serios, legibles, contrastados) */
+  --primary:#0f294c;      /* azul “marca” */
+  --secondary:#cda758;    /* dorado de acento */
+
+  /* Neutros razonables: ni gris lavado ni negro duro */
+  --text:#1f2937;
+  --muted:#474b55;
+  --bg:#f6f7f9;
+  --card:#ffffff;
+  --border:#e5e7eb;
+
+  /* Estados, para chips/tags sin estridencias */
+  --ok:#16a34a;
+  --warn:#f59e0b;
+  --info:#2563eb;
+  --bad:#dc2626;
+
+  /* Radios/espaciados coherentes: sin magia rara */
+  --r-8:8px; --r-10:10px; --r-12:12px; --r-14:14px;
+  --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.25rem; --sp-6:1.5rem;
+
+  /* Sombras con respeto: elegantes y sin ensuciar */
+  --shadow-1:0 4px 12px rgba(15,41,76,.06);
+  --shadow-2:0 10px 30px rgba(15,41,76,.12);
 }
 
-/* --- RESET Y ESTILOS GENERALES --- */
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  font-family: "Poppins", sans-serif;
-  color: var(--color-text-dark);
-  background: var(--color-background-body);
-  font-size: 15px;
+/* 
+  Modo oscuro sin drama:
+  - No duplicamos reglas; solo cambiamos tokens.
+  - Así no hay 2 CSS distintos que mantener.
+*/
+.theme-dark{
+  --text:#e5e7eb;
+  --muted:#ffffff;
+  --bg:#0f172a;
+  --card:#101827;
+  --border:#1f2937;
+  --shadow-1:0 4px 12px rgba(0,0,0,.25);
+  --shadow-2:0 10px 30px rgba(0,0,0,.4);
 }
 
-/* --- LAYOUT --- */
-.layout { display: flex; min-height: 100vh; width: 100%; }
-
-/* --- SIDEBAR (BARRA LATERAL) --- */
-.sidebar {
-  width: var(--sidebar-width);
-  background: var(--color-primary);
-  color: var(--color-text-light);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  transition: transform .3s ease-in-out;
-  flex-shrink: 0;
-}
-.sidebar.closed { transform: translateX(calc(-1 * var(--sidebar-width))); }
-.brand {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, .1);
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-.brand-logo { width: 40px; height: auto; }
-.profile {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, .1);
-}
-.avatar, .avatar-mini {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.profile-info .role { font-size: .8rem; color: #d1d5db; }
-.menu { padding: 1rem 0; overflow-y: auto; }
-.menu a {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-  padding: .8rem 1.25rem;
-  margin: 0 .75rem;
-  color: #e5e7eb;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all .2s;
-  border-radius: 8px;
-}
-.menu a i { width: 20px; text-align: center; }
-.menu a:hover { background: rgba(255, 255, 255, .1); }
-.menu a.active {
-  background: var(--color-text-light);
-  color: var(--color-primary);
-  font-weight: 600;
+/* Reset básico: limpio pero sin romper inputs ni accesibilidad */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
 }
 
-/* --- MAIN (CONTENIDO PRINCIPAL) --- */
-.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.topbar {
-  height: 65px;
-  background: var(--color-background-card);
-  color: var(--color-text-dark);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  border-bottom: 1px solid var(--color-border);
+/* 
+  ================== TRANSICIÓN DE TEMA ==================
+  - Animamos colores SOLO cuando el JS pone .theme-animating.
+  - Esto evita que todo esté animando siempre (que es molesto y caro).
+*/
+html.theme-animating body,
+html.theme-animating .sidebar,
+html.theme-animating .topbar,
+html.theme-animating .card,
+html.theme-animating .menu a,
+html.theme-animating .table th,
+html.theme-animating .table td {
+  transition: background-color .28s ease, color .28s ease, border-color .28s ease;
 }
-.toggle {
-  background: transparent;
-  border: 0;
-  color: var(--color-text-dark);
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-.topbar-title { font-weight: 600; font-size: 1.2rem; }
-.topbar .spacer { flex: 1; }
-.user-mini { display: flex; align-items: center; gap: .6rem; cursor: pointer; font-weight: 500; }
-.avatar-mini { width: 32px; height: 32px; font-size: 0.9rem; }
 
-/* --- CONTENT (ÁREA DE CONTENIDO) --- */
-.content { padding: 1.5rem; flex: 1; }
-.card {
-  background: var(--color-background-card);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
-}
-.card-title { margin: 0 0 1.5rem 0; font-size: 1.25rem; color: var(--color-text-dark); font-weight: 600; }
-
-/* --- PORTAL DE PAGOS --- */
-.pagos-resumen { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-.resumen-card {
-  background: var(--color-background-card);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary);
-  padding: 1.5rem;
-  border-radius: 10px;
-  text-align: center;
-}
-.resumen-card.paid { color: #10b981; }
-.resumen-card .num { font-size: 2rem; font-weight: 700; }
-.resumen-card .label { font-size: .9rem; margin-top: .25rem; color: #6b7280; }
-
-h4 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0; }
-.table-wrapper { overflow-x: auto; }
-.tabla-pagos { width: 100%; border-collapse: collapse; }
-.tabla-pagos th, .tabla-pagos td {
-  padding: .8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-.tabla-pagos th { background: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85rem; text-transform: uppercase; }
-.tabla-pagos tbody tr:hover { background-color: #f9fafb; }
-
-.btn {
-  background: var(--color-primary);
-  color: var(--color-text-light);
-  border: none;
-  padding: .6rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all .2s;
-}
-.btn:hover { background: var(--color-secondary); color: var(--color-primary); transform: translateY(-2px); }
-.status { padding: .25rem .6rem; border-radius: 99px; font-size: .8rem; font-weight: 600; }
-.status.status-paid { background-color: #d1fae5; color: #065f46; }
-.status.status-review { background-color: #fef3c7; color: #92400e; }
-
-/* --- FOOTER --- */
-.footer { color: #6b7280; font-size: .85rem; padding: 1.5rem; text-align: center; border-top: 1px solid var(--color-border); }
-
-
-/* --- NUEVOS ESTILOS PARA EL DASHBOARD --- */
-.stat-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-.stat-card {
-  background-color: var(--card-color);
-  color: var(--color-text-light);
-  padding: 1.5rem;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-.stat-card .card-icon { font-size: 2rem; opacity: 0.8; }
-.stat-card .card-info { text-align: right; width: 100%; }
-.stat-card .card-num { font-size: 2.25rem; font-weight: 700; line-height: 1; }
-.stat-card .card-label { font-size: 0.9rem; font-weight: 500; }
-
-.dashboard-columns {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 1.5rem;
-}
-.card-title-small {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.75rem;
-}
-.events-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.events-list li { display: flex; align-items: center; gap: 1rem; }
-.event-date {
-  flex-shrink: 0;
-  width: 55px;
-  height: 55px;
-  border-radius: 10px;
-  background-color: var(--color-background-body);
-  color: var(--color-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  line-height: 1.1;
-}
-.event-date span { font-size: 1.5rem; }
-.event-details .event-title { font-weight: 600; color: var(--color-text-dark); }
-.event-details .event-meta { font-size: 0.85rem; color: var(--color-placeholder); }
-
-.grades-table { width: 100%; border-collapse: collapse; }
-.grades-table th, .grades-table td {
-  padding: .8rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-.grades-table th { font-weight: 600; font-size: 0.85rem; color: #6b7280; }
-.grade {
-  font-weight: 700;
-  font-size: 1rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  color: #fff;
-  display: inline-block;
-  min-width: 40px;
-  text-align: center;
-}
-.grade.grade-excellent { background-color: #16a34a; }
-.grade.grade-good { background-color: #2563eb; }
-.grade.grade-regular { background-color: #f59e0b; }
-.grade.grade-bad { background-color: #dc2626; }
-
-
-/* --- RESPONSIVE --- */
-@media (max-width: 992px) {
-  .dashboard-columns { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    z-index: 1000;
-    transform: translateX(calc(-1 * var(--sidebar-width)));
+/* Si el usuario pidió menos movimiento, lo respetamos */
+@media (prefers-reduced-motion: reduce){
+  html.theme-animating body,
+  html.theme-animating .sidebar,
+  html.theme-animating .topbar,
+  html.theme-animating .card,
+  html.theme-animating .menu a,
+  html.theme-animating .table th,
+  html.theme-animating .table td {
+    transition: none;
   }
-  .sidebar.closed { transform: translateX(calc(-1 * var(--sidebar-width))); }
-  .sidebar:not(.closed) { transform: translateX(0); box-shadow: 10px 0 25px rgba(0,0,0,0.1); }
-  .user-mini span { display: none; }
-  .pagos-resumen { grid-template-columns: 1fr; }
-  .content { padding: 1rem; }
 }
-@media (max-width: 576px) {
-  .stat-cards-container { grid-template-columns: 1fr; }
-}
-/* --- ESTILOS PARA LA SECCIÓN TAREAS Y NOTAS --- */
 
-.filters-container {
-  display: flex;
+/* ================== LAYOUT ================== */
+.layout{display:flex;min-height:100vh}
+
+/* 
+  Sidebar:
+  - Desktop: columna sólida a la izquierda.
+  - Mobile: la convertimos en barra scrolleable horizontal (ver abajo).
+*/
+.sidebar{
+  width:250px;background:var(--primary);color:#fff;display:flex;flex-direction:column
+}
+.brand{display:flex;align-items:center;gap:.75rem;padding:var(--sp-4) var(--sp-5);text-decoration:none;color:#fff}
+.brand-logo{height:36px;width:auto}
+.brand-text{display:flex;flex-direction:column;line-height:1.05}
+.brand-title{font-weight:700}
+.brand-subtitle{opacity:.85;font-weight:600}
+
+.profile{display:flex;gap:.75rem;align-items:center;padding:var(--sp-4) var(--sp-5);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--secondary);color:#000;font-weight:700;position:relative;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.avatar-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.avatar-initials{position:relative;z-index:1}
+.profile-name{font-weight:600}
+.profile-role{font-size:.85rem;opacity:.85}
+
+.menu{display:flex;flex-direction:column;padding:.5rem}
+.menu a{
+  color:#eef0f4;text-decoration:none;padding:.7rem .9rem;border-radius:10px;display:flex;gap:.55rem;align-items:center;
+  transition:background .15s ease, color .15s ease; outline:none;
+}
+.menu a:hover{background:rgba(255,255,255,.12)}
+.menu a:focus-visible{box-shadow:0 0 0 3px rgba(205,167,88,.35)}
+.menu a.active{background:#fff;color:var(--primary);font-weight:700}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  height:69px;background:var(--card);display:flex;align-items:center;gap:.6rem;padding:0 var(--sp-4);
+  border-bottom:2px solid rgba(205,167,88,.25)
+}
+.topbar-t{font-size:1.2rem;margin:0}
+.spacer{flex:1}
+.btn-icon{
+  background:transparent;border:0;color:var(--text);font-size:1.1rem;cursor:pointer;border-radius:10px;padding:.35rem .45rem
+}
+.btn-icon:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(205,167,88,.35)}
+.user-mini{display:flex;align-items:center;gap:.55rem;color:var(--text);font-weight:600}
+.avatar-mini{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--secondary);color:#000;font-weight:700}
+
+.content{padding:var(--sp-4)}
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--r-14); padding:var(--sp-4);
+  box-shadow:var(--shadow-1)
+}
+
+/* ================== TIPOGRAFÍA / UTILS ================== */
+.section-title{margin:.25rem 0 var(--sp-4) 0;font-size:1.25rem;font-weight:700}
+.subtle{color:var(--muted);font-size:.95rem;margin:.25rem 0 var(--sp-4) 0}
+.row{display:flex;gap:.6rem}
+
+/* ================== BOTONES / FORM ================== */
+.btn{
+  background:var(--primary);color:#fff;border:0;border-radius:var(--r-10);padding:.6rem .9rem;font-weight:700;cursor:pointer;
+  transition:transform .05s ease, background .15s ease; letter-spacing:.2px
+}
+.btn:hover{background:var(--secondary);color:#000}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(205,167,88,.35)}
+.btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+.btn-secondary:hover{background:var(--primary);color:#fff}
+
+.field{display:flex;flex-direction:column;gap:.4rem}
+.input{
+  border:1px solid var(--border);border-radius:var(--r-10);background:#fff;color:var(--primary);
+  padding:.65rem .75rem;font-size:1rem;outline:none
+}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,41,76,.1)}
+.input-row{display:flex;gap:.5rem;align-items:center}
+.help{color:var(--muted);font-size:.9rem}
+
+/* Estados y notas: etiquetas claras, sin confundir al ojo */
+.tag{display:inline-block;padding:.25rem .55rem;border-radius:999px;font-size:.8rem;font-weight:700}
+.tag.pending{background:#fff5d9;color:#6a4c00;border:1px solid #f0dfad}
+.tag.submitted{background:#e9eef9;color:#0f294c;border:1px solid #d7e0f1}
+.tag.graded{background:#f4efe4;color:#7d5a17;border:1px solid #eadfca}
+.grade{display:inline-block;padding:.25rem .5rem;border-radius:8px;background:#1e40af;color:#fff;font-weight:700}
+
+/* ================== COMPONENTES ================== */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--sp-4)}
+.class-card{border:1px solid var(--border);border-radius:var(--r-14);padding:var(--sp-4);background:var(--card);display:flex;flex-direction:column;gap:.6rem;box-shadow:var(--shadow-1);transition:transform .15s ease, box-shadow .15s ease}
+.class-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2)}
+.class-head{display:flex;align-items:center;gap:.6rem}
+.class-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#eef;border:1px solid var(--border);font-size:1rem;color:#273}
+.class-name{margin:0;font-weight:700}
+.class-teacher{margin:0;color:var(--muted);font-size:.9rem}
+
+.progress{height:10px;border-radius:999px;background:#edf0f4;overflow:hidden;position:relative}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.progress[role="progressbar"]{outline:none}
+.progress::after{content:attr(data-percent) '%';position:absolute;right:8px;top:-22px;font-size:.8rem;color:var(--muted)}
+
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.7rem;border-bottom:1px solid var(--border);text-align:left}
+.table th{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.table tbody tr:nth-child(even){background:color-mix(in srgb, var(--border) 25%, transparent)}
+
+/* ================== SKELETONS (carga con dignidad) ================== */
+.skeleton{background:linear-gradient(90deg, rgba(0,0,0,.05), rgba(255,255,255,.06), rgba(0,0,0,.05));background-size:200% 100%;animation:sk 1.2s ease-in-out infinite;border-radius:var(--r-10)}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-line{height:12px;margin:.4rem 0}
+.sk-box{height:120px}
+
+/* ================== CALENDARIO (FullCalendar) ================== */
+#calendar{min-height:520px}
+.fc .fc-toolbar-title{color:var(--primary);font-weight:700}
+.fc .fc-button-primary{background:#fff;border:1px solid var(--border);color:var(--primary)}
+.fc .fc-button-primary:hover{background:var(--primary);color:#fff}
+.fc-event.event-examen{background:var(--primary);color:#fff}
+.fc-event.event-tarea{background:var(--secondary);color:#000}
+.fc-event.event-feriado.fc-bg-event{background:var(--secondary);opacity:.2}
+.fc-bg-event .fc-event-title{display:none}
+
+/* ================== MODAL ================== */
+.modal{position:fixed;inset:0;display:none}
+.modal.show{display:block}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.modal-card{
+  position:relative;margin:5vh auto;background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:560px;padding:0;box-shadow:var(--shadow-2)
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:1rem 1rem .5rem 1rem;border-bottom:1px solid var(--border)}
+.modal-title{margin:0}
+.modal-body{padding:1rem}
+.modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:0 1rem 1rem 1rem}
+
+/* ================== FOOTER ================== */
+.footer{padding:var(--sp-4);text-align:center;color:var(--muted);font-size:.92rem}
+
+/* ================== RESPONSIVE ================== */
+@media (max-width: 860px){
+  /* 
+    En móvil, pasamos la sidebar a “barra” arriba, scrolleable horizontal.
+    Es mil veces más cómodo que esconder todo en un menú.
+  */
+  .layout{flex-direction:column}
+  .sidebar{width:100%;position:sticky;top:0;z-index:30;box-shadow:var(--shadow-1)}
+  .profile{display:none} /* El perfil arriba no suma en mobile: lo omitimos */
+  .menu{flex-direction:row;gap:.4rem;padding:.5rem .6rem;overflow-x:auto;scroll-snap-type:x mandatory}
+  .menu a{white-space:nowrap;scroll-snap-align:start}
+  .content{padding:.9rem}
+}
+
+
+/* =================== Responsividad tareas/notas================ */
+#tareas-card {
+  overflow-x: auto; /* habilita scroll horizontal si hace falta */
+}
+#tareas-card table {
+  min-width: 600px; /* o el ancho necesario para tus columnas */
+}
+@media (max-width: 480px) {
+  #tareas-card table th,
+  #tareas-card table td {
+    padding: .4rem;
+    font-size: .75rem;
+  }
+}
+/* Para el row de filtros de tareas */
+#main-card .row {
   flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: flex-end;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
+  gap: .5rem; /* ajusta el espacio entre botones y selects */
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
+/* Botones secundarios dentro de esa row */
+#main-card .row button.btn-secondary {
+  flex: 1 1 auto;        /* que puedan encogerse y crecer */
+  min-width: 100px;      /* ancho mínimo razonable */
+}
+
+/* En móviles aún más pequeños */
+@media (max-width: 480px) {
+  #main-card .row button.btn-secondary {
+    flex: 1 1 45%;       /* ocupan casi la mitad del ancho cada uno */
+    font-size: .75rem;   /* reducimos texto para que quepa */
+  }
+
+  #main-card .row select.input {
+    flex: 1 1 100%;      /* los selects toman todo el ancho disponible */
+    margin-bottom: .5rem;
+  }
+}
+/* =================== Responsividad Calendario================ */
+/* La card del calendario */
+#calendar {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+/* Toolbar de FullCalendar */
+#calendar .fc-header-toolbar {
+  flex-wrap: wrap; /* Que los botones bajen si no caben */
+  justify-content: space-between;
   gap: 0.5rem;
 }
 
-.filter-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #6b7280;
+/* Botones */
+#calendar .fc-button {
+  flex: 1 1 auto;      /* Que se ajusten */
+  min-width: 80px;     /* Para no achicarse demasiado */
 }
 
-.filter-select {
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-background-card);
-  font-family: "Poppins", sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.filter-buttons {
-  display: flex;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.filter-btn {
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  background-color: var(--color-background-card);
-  color: var(--color-text-dark);
-  border: none;
-  border-left: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-btn:first-child {
-  border-left: none;
-}
-
-.filter-btn:hover {
-  background-color: #f3f4f6;
-}
-
-.filter-btn.active {
-  background-color: var(--color-primary);
-  color: var(--color-text-light);
-  border-color: var(--color-primary);
-}
-
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tasks-table th, .tasks-table td {
-  padding: .8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.tasks-table th {
-  background: #f9fafb;
-  font-weight: 600;
-  color: #6b7280;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-}
-
-.tasks-table tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-/* Nuevos estados para la tabla de tareas */
-.status.status-pending { background-color: #fef3c7; color: #92400e; }
-.status.status-submitted { background-color: #dbeafe; color: #1e40af; }
-.status.status-graded { background-color: #d1fae5; color: #065f46; }
-/* --- ESTILOS PARA EL CALENDARIO INTERACTIVO (FullCalendar) --- */
-
-#calendar-container {
-  width: 100%;
-  height: 80vh; /* Aumentamos un poco la altura para mejor visualización */
-}
-
-/* --- Barra de Herramientas (Botones y Título) --- */
-.fc .fc-toolbar.fc-header-toolbar {
-  margin-bottom: 1.5rem;
-  align-items: center;
-}
-
-.fc .fc-toolbar-title {
-  font-family: "Poppins", sans-serif;
-  color: var(--color-primary);
-  font-weight: 600;
-  font-size: 1.5rem;
-}
-
-.fc .fc-button-primary {
-  background-color: var(--color-background-card);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-dark);
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  text-transform: capitalize;
-  transition: all 0.2s ease;
-  padding: 0.5rem 1rem;
-}
-
-.fc .fc-button-primary:hover, .fc .fc-button-primary:focus {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-light);
-  box-shadow: none;
-}
-
-.fc .fc-button-primary:active {
-  background-color: var(--color-primary) !important;
-  border-color: var(--color-primary) !important;
-}
-
-.fc .fc-today-button {
-  font-weight: 600;
-}
-
-/* --- Encabezado de los Días de la Semana (Lun, Mar...) --- */
-.fc .fc-col-header-cell {
-  background-color: #f9fafb;
-  padding: 0.75rem 0;
-  font-weight: 600;
-  color: var(--color-placeholder);
-  font-size: 0.85rem;
-  border-color: var(--color-border);
-}
-
-/* --- Celdas de los Días --- */
-.fc .fc-daygrid-day {
-  border-color: var(--color-border);
-}
-
-.fc .fc-daygrid-day.fc-day-today {
-  background-color: rgba(74, 43, 109, 0.05);
-}
-
-.fc .fc-daygrid-day-number {
-  padding: 0.5rem;
-  font-weight: 500;
-}
-
-/* --- Estilo de los Eventos --- */
-.fc-daygrid-event {
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-weight: 500;
-  border: none !important;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
-}
-
-.fc-daygrid-event:hover {
-  opacity: 0.8;
-}
-
-/* --- Colores personalizados para cada tipo de evento --- */
-.fc-event.event-examen {
-  background-color: #dc2626; /* Rojo */
-  color: #fff;
-}
-
-.fc-event.event-tarea {
-  background-color: #2563eb; /* Azul */
-  color: #fff;
-}
-
-.fc-event.event-reunion {
-  background-color: #db2777; /* Rosado */
-  color: #fff;
-}
-
-/* --- Evento de fondo (Feriado) --- */
-.fc-event.event-feriado.fc-bg-event {
-  background-color: #16a34a; /* Verde */
-  opacity: 0.2;
-}
-
-/* Ocultar el título del evento de fondo para que no se vea el texto "Feriado..." */
-.fc-bg-event .fc-event-title {
-  display: none;
-}
-/* --- ESTILOS PARA LA SECCIÓN PERFIL --- */
-
-.profile-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 2rem;
-}
-
-.profile-avatar-card {
-  padding: 2rem;
-  border-radius: 12px;
-  background-color: var(--color-background-body);
+/* Título centrado y que baje en pantallas chicas */
+#calendar .fc-toolbar-title {
+  flex: 1 1 100%;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-avatar {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  border: 4px solid var(--color-background-card);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.profile-name {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-primary);
   margin: 0.5rem 0;
-}
-
-.profile-course {
   font-size: 1rem;
-  color: #6b7280;
-  margin-bottom: 1.5rem;
 }
 
-/* Botón secundario para "Cambiar Foto" */
-.btn.btn-secondary {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn.btn-secondary:hover {
-  background-color: var(--color-primary);
-  color: var(--color-text-light);
-  transform: none; /* No queremos que este botón se mueva */
-}
-
-/* Contenedor de los detalles */
-.profile-details {
-  padding: 1rem;
-}
-
-.details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.details-header h4, .details-subtitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-dark);
-  margin: 0;
-}
-.details-subtitle {
-    margin-top: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 1.5rem;
-}
-
-.btn.btn-edit {
-  font-size: 0.85rem;
-  padding: 0.5rem 0.8rem;
-  background-color: var(--color-background-body);
-  color: var(--color-text-dark);
-  border: 1px solid var(--color-border);
-}
-
-.btn.btn-edit:hover {
-  background-color: #e5e7eb;
-  color: var(--color-text-dark);
-  transform: none;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.info-label {
-  font-size: 0.85rem;
-  color: var(--color-placeholder);
-  margin-bottom: 0.25rem;
-  font-weight: 500;
-}
-
-.info-value {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-text-dark);
-}
-
-/* --- RESPONSIVE PARA EL PERFIL --- */
-@media (max-width: 992px) {
-  .profile-layout {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+/* En móviles */
+@media (max-width: 480px) {
+  #calendar .fc-header-toolbar {
+    flex-direction: column;
+    align-items: center;
   }
-  .profile-details {
-    padding: 0;
+
+  #calendar .fc-button-group {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.5rem;
+  }
+
+  #calendar .fc-button {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 }
-/* --- ESTILOS PARA LA SECCIÓN MIS CLASES --- */
 
-.card-subtitle {
-  font-size: 1rem;
-  color: #6b7280;
-  margin-top: -1rem;
-  margin-bottom: 2rem;
-}
 
-.classes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.class-card {
-  background-color: var(--color-background-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.class-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-.class-card-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.class-card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-dark);
-  margin: 0;
-}
-
-.class-card-teacher {
-  font-size: 0.9rem;
-  color: var(--color-placeholder);
-  margin: 0.25rem 0 0 0;
-}
-
-.class-card-progress {
-  margin-top: 1.5rem;
-}
-
-.progress-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.progress-labels span:last-child {
-  font-weight: 600;
-  color: var(--color-text-dark);
-}
-
-.progress-bar-container {
-  width: 100%;
-  height: 8px;
-  background-color: #e5e7eb;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
-  border-radius: 99px;
-  transition: width 0.5s ease-in-out;
-}
-
-.class-card-footer {
-  margin-top: auto; /* Empuja el botón al fondo */
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-  margin-top: 1.5rem;
-}
-
-.class-card-footer .btn-secondary {
-  width: 100%;
-  text-align: center;
-  display: block;
+/* =================== Responsividad subida de foto================ */
+#input-foto {
+  width: 100%;          /* Ocupa todo el ancho del contenedor */
+  max-width: 100%;      /* No se salga */
+  box-sizing: border-box; /* Incluye padding y border en el ancho */
+  padding: 0.5rem;      /* Opcional: espacio interno */
+  font-size: 1rem;      /* Que no se vea muy chico */
 }

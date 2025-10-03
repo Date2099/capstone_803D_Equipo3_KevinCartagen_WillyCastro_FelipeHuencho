@@ -1,69 +1,143 @@
 {% load static %}
-
 <!doctype html>
-<html lang="es">
+<html lang="es" class="theme-auto">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>INTRANET | Panel Alumno</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <title>Intranet | Alumno</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 
+    Google Fonts + FontAwesome:
+    - Porque se ven bien, cargan rápido y nos evitan reinventar íconos.
+    - ¿Podríamos autohospedarlas? Sí, pero para una vista de alumno simple,
+      CDN es suficiente y acelera la entrega.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
-<link rel="stylesheet" href="{% static 'student_css/studentStyle.css' %}">
+  <!-- 
+    FullCalendar lo cargo bajo demanda desde el JS, 
+    para no meterle peso al primer render si el alumno ni abre calendario.
+  -->
 
+  <!-- Favicon para que el tab se vea decente -->
+  <link rel="icon" href="{% static 'img/logo.png' %}" />
 
+  <!-- Nuestra hoja de estilos (mobile-first, tema por variables, etc.) -->
+  <link rel="stylesheet" href="{% static 'student_css/studentStyle.css' %}" />
+
+  <!-- 
+    Exponemos STATIC_URL en window para armar rutas a imágenes desde el JS.
+    Sin esto, el front no sabe dónde vive “/static/” en producción.
+  -->
+  <script>window.STATIC_URL="{{ STATIC_URL|default:'/static/' }}";</script>
 </head>
-
 <body>
-<div class="layout">
-  <aside class="sidebar closed" id="sidebar">
-    <div class="brand">
-        <img src="assets/INSIGNIA_HIPONA-removebg-preview-e1679963461233.png" alt="Insignia Colegio" class="brand-logo">
-        <span>Intranet</span>
-    </div>
-    <div class="profile">
-      <div class="avatar">FH</div>
-      <div class="profile-info">
-        <div>Felipe Huencho</div>
-        <div class="role">Alumno</div>
-      </div>
-    </div>
-    <nav class="menu">
-      <a href="#" data-section="dashboard" class="active"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
-      <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i> <span>Mis Clases</span></a>
-      <a href="#" data-section="tareas"><i class="fa-solid fa-file-pen"></i> <span>Tareas/Notas</span></a>
-      <a href="#" data-section="calendario"><i class="fa-solid fa-calendar"></i> <span>Calendario</span></a>
-      <a href="#" data-section="perfil"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
-      <a href="#" data-section="pagos"><i class="fa-solid fa-wallet"></i> <span>Portal de Pagos</span></a>
-    </nav>
-  </aside>
-
-  <section class="main">
-    <header class="topbar">
-      <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <div class="spacer"></div>
-      <div class="user-mini">
-        <span>Felipe Huencho</span>
-        <div class="avatar-mini">FH</div>
-        <i class="fa-solid fa-angle-down"></i>
-      </div>
-    </header>
-    <main class="content">
-      <div class="card" id="main-card">
+  <div class="layout">
+    <!-- 
+      Sidebar: el “carril” de navegación del alumno.
+      - En desktop queda a la izquierda, siempre visible.
+      - En celular se transforma en una barra superior horizontal (ver CSS).
+    -->
+    <aside class="sidebar" aria-label="Navegación principal">
+      <!-- Branding: logo + texto; no inventemos, que el alumno ya sabe dónde está -->
+      <a class="brand" href="/" aria-label="Inicio">
+        <img class="brand-logo" src="{% static 'img/logo.png' %}" alt="Logo Colegio" />
+        <div class="brand-text">
+          <span class="brand-title">Intranet</span>
+          <small class="brand-subtitle">Portal Alumno</small>
         </div>
-    </main>
-    <footer class="footer">
-      Copyright © Colegio San Agustín de Hipona 2025
-    </footer>
-  </section>
-</div>
+      </a>
 
-<script src="{% static 'js/studentApp.js' %}"></script>
+      <!-- 
+        Bloque mini-perfil:
+        - Mostramos foto si el alumno la cambió; si no, iniciales bonito y ya.
+        - Nada de opciones raras aquí: esto es una vista de alumno, keep it simple.
+      -->
+      <div class="profile">
+        <div class="avatar" aria-hidden="true">
+          <img class="avatar-photo" src="{% static 'img/student.jpg' %}" alt="" onerror="this.style.display='none'" />
+          <span class="avatar-initials">FH</span>
+        </div>
+        <div>
+          <div class="profile-name">Felipe Huencho</div>
+          <div class="profile-role">Alumno</div>
+        </div>
+      </div>
+
+      <!-- 
+        Menú principal:
+        - Cada <a> tiene data-section: el router del JS lo usa para renderizar la vista.
+        - Accesible: el activo lleva aria-current="page".
+        - Compacto en móvil: no escondemos todo en hamburguesa, el alumno navega más rápido.
+      -->
+      <nav class="menu" role="navigation">
+        <a href="#" class="active" data-section="dashboard" aria-current="page"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+        <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i><span>Mis Clases</span></a>
+        <a href="#" data-section="tareas"><i class="fa-solid fa-list-check"></i><span>Tareas/Notas</span></a>
+        <a href="#" data-section="calendario"><i class="fa-solid fa-calendar"></i><span>Calendario</span></a>
+        <a href="#" data-section="perfil"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
+        <a href="#" data-section="pagos"><i class="fa-solid fa-wallet"></i><span>Pagos</span></a>
+      </nav>
+    </aside>
+
+    <!-- 
+      Main: acá vive el contenido que cambia.
+      - #main-card es el “lienzo” donde montamos cada sección desde JS.
+      - topbar simple: título + botón de tema + usuario.
+    -->
+    <section class="main">
+      <header class="topbar">
+        <h1 id="topbar-t" class="topbar-t">Portal alumnos</h1>
+        <div class="spacer"></div>
+
+        <!-- Botón de tema: cicla auto → claro → oscuro (con transición suave) -->
+        <button id="btn-theme" class="btn-icon" aria-label="Cambiar tema (claro/oscuro)" title="Tema">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
+
+        <!-- No hacemos un “menú de usuario” completo; no es la idea de esta vista -->
+        <div class="user-mini" aria-label="Usuario">
+          <span class="user-name">Felipe Huencho</span>
+          <div class="avatar-mini" aria-hidden="true">FH</div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- aria-live: si cambiamos la vista, los lectores lo anuncian sin ser invasivos -->
+        <div id="main-card" class="card" aria-live="polite"></div>
+      </main>
+
+      <footer class="footer">© Colegio San Agustín de Hipona — 2025</footer>
+    </section>
+  </div>
+
+  <!-- 
+    Modal reutilizable para todo: detalles de clase, info de evento, etc.
+    Nada de 10 modales diferentes; uno que funcione bien y listo.
+  -->
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Diálogo">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card" role="document">
+      <div class="modal-head">
+        <h3 id="modal-title" class="modal-title">Título</h3>
+        <button class="btn-icon" id="modal-close" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" id="modal-ok">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 
+    Un solo bundle JS: menos requests, menos problema.
+    Aquí vive todo: router, vistas, PDFs, cambio de tema, foto, bloqueo pagos, etc.
+  -->
+  <script src="{% static 'js/studentApp.js' %}"></script>
 </body>
 </html>
+
