@@ -570,11 +570,387 @@ function applyStudentPhotoToDOM(){
 }
 
 /* ================== PAGOS (sin cambios) ================== */
-const PARENT_PASS = "HIPONA-APO-2025";
-function isPagosUnlocked(){ return Date.now() < STATE.pagosUnlockUntil; }
-/* ... renderPagos y renderPagosContent iguales que antes (omitidos por espacio) ... */
-/// ==> por brevedad aquí no repito el código de Pagos que ya pegaste; cópialo tal cual de la versión anterior.
-/// (No interactúa con el menú hamburguesa.)
+/* =============== PAGOS (multi-selección, resumen, bloqueo + CSV) =============== */
+
+/** Config */
+const PARENT_PASS = "HIPONA-APO-2025"; // clave apoderado
+const UNLOCK_MINUTES = 30;             // minutos de sesión abierta
+
+/** Storage y helpers de sesión */
+const STORAGE_KEY_PAGOS = "alumno_pagos_unlock_until";
+function getUnlockUntil() {
+  if (typeof STATE !== "undefined" && STATE) {
+    if (typeof STATE.pagosUnlockUntil !== "number") STATE.pagosUnlockUntil = 0;
+    return Number(STATE.pagosUnlockUntil || 0);
+  }
+  return Number(localStorage.getItem(STORAGE_KEY_PAGOS) || 0);
+}
+function setUnlockUntil(ts) {
+  try {
+    if (typeof STATE !== "undefined" && STATE) STATE.pagosUnlockUntil = Number(ts);
+    localStorage.setItem(STORAGE_KEY_PAGOS, String(ts));
+  } catch (_) {}
+}
+function clearUnlock(){ setUnlockUntil(0); }
+function isPagosUnlocked(){ return Date.now() < getUnlockUntil(); }
+
+/* ===== Utilidades locales ===== */
+function msToClock(ms){
+  if (ms <= 0) return "00:00";
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const r = s % 60;
+  return `${String(m).padStart(2,"0")}:${String(r).padStart(2,"0")}`;
+}
+function pagoEstado(row){
+  if (row.pagada) return { key:"paid", label:"Pagada",   color:"#166534", bg:"#EAF7EE", border:"#86efac" };
+  const vencio = new Date(row.fecha_vencimiento+"T00:00:00") < new Date();
+  if (vencio)   return { key:"overdue", label:"Atrasada", color:"#991B1B", bg:"#FEE2E2", border:"#FCA5A5" };
+  return { key:"pending", label:"Pendiente", color:"#92400E", bg:"#FEF3C7", border:"#FCD34D" };
+}
+function tagHtml(state){
+  return `<span style="display:inline-block;padding:.2rem .5rem;border-radius:999px;font-weight:700;
+          color:${state.color};background:${state.bg};border:1px solid ${state.border};font-size:.85rem">
+          ${state.label}</span>`;
+}
+function uniqueYearsFromMensualidades(){
+  const years = Array.from(new Set((DATA?.mensualidades||[]).map(x=>x.anio))).sort((a,b)=>a-b);
+  return years.length ? years : [new Date().getFullYear()];
+}
+function rowsByYear(year){
+  return (DATA?.mensualidades||[]).filter(x=>String(x.anio)===String(year))
+                                  .sort((a,b)=>a.mes-b.mes);
+}
+function resumenYear(year){
+  const rows = rowsByYear(year);
+  const total = rows.reduce((acc,r)=>acc + (Number(r.importe)||0), 0);
+  const pagadas = rows.filter(r=>r.pagada);
+  const pendientes = rows.filter(r=>!r.pagada && new Date(r.fecha_vencimiento+"T00:00:00") >= new Date());
+  const atrasadas  = rows.filter(r=>!r.pagada && new Date(r.fecha_vencimiento+"T00:00:00") <  new Date());
+  const saldo = [...pendientes, ...atrasadas].reduce((a,r)=>a+(Number(r.importe)||0),0);
+  return { total, pagadas:pagadas.length, pendientes:pendientes.length, atrasadas:atrasadas.length, saldo };
+}
+function exportPagosCSV(year){
+  const rows = rowsByYear(year);
+  const header = ["Año","Mes","Vencimiento","Monto","Estado"];
+  const lines = [header.join(",")];
+  rows.forEach(r=>{
+    const st = pagoEstado(r).label;
+    lines.push([r.anio, mesNombre(r.mes), fmtDate(r.fecha_vencimiento), (Number(r.importe)||0), st].join(","));
+  });
+  const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `pagos_${year}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ===== Vistas: Bloqueo ===== */
+let ttlIntervalId = null;
+
+function renderPagosLocked(){
+  setTitle("Pagos — Acceso protegido");
+  if (ttlIntervalId) { clearInterval(ttlIntervalId); ttlIntervalId = null; }
+
+  mount(`
+    <div class="card" style="max-width:560px;margin:1rem auto">
+      <h3 class="card-title" style="margin-bottom:.5rem">Acceso protegido</h3>
+      <p class="subtle" style="margin-bottom:1rem">
+        Ingresa la <b>clave de apoderado</b>. El acceso se mantendrá activo por ${UNLOCK_MINUTES} minutos.
+      </p>
+
+      <div class="row" style="gap:.5rem;margin-bottom:.75rem">
+        <input id="pay-pass-input" class="input" type="password" placeholder="Clave de apoderado" aria-label="Clave de apoderado" style="max-width:320px">
+        <button id="pay-pass-toggle" class="btn btn-secondary" aria-label="Mostrar u ocultar clave">Mostrar</button>
+        <button id="pay-unlock" class="btn" aria-label="Desbloquear portal de pagos">Desbloquear</button>
+      </div>
+
+      <p id="pay-error" style="display:none;margin:.25rem 0 0 0; color:#991B1B; font-weight:700"></p>
+
+      <details style="margin-top:1rem">
+        <summary>Ayuda</summary>
+        <ul class="subtle" style="margin:.5rem 1rem">
+          <li>Si olvidaste tu clave, solicita asistencia en Secretaría.</li>
+          <li>Tras desbloquear, podrás pagar <b>una o varias cuotas a la vez</b>.</li>
+        </ul>
+      </details>
+    </div>
+  `);
+
+  const input  = $("#pay-pass-input");
+  const toggle = $("#pay-pass-toggle");
+  const btn    = $("#pay-unlock");
+  const err    = $("#pay-error");
+  if(!input || !toggle || !btn) return;
+
+  toggle.addEventListener("click", ()=>{
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    toggle.textContent = show ? "Ocultar" : "Mostrar";
+    input.focus();
+  });
+
+  const tryUnlock = () => {
+    const val = (input.value||"").trim();
+    if (!val) { err.style.display="block"; err.textContent="Ingresa la clave."; return; }
+    if (val === PARENT_PASS) {
+      const until = Date.now() + UNLOCK_MINUTES*60*1000;
+      setUnlockUntil(until);
+      renderPagos();
+    } else {
+      err.style.display="block";
+      err.textContent="Clave incorrecta. Inténtalo nuevamente.";
+    }
+  };
+  btn.addEventListener("click", tryUnlock);
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") tryUnlock(); });
+}
+
+/* ===== Vistas: Contenido con multi-selección ===== */
+function renderPagosContent(){
+  setTitle("Pagos");
+
+  // Año por defecto
+  const years = uniqueYearsFromMensualidades();
+  if (!STATE.pagosYear) STATE.pagosYear = years[years.length-1];
+
+  // selección múltiple en memoria
+  let selectedIds = new Set();
+
+  const syncSelectionWithYear = () => {
+    const validIds = new Set(rowsByYear(STATE.pagosYear).map(r=>String(r.id)));
+    selectedIds = new Set([...selectedIds].filter(id=>validIds.has(id)));
+  };
+
+  const openPayModal = (rowsSel)=>{
+    const total = rowsSel.reduce((a,r)=>a+(Number(r.importe)||0),0);
+    const list  = rowsSel.map(r=>`• ${mesNombre(r.mes)} ${r.anio} — ${clp(r.importe)}`).join("<br>");
+    UI.Modal.show("Confirmar pago", `
+      <p>Vas a pagar las siguientes cuotas:</p>
+      <div class="subtle" style="margin:.5rem 0 1rem 0">${list}</div>
+      <p><b>Total:</b> ${clp(total)}</p>
+      <div class="row" style="justify-content:flex-end;gap:.5rem;margin-top:1rem">
+        <button class="btn btn-secondary" id="m-cancel">Cancelar</button>
+        <button class="btn" id="m-confirm">Confirmar</button>
+      </div>
+    `);
+    $("#m-cancel")?.addEventListener("click", UI.Modal.hide);
+    $("#m-confirm")?.addEventListener("click", ()=>{
+      // DEMO: marcar como pagadas en memoria
+      const ids = new Set(rowsSel.map(r=>String(r.id)));
+      (DATA.mensualidades||[]).forEach(r=>{
+        if (ids.has(String(r.id))) r.pagada = true;
+      });
+      UI.Modal.hide();
+      // limpiamos selección y repintamos
+      selectedIds.clear();
+      paint();
+    });
+  };
+
+  const paintToolbar = ()=>{
+    const all = rowsByYear(STATE.pagosYear);
+    const selected = all.filter(r=>selectedIds.has(String(r.id)));
+    const total = selected.reduce((a,r)=>a+(Number(r.importe)||0),0);
+    const visible = selected.length > 0;
+
+    const host = $("#pay-toolbar");
+    if (!host) return;
+
+    host.innerHTML = visible ? `
+      <div class="card" style="position:sticky; bottom:0; z-index:5; border:1px dashed var(--border,#e5e7eb); background:var(--card,#fff)">
+        <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+          <div class="subtle"><b>${selected.length}</b> cuota(s) seleccionada(s)</div>
+          <div class="row" style="gap:.5rem">
+            <div class="subtle">Total a pagar: <b>${clp(total)}</b></div>
+            <button class="btn" id="btn-pay-selected">Pagar seleccionadas</button>
+          </div>
+        </div>
+      </div>
+    ` : "";
+    if (visible){
+      $("#btn-pay-selected")?.addEventListener("click", ()=> openPayModal(selected));
+    }
+  };
+
+  const paint = ()=>{
+    syncSelectionWithYear();
+
+    const y   = STATE.pagosYear;
+    const res = resumenYear(y);
+    const rows = rowsByYear(y);
+
+    mount(`
+      <div class="page-header">
+        <h2 style="display:flex;align-items:center;gap:.6rem">Portal de Pagos
+          <small class="subtle" style="font-weight:600">· Sesión: <span id="pay-ttl">--:--</span></small>
+        </h2>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <select id="pay-year" class="input" aria-label="Seleccionar año" style="min-width:120px">
+            ${years.map(yr=>`<option value="${yr}" ${yr===y?"selected":""}>${yr}</option>`).join("")}
+          </select>
+          <button id="btn-select-pending" class="btn btn-secondary" title="Seleccionar pendientes/atrasadas">Seleccionar todas</button>
+          <button id="btn-clear-selection" class="btn btn-secondary" title="Limpiar selección">Limpiar</button>
+          <button id="btn-export-csv" class="btn btn-secondary" title="Exportar CSV">Exportar CSV</button>
+          <button id="pay-lock" class="btn btn-secondary" title="Bloquear acceso">Bloquear</button>
+        </div>
+      </div>
+
+      <section class="grid" style="margin-bottom:1rem">
+        <div class="class-card"><div class="subtle">Saldo por pagar</div><div style="font-weight:800;font-size:1.7rem">${clp(res.saldo)}</div></div>
+        <div class="class-card"><div class="subtle">Cuotas pagadas</div><div style="font-weight:800;font-size:1.7rem">${res.pagadas} / 12</div></div>
+        <div class="class-card"><div class="subtle">Pendientes</div><div style="font-weight:800;font-size:1.7rem">${res.pendientes}</div></div>
+        <div class="class-card"><div class="subtle">Atrasadas</div><div style="font-weight:800;font-size:1.7rem">${res.atrasadas}</div></div>
+      </section>
+
+      <div class="card">
+        <h3 class="section-title" style="margin-bottom:.5rem">Detalle ${y}</h3>
+        <div class="table-wrapper">
+          <table class="data-table" id="tbl-pagos">
+            <thead>
+              <tr>
+                <th style="width:38px;text-align:center">
+                  <input id="chk-all" type="checkbox" aria-label="Seleccionar todas" />
+                </th>
+                <th>Mes</th>
+                <th>Vencimiento</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th style="text-align:right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r=>{
+                const st = pagoEstado(r);
+                const id = String(r.id);
+                const selectable = !r.pagada;
+                const checked = selectable && selectedIds.has(id) ? "checked" : "";
+                return `
+                <tr data-id="${id}">
+                  <td style="text-align:center">
+                    <input type="checkbox" class="chk-pay" ${selectable?"":"disabled"} ${checked} aria-label="Seleccionar cuota ${mesNombre(r.mes)}"/>
+                  </td>
+                  <td>${mesNombre(r.mes)}</td>
+                  <td>${fmtDate(r.fecha_vencimiento)}</td>
+                  <td>${clp(r.importe)}</td>
+                  <td>${tagHtml(st)}</td>
+                  <td style="text-align:right;white-space:nowrap">
+                    <button class="btn ${selectable?'':'btn-secondary'}" data-act="quickpay" ${selectable?'':'disabled'}>Pagar</button>
+                    <button class="btn btn-secondary" data-act="rcpt" ${r.pagada?'':'disabled'}>Comprobante</button>
+                  </td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+        <div id="pay-toolbar" style="margin-top:.8rem"></div>
+      </div>
+
+      <details style="margin-top:1rem">
+        <summary>Información importante</summary>
+        <div class="subtle" style="margin:.6rem 0 0 0">
+          Los montos/fechas son referenciales. Para dudas o convenios, escribe a <strong>tesoreria@hipona.cl</strong>.
+        </div>
+      </details>
+    `);
+
+    responsiveTableEnhance("#tbl-pagos");
+
+    // Cambios de año
+    $("#pay-year")?.addEventListener("change", e=>{ STATE.pagosYear = Number(e.target.value); paint(); });
+
+    // Exportar y bloqueo
+    $("#btn-export-csv")?.addEventListener("click", ()=>exportPagosCSV(STATE.pagosYear));
+    $("#pay-lock")?.addEventListener("click", ()=>{ clearUnlock(); renderPagos(); });
+
+    // Seleccionar todas pendientes+atrasadas
+    $("#btn-select-pending")?.addEventListener("click", ()=>{
+      rows.forEach(r=>{
+        const st = pagoEstado(r).key;
+        if (st!=="paid") selectedIds.add(String(r.id));
+      });
+      paint(); // repinta para reflejar checks
+    });
+
+    // Limpiar selección
+    $("#btn-clear-selection")?.addEventListener("click", ()=>{
+      selectedIds.clear();
+      paint();
+    });
+
+    // Checkbox maestro
+    $("#chk-all")?.addEventListener("change", (e)=>{
+      if (e.target.checked){
+        rows.forEach(r=>{ if(!r.pagada) selectedIds.add(String(r.id)); });
+      } else {
+        rows.forEach(r=> selectedIds.delete(String(r.id)));
+      }
+      paint();
+    });
+
+    // Checks por fila
+    $("#tbl-pagos")?.addEventListener("change", (e)=>{
+      const chk = e.target.closest(".chk-pay");
+      if(!chk) return;
+      const tr = chk.closest("tr");
+      const id = tr?.dataset?.id;
+      if (!id) return;
+      if (chk.checked) selectedIds.add(id); else selectedIds.delete(id);
+      paintToolbar();
+    });
+
+    // Acciones por fila
+    $("#tbl-pagos")?.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button[data-act]");
+      if(!btn) return;
+      const tr = btn.closest("tr"); if(!tr) return;
+      const id = tr.dataset.id;
+      const row = rows.find(r=>String(r.id)===id);
+      if(!row) return;
+
+      if (btn.dataset.act === "quickpay" && !row.pagada){
+        // Shortcut: pagar solo esta
+        openPayModal([row]);
+      }
+      if (btn.dataset.act === "rcpt" && row.pagada){
+        UI.Modal.show("Comprobante", `
+          <p>Comprobante para <b>${mesNombre(row.mes)} ${row.anio}</b>.</p>
+          <p class="subtle">* Aquí se generaría el PDF o link al comprobante oficial.</p>
+          <div class="row" style="justify-content:flex-end;margin-top:.8rem">
+            <button class="btn btn-secondary" id="m-ok">Cerrar</button>
+          </div>
+        `);
+        $("#m-ok")?.addEventListener("click", UI.Modal.hide);
+      }
+    });
+
+    // TTL (conteo regresivo)
+    const ttlSpan = $("#pay-ttl");
+    if (ttlIntervalId) clearInterval(ttlIntervalId);
+    const tick = ()=>{
+      const left = getUnlockUntil() - Date.now();
+      if (ttlSpan) ttlSpan.textContent = msToClock(left);
+      if (left <= 0) { clearInterval(ttlIntervalId); ttlIntervalId = null; renderPagos(); }
+    };
+    tick();
+    ttlIntervalId = setInterval(tick, 1000);
+
+    // primera pintura de toolbar
+    paintToolbar();
+  };
+
+  paint();
+}
+
+/** Entrada pública */
+function renderPagos(){
+  if (isPagosUnlocked()) renderPagosContent();
+  else renderPagosLocked();
+}
+
+/** Para el router/menú */
+window.renderPagos = renderPagos;
+
 
 /* ================== ROUTER ================== */
 function render(section){
