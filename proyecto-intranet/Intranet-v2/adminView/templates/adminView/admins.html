@@ -1,33 +1,31 @@
 {% load static %}
-
 <!doctype html>
 <html lang="es">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel de Administración</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+  <!-- Fuentes / Iconos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
+  <!-- Estilos -->
   <link rel="stylesheet" href="{% static 'adminstyle/styleadmins.css' %}">
-  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'img/logo_V2-removebg-preview.png' %}">
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'adminstyle/logo2.png' %}">
 </head>
 
 <body>
   <div class="layout">
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <img src="{% static 'adminstyle/logo2.png' %} " alt="Insignia Colegio" class="brand-logo">
-
-
-        <!-- Nombre del administrador -->
+        <img src="{% static 'adminstyle/logo2.png' %}" class="brand-logo" alt="Insignia">
         <span>Administración</span>
       </div>
+
       <div class="profile">
         <div class="avatar">SA</div>
         <div class="profile-info">
@@ -36,18 +34,11 @@
         </div>
       </div>
 
-      <!--  
-        Funcionalidad para cuando tengamos la base de datos:
-        <div>{{ request.user.get_full_name }}</div>
-        <div class="role">{{ request.user.profile.role }}</div> 
-        -->
-      <!-- ... -->
-
       <nav class="menu">
-        <a href="#" data-section="tablero" class="active"><i class="fa-solid fa-gauge"></i> <span>Tablero</span></a>
+        <a href="#" data-section="tablero" class="active"><i class="fa-solid fa-gauge"></i><span>Tablero</span></a>
 
         <details class="menu-group">
-          <summary><i class="fa-solid fa-book"></i> <span>Académico</span></summary>
+          <summary><i class="fa-solid fa-book"></i><span>Académico</span></summary>
           <div class="sub-menu">
             <a href="#" data-section="agregar-alumno">Alumnos</a>
             <a href="#" data-section="estudiantes">Ver Cursos</a>
@@ -56,47 +47,66 @@
           </div>
         </details>
 
-        <a href="#" data-section="profesores"><i class="fa-solid fa-chalkboard-user"></i> <span>Profesores</span></a>
-
-
+        <a href="#" data-section="profesores"><i class="fa-solid fa-chalkboard-user"></i><span>Profesores</span></a>
 
         <details class="menu-group">
-          <summary><i class="fa-solid fa-wallet"></i> <span>Pagos</span></summary>
+          <summary><i class="fa-solid fa-wallet"></i><span>Pagos</span></summary>
           <div class="sub-menu">
             <a href="#" data-section="revision-pagos">Revisión de pagos</a>
           </div>
         </details>
 
-        <a href="#" data-section="comunicados"><i class="fa-solid fa-bullhorn"></i> <span>Comunicados</span></a>
-        <a href="#" data-section="usuarios"><i class="fa-solid fa-user-gear"></i> <span>Usuarios</span></a>
-
-        <!--  Cerrar Sesión / aun no funciona pq no tenemos el logout aun-->
-        <a href="{% url 'logout' %}" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar
-            Sesión</span></a>
+        <a href="#" data-section="comunicados"><i class="fa-solid fa-bullhorn"></i><span>Comunicados</span></a>
+        <a href="#" data-section="usuarios"><i class="fa-solid fa-user-gear"></i><span>Usuarios</span></a>
+        <a href="{% url 'logout' %}" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
       </nav>
-
-
     </aside>
 
+    <!-- MAIN -->
     <section class="main">
       <header class="topbar">
-        <button class="toggle" id="toggle">
+        <button class="toggle" id="toggle" aria-label="Abrir menú">
           <i class="fa-solid fa-bars"></i>
         </button>
+
         <div class="topbar-title" id="topbar-title">Panel de Control</div>
         <div class="spacer"></div>
+
+        <!-- Switch tema -->
+        <label class="theme-switch" title="Tema oscuro">
+          <input type="checkbox" id="theme-switch">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+
         <div class="school-mini">
           <span class="school-mini-name">Colegio San Agustín de Hipona</span>
           <img src="{% static 'adminstyle/logo2.png' %}" alt="Insignia Colegio" class="school-mini-logo">
         </div>
       </header>
-      <main class="content" id="main-content">
-      </main>
+
+      <main class="content" id="main-content"></main>
+
       <footer class="footer">
         Copyright © Colegio San Agustín de Hipona 2025
       </footer>
     </section>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="{% static 'adminstyle/scriptadmins.js' %}"></script>
+  </div>
+
+  <!-- Modal reutilizable -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h3 id="modal-title">Título</h3>
+        <button class="modal-close" id="modal-close" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-foot" id="modal-foot"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="{% static 'adminstyle/scriptadmins.js' %}"></script>
 </body>
 </html>
