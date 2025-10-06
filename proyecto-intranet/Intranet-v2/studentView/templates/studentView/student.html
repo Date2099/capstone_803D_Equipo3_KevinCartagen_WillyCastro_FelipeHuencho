@@ -4,46 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Intranet | Alumno</title>
 
-  <!-- 
-    Google Fonts + FontAwesome:
-    - Porque se ven bien, cargan rápido y nos evitan reinventar íconos.
-    - ¿Podríamos autohospedarlas? Sí, pero para una vista de alumno simple,
-      CDN es suficiente y acelera la entrega.
-  -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
-  <!-- 
-    FullCalendar lo cargo bajo demanda desde el JS, 
-    para no meterle peso al primer render si el alumno ni abre calendario.
-  -->
-
-  <!-- Favicon para que el tab se vea decente -->
   <link rel="icon" href="{% static 'img/logo.png' %}" />
-
-  <!-- Nuestra hoja de estilos (mobile-first, tema por variables, etc.) -->
   <link rel="stylesheet" href="{% static 'student_css/studentStyle.css' %}" />
 
-  <!-- 
-    Exponemos STATIC_URL en window para armar rutas a imágenes desde el JS.
-    Sin esto, el front no sabe dónde vive “/static/” en producción.
-  -->
   <script>window.STATIC_URL="{{ STATIC_URL|default:'/static/' }}";</script>
 </head>
 <body>
   <div class="layout">
-    <!-- 
-      Sidebar: el “carril” de navegación del alumno.
-      - En desktop queda a la izquierda, siempre visible.
-      - En celular se transforma en una barra superior horizontal (ver CSS).
-    -->
-    <aside class="sidebar" aria-label="Navegación principal">
-      <!-- Branding: logo + texto; no inventemos, que el alumno ya sabe dónde está -->
+    <!-- SIDEBAR (off-canvas en móvil) -->
+    <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
       <a class="brand" href="/" aria-label="Inicio">
         <img class="brand-logo" src="{% static 'img/logo.png' %}" alt="Logo Colegio" />
         <div class="brand-text">
@@ -52,11 +28,6 @@
         </div>
       </a>
 
-      <!-- 
-        Bloque mini-perfil:
-        - Mostramos foto si el alumno la cambió; si no, iniciales bonito y ya.
-        - Nada de opciones raras aquí: esto es una vista de alumno, keep it simple.
-      -->
       <div class="profile">
         <div class="avatar" aria-hidden="true">
           <img class="avatar-photo" src="{% static 'img/student.jpg' %}" alt="" onerror="this.style.display='none'" />
@@ -68,12 +39,6 @@
         </div>
       </div>
 
-      <!-- 
-        Menú principal:
-        - Cada <a> tiene data-section: el router del JS lo usa para renderizar la vista.
-        - Accesible: el activo lleva aria-current="page".
-        - Compacto en móvil: no escondemos todo en hamburguesa, el alumno navega más rápido.
-      -->
       <nav class="menu" role="navigation">
         <a href="#" class="active" data-section="dashboard" aria-current="page"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
         <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i><span>Mis Clases</span></a>
@@ -84,22 +49,26 @@
       </nav>
     </aside>
 
-    <!-- 
-      Main: acá vive el contenido que cambia.
-      - #main-card es el “lienzo” donde montamos cada sección desde JS.
-      - topbar simple: título + botón de tema + usuario.
-    -->
+    <!-- Backdrop para el drawer en móvil -->
+    <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+
     <section class="main">
       <header class="topbar">
+        <!-- botón hamburguesa (solo visible en móvil) -->
+        <button id="btn-hamburger" class="btn-icon hamburger"
+                aria-label="Abrir menú"
+                aria-controls="sidebar"
+                aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
         <h1 id="topbar-t" class="topbar-t">Portal alumnos</h1>
         <div class="spacer"></div>
 
-        <!-- Botón de tema: cicla auto → claro → oscuro (con transición suave) -->
         <button id="btn-theme" class="btn-icon" aria-label="Cambiar tema (claro/oscuro)" title="Tema">
           <i class="fa-solid fa-circle-half-stroke"></i>
         </button>
 
-        <!-- No hacemos un “menú de usuario” completo; no es la idea de esta vista -->
         <div class="user-mini" aria-label="Usuario">
           <span class="user-name">Felipe Huencho</span>
           <div class="avatar-mini" aria-hidden="true">FH</div>
@@ -107,7 +76,6 @@
       </header>
 
       <main class="content">
-        <!-- aria-live: si cambiamos la vista, los lectores lo anuncian sin ser invasivos -->
         <div id="main-card" class="card" aria-live="polite"></div>
       </main>
 
@@ -115,10 +83,6 @@
     </section>
   </div>
 
-  <!-- 
-    Modal reutilizable para todo: detalles de clase, info de evento, etc.
-    Nada de 10 modales diferentes; uno que funcione bien y listo.
-  -->
   <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Diálogo">
     <div class="modal-backdrop"></div>
     <div class="modal-card" role="document">
@@ -133,11 +97,6 @@
     </div>
   </div>
 
-  <!-- 
-    Un solo bundle JS: menos requests, menos problema.
-    Aquí vive todo: router, vistas, PDFs, cambio de tema, foto, bloqueo pagos, etc.
-  -->
   <script src="{% static 'js/studentApp.js' %}"></script>
 </body>
 </html>
-

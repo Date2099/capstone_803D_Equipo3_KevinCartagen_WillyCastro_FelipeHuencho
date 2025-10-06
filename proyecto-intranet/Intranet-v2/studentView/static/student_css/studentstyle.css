@@ -1,40 +1,24 @@
-/* 
-  ================== SISTEMA DE DISEÑO ==================
-  Variables globales para no pelear con mil colores sueltos.
-  Si el colegio cambia paleta, venimos acá y el resto cae solo.
-*/
 :root{
-  /* Colores institucionales (serios, legibles, contrastados) */
-  --primary:#0f294c;      /* azul “marca” */
-  --secondary:#cda758;    /* dorado de acento */
+  --primary:#0f294c;
+  --secondary:#cda758;
 
-  /* Neutros razonables: ni gris lavado ni negro duro */
   --text:#1f2937;
   --muted:#474b55;
   --bg:#f6f7f9;
   --card:#ffffff;
   --border:#e5e7eb;
 
-  /* Estados, para chips/tags sin estridencias */
   --ok:#16a34a;
   --warn:#f59e0b;
   --info:#2563eb;
   --bad:#dc2626;
 
-  /* Radios/espaciados coherentes: sin magia rara */
   --r-8:8px; --r-10:10px; --r-12:12px; --r-14:14px;
   --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.25rem; --sp-6:1.5rem;
 
-  /* Sombras con respeto: elegantes y sin ensuciar */
   --shadow-1:0 4px 12px rgba(15,41,76,.06);
   --shadow-2:0 10px 30px rgba(15,41,76,.12);
 }
-
-/* 
-  Modo oscuro sin drama:
-  - No duplicamos reglas; solo cambiamos tokens.
-  - Así no hay 2 CSS distintos que mantener.
-*/
 .theme-dark{
   --text:#e5e7eb;
   --muted:#ffffff;
@@ -45,7 +29,6 @@
   --shadow-2:0 10px 30px rgba(0,0,0,.4);
 }
 
-/* Reset básico: limpio pero sin romper inputs ni accesibilidad */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -54,11 +37,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* 
-  ================== TRANSICIÓN DE TEMA ==================
-  - Animamos colores SOLO cuando el JS pone .theme-animating.
-  - Esto evita que todo esté animando siempre (que es molesto y caro).
-*/
+/* Transición de tema */
 html.theme-animating body,
 html.theme-animating .sidebar,
 html.theme-animating .topbar,
@@ -68,8 +47,6 @@ html.theme-animating .table th,
 html.theme-animating .table td {
   transition: background-color .28s ease, color .28s ease, border-color .28s ease;
 }
-
-/* Si el usuario pidió menos movimiento, lo respetamos */
 @media (prefers-reduced-motion: reduce){
   html.theme-animating body,
   html.theme-animating .sidebar,
@@ -77,28 +54,17 @@ html.theme-animating .table td {
   html.theme-animating .card,
   html.theme-animating .menu a,
   html.theme-animating .table th,
-  html.theme-animating .table td {
-    transition: none;
-  }
+  html.theme-animating .table td { transition: none; }
 }
 
-/* ================== LAYOUT ================== */
+/* Layout base (desktop) */
 .layout{display:flex;min-height:100vh}
-
-/* 
-  Sidebar:
-  - Desktop: columna sólida a la izquierda.
-  - Mobile: la convertimos en barra scrolleable horizontal (ver abajo).
-*/
-.sidebar{
-  width:250px;background:var(--primary);color:#fff;display:flex;flex-direction:column
-}
+.sidebar{ width:250px;background:var(--primary);color:#fff;display:flex;flex-direction:column }
 .brand{display:flex;align-items:center;gap:.75rem;padding:var(--sp-4) var(--sp-5);text-decoration:none;color:#fff}
 .brand-logo{height:36px;width:auto}
 .brand-text{display:flex;flex-direction:column;line-height:1.05}
 .brand-title{font-weight:700}
 .brand-subtitle{opacity:.85;font-weight:600}
-
 .profile{display:flex;gap:.75rem;align-items:center;padding:var(--sp-4) var(--sp-5);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
 .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--secondary);color:#000;font-weight:700;position:relative;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .avatar-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -120,11 +86,10 @@ html.theme-animating .table td {
   height:69px;background:var(--card);display:flex;align-items:center;gap:.6rem;padding:0 var(--sp-4);
   border-bottom:2px solid rgba(205,167,88,.25)
 }
+.hamburger{ display:none; } /* se muestra en móvil */
 .topbar-t{font-size:1.2rem;margin:0}
 .spacer{flex:1}
-.btn-icon{
-  background:transparent;border:0;color:var(--text);font-size:1.1rem;cursor:pointer;border-radius:10px;padding:.35rem .45rem
-}
+.btn-icon{ background:transparent;border:0;color:var(--text);font-size:1.1rem;cursor:pointer;border-radius:10px;padding:.35rem .45rem }
 .btn-icon:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(205,167,88,.35)}
 .user-mini{display:flex;align-items:center;gap:.55rem;color:var(--text);font-weight:600}
 .avatar-mini{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--secondary);color:#000;font-weight:700}
@@ -135,39 +100,32 @@ html.theme-animating .table td {
   box-shadow:var(--shadow-1)
 }
 
-/* ================== TIPOGRAFÍA / UTILS ================== */
+/* Tipografía / utils */
 .section-title{margin:.25rem 0 var(--sp-4) 0;font-size:1.25rem;font-weight:700}
 .subtle{color:var(--muted);font-size:.95rem;margin:.25rem 0 var(--sp-4) 0}
 .row{display:flex;gap:.6rem}
 
-/* ================== BOTONES / FORM ================== */
-.btn{
-  background:var(--primary);color:#fff;border:0;border-radius:var(--r-10);padding:.6rem .9rem;font-weight:700;cursor:pointer;
-  transition:transform .05s ease, background .15s ease; letter-spacing:.2px
-}
+/* Botones / forms */
+.btn{ background:var(--primary);color:#fff;border:0;border-radius:var(--r-10);padding:.6rem .9rem;font-weight:700;cursor:pointer; transition:transform .05s ease, background .15s ease; letter-spacing:.2px }
 .btn:hover{background:var(--secondary);color:#000}
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(205,167,88,.35)}
 .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
 .btn-secondary:hover{background:var(--primary);color:#fff}
-
 .field{display:flex;flex-direction:column;gap:.4rem}
-.input{
-  border:1px solid var(--border);border-radius:var(--r-10);background:#fff;color:var(--primary);
-  padding:.65rem .75rem;font-size:1rem;outline:none
-}
+.input{ border:1px solid var(--border);border-radius:var(--r-10);background:#fff;color:var(--primary); padding:.65rem .75rem;font-size:1rem;outline:none }
 .input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,41,76,.1)}
 .input-row{display:flex;gap:.5rem;align-items:center}
 .help{color:var(--muted);font-size:.9rem}
 
-/* Estados y notas: etiquetas claras, sin confundir al ojo */
+/* Estados y notas */
 .tag{display:inline-block;padding:.25rem .55rem;border-radius:999px;font-size:.8rem;font-weight:700}
 .tag.pending{background:#fff5d9;color:#6a4c00;border:1px solid #f0dfad}
 .tag.submitted{background:#e9eef9;color:#0f294c;border:1px solid #d7e0f1}
 .tag.graded{background:#f4efe4;color:#7d5a17;border:1px solid #eadfca}
 .grade{display:inline-block;padding:.25rem .5rem;border-radius:8px;background:#1e40af;color:#fff;font-weight:700}
 
-/* ================== COMPONENTES ================== */
+/* Componentes */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--sp-4)}
 .class-card{border:1px solid var(--border);border-radius:var(--r-14);padding:var(--sp-4);background:var(--card);display:flex;flex-direction:column;gap:.6rem;box-shadow:var(--shadow-1);transition:transform .15s ease, box-shadow .15s ease}
 .class-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2)}
@@ -186,13 +144,13 @@ html.theme-animating .table td {
 .table th{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .table tbody tr:nth-child(even){background:color-mix(in srgb, var(--border) 25%, transparent)}
 
-/* ================== SKELETONS (carga con dignidad) ================== */
+/* Skeletons */
 .skeleton{background:linear-gradient(90deg, rgba(0,0,0,.05), rgba(255,255,255,.06), rgba(0,0,0,.05));background-size:200% 100%;animation:sk 1.2s ease-in-out infinite;border-radius:var(--r-10)}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .sk-line{height:12px;margin:.4rem 0}
 .sk-box{height:120px}
 
-/* ================== CALENDARIO (FullCalendar) ================== */
+/* FullCalendar */
 #calendar{min-height:520px}
 .fc .fc-toolbar-title{color:var(--primary);font-weight:700}
 .fc .fc-button-primary{background:#fff;border:1px solid var(--border);color:var(--primary)}
@@ -202,130 +160,107 @@ html.theme-animating .table td {
 .fc-event.event-feriado.fc-bg-event{background:var(--secondary);opacity:.2}
 .fc-bg-event .fc-event-title{display:none}
 
-/* ================== MODAL ================== */
+/* Modal */
 .modal{position:fixed;inset:0;display:none}
 .modal.show{display:block}
 .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4)}
-.modal-card{
-  position:relative;margin:5vh auto;background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:560px;padding:0;box-shadow:var(--shadow-2)
-}
+.modal-card{ position:relative;margin:5vh auto;background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:560px;padding:0;box-shadow:var(--shadow-2) }
 .modal-head{display:flex;justify-content:space-between;align-items:center;padding:1rem 1rem .5rem 1rem;border-bottom:1px solid var(--border)}
 .modal-title{margin:0}
 .modal-body{padding:1rem}
 .modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:0 1rem 1rem 1rem}
 
-/* ================== FOOTER ================== */
+/* Footer */
 .footer{padding:var(--sp-4);text-align:center;color:var(--muted);font-size:.92rem}
 
-/* ================== RESPONSIVE ================== */
+/* ====== Drawer (móvil) ====== */
+.drawer-backdrop{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:40;
+}
+.hamburger{ display:none; } /* visible sólo en móvil */
+
 @media (max-width: 860px){
-  /* 
-    En móvil, pasamos la sidebar a “barra” arriba, scrolleable horizontal.
-    Es mil veces más cómodo que esconder todo en un menú.
-  */
-  .layout{flex-direction:column}
-  .sidebar{width:100%;position:sticky;top:0;z-index:30;box-shadow:var(--shadow-1)}
-  .profile{display:none} /* El perfil arriba no suma en mobile: lo omitimos */
-  .menu{flex-direction:row;gap:.4rem;padding:.5rem .6rem;overflow-x:auto;scroll-snap-type:x mandatory}
-  .menu a{white-space:nowrap;scroll-snap-align:start}
-  .content{padding:.9rem}
-}
+  .hamburger{ display:inline-flex; }
 
-
-/* =================== Responsividad tareas/notas================ */
-#tareas-card {
-  overflow-x: auto; /* habilita scroll horizontal si hace falta */
-}
-#tareas-card table {
-  min-width: 600px; /* o el ancho necesario para tus columnas */
-}
-@media (max-width: 480px) {
-  #tareas-card table th,
-  #tareas-card table td {
-    padding: .4rem;
-    font-size: .75rem;
+  /* sidebar se convierte en off-canvas */
+  .sidebar{
+    position:fixed; top:0; left:0; height:100vh; width:82vw; max-width:320px;
+    transform:translateX(-100%); transition:transform .25s ease;
+    z-index:50; box-shadow:var(--shadow-2); overflow-y:auto;
   }
-}
-/* Para el row de filtros de tareas */
-#main-card .row {
-  flex-wrap: wrap;
-  gap: .5rem; /* ajusta el espacio entre botones y selects */
-}
+  .drawer-open .sidebar{ transform:translateX(0); }
+  .drawer-open .drawer-backdrop{ display:block; }
 
-/* Botones secundarios dentro de esa row */
-#main-card .row button.btn-secondary {
-  flex: 1 1 auto;        /* que puedan encogerse y crecer */
-  min-width: 100px;      /* ancho mínimo razonable */
+  /* el contenido sigue ocupando toda la pantalla */
+  .content{ padding:.9rem }
 }
 
-/* En móviles aún más pequeños */
-@media (max-width: 480px) {
-  #main-card .row button.btn-secondary {
-    flex: 1 1 45%;       /* ocupan casi la mitad del ancho cada uno */
-    font-size: .75rem;   /* reducimos texto para que quepa */
-  }
-
-  #main-card .row select.input {
-    flex: 1 1 100%;      /* los selects toman todo el ancho disponible */
-    margin-bottom: .5rem;
-  }
-}
-/* =================== Responsividad Calendario================ */
-/* La card del calendario */
-#calendar {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  box-sizing: border-box;
+/* Menú más cómodo al tacto en móvil */
+@media (max-width: 860px){
+  .menu a{ padding:.85rem 1rem; font-size:1rem; }
 }
 
-/* Toolbar de FullCalendar */
-#calendar .fc-header-toolbar {
-  flex-wrap: wrap; /* Que los botones bajen si no caben */
-  justify-content: space-between;
-  gap: 0.5rem;
+/* Menú solo íconos en móviles muy chicos (opcional) */
+@media (max-width: 420px){
+  .menu a span{ display:none; }
+  .menu a i{ font-size:1.1rem; margin-right:0; }
 }
 
-/* Botones */
-#calendar .fc-button {
-  flex: 1 1 auto;      /* Que se ajusten */
-  min-width: 80px;     /* Para no achicarse demasiado */
+/* Compactos en 640px */
+@media (max-width: 640px){
+  .topbar{ height:60px; padding:0 .75rem; }
+  .card{ padding: .9rem; }
+  .grid{ gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+  .section-title{ font-size:1.1rem; }
 }
 
-/* Título centrado y que baje en pantallas chicas */
-#calendar .fc-toolbar-title {
-  flex: 1 1 100%;
-  text-align: center;
-  margin: 0.5rem 0;
-  font-size: 1rem;
+/* ====== Tablas “tipo ficha” en móvil ====== */
+.table.responsive thead{ display:none; }
+.table.responsive tbody tr{
+  display:block; margin: .6rem 0; padding: .6rem .75rem;
+  border:1px solid var(--border); border-radius: var(--r-12); background: var(--card);
+  box-shadow: var(--shadow-1);
+}
+.table.responsive tbody tr td{
+  display:flex; gap:.75rem; align-items:center; justify-content:space-between;
+  border:0; padding:.45rem 0;
+}
+.table.responsive tbody tr td::before{
+  content: attr(data-label); color: var(--muted); font-weight:700; margin-right:.75rem;
+}
+@media (min-width: 641px){
+  .table.responsive thead{ display: table-header-group; }
+  .table.responsive tbody tr{ display: table-row; box-shadow:none; border:0; border-bottom:1px solid var(--border); border-radius:0; margin:0; padding:0; }
+  .table.responsive tbody tr td{ display: table-cell; padding:.7rem; }
+  .table.responsive tbody tr td::before{ content:none; }
 }
 
-/* En móviles */
-@media (max-width: 480px) {
-  #calendar .fc-header-toolbar {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #calendar .fc-button-group {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 0.5rem;
-  }
-
-  #calendar .fc-button {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
+/* Filtros apilables */
+#main-card .row{ flex-wrap:wrap; gap:.5rem; }
+#main-card .row .input{ min-width:160px; }
+@media (max-width: 480px){
+  #main-card .row .btn,
+  #main-card .row .btn-secondary{ flex: 1 1 48%; min-width: 120px; }
+  #main-card .row .input{ flex: 1 1 100%; }
 }
 
+/* Calendario: toolbar adaptativa */
+#calendar{ width:100%; max-width:100%; overflow-x:auto; }
+#calendar .fc-header-toolbar{ flex-wrap:wrap; gap:.5rem; }
+#calendar .fc-toolbar-title{ flex:1 1 100%; text-align:center; margin:.25rem 0; }
+@media (max-width: 480px){
+  #calendar .fc-button{ font-size:.8rem; padding:.25rem .5rem; }
+}
 
-/* =================== Responsividad subida de foto================ */
-#input-foto {
-  width: 100%;          /* Ocupa todo el ancho del contenedor */
-  max-width: 100%;      /* No se salga */
-  box-sizing: border-box; /* Incluye padding y border en el ancho */
-  padding: 0.5rem;      /* Opcional: espacio interno */
-  font-size: 1rem;      /* Que no se vea muy chico */
+/* Modal más cómodo en móvil */
+@media (max-width: 520px){
+  .modal-card{ width: calc(100% - 24px); margin: 2vh auto; border-radius: 12px; }
+}
+
+/* Input de foto */
+#input-foto { width:100%; max-width:100%; box-sizing:border-box; padding:.5rem; font-size:1rem; }
+/* Forzar texto visible en móvil */
+@media (max-width: 420px){
+  .menu a span{ display:inline; }   /* antes estaba en none */
+  .menu a i{ margin-right:.55rem; } /* deja un espacio con el texto */
 }
