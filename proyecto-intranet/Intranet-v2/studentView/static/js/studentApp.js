@@ -359,68 +359,66 @@ function accItemHtml(id, title, bodyHTML, open=false, icon="fa-file-lines"){
 
 
 // JS — nueva sección "Notas" tipo acordeón (sin estado)
-async function renderTareas(){
+async function renderNotas(){
   setTitle("Notas");
+
+  const clases  = await api.getClases();
+  const tareas  = await api.getTareas();
+  const porAsign = (asig) => tareas.filter(t => t.asignatura === asig);
+
   mount(`
     <h2 class="section-title">Notas</h2>
     <p class="subtle">Revisa tus notas por cada ramo. Toca un ramo para ver sus evaluaciones.</p>
-    <section id="notas-acc">${skeleton(4)}</section>
+
+    
+    <div class="acc" id="notas-acc">
+      ${
+        clases.map(c=>{
+          const final = Number.isFinite(c.promedio) ? c.promedio : "--";
+          const rows  = porAsign(c.nombre);
+
+          const body = `
+            <div class="acc-body"><div class="acc-body-in">
+              <ul class="syllabus">
+                ${
+                  rows.length
+                    ? rows.map(r=>`
+                        <li>
+                          <span class="sy-date">${fmtDate(r.fecha)}</span>
+                          <span class="sy-dot"></span>
+                          <span>${r.titulo}</span>
+                          <span style="margin-left:auto">${r.nota!=null?`<span class="grade">${r.nota}</span>`:"—"}</span>
+                        </li>
+                      `).join("")
+                    : `<li><span class="sy-dot"></span><span>No hay evaluaciones registradas.</span></li>`
+                }
+              </ul>
+            </div></div>`;
+
+          return `
+            <article class="acc-item">
+              <button class="acc-head">
+                <i class="fa-solid fa-book acc-icon"></i>
+                <div class="acc-title"><div class="cls-name">${c.nombre}</div></div>
+                <div class="acc-grade">Nota final ${final}</div>
+                <i class="fa-solid fa-plus acc-caret"></i>
+              </button>
+              ${body}
+            </article>`;
+        }).join("")
+      }
+    </div>
   `);
 
-  const tareas = await api.getTareas();
-  const byAsig = tareas.reduce((m,t)=>{ (m[t.asignatura] ||= []).push(t); return m; }, {});
-  const items = Object.entries(byAsig).map(([asig, arr])=>{
-    const notas = arr.map(x=>x.nota).filter(n=>typeof n==="number");
-    const prom  = notas.length ? (Math.round((notas.reduce((a,b)=>a+b,0)/notas.length)*10)/10).toFixed(1) : "--";
-    const rows  = arr.map(t=>`
-      <tr>
-        <td>${t.titulo}</td>
-        <td>${fmtDate(t.fecha)}</td>
-        <td>${t.nota!=null?`<span class="grade">${t.nota}</span>`:"--"}</td>
-      </tr>
-    `).join("");
-    return `
-      <article class="acc-item">
-        <button class="acc-head" data-acc="${asig}">
-          <div class="acc-title">${asig}</div>
-          <div class="acc-grade">Nota final <b>${prom}</b> <i class="fa-solid fa-plus acc-icon" aria-hidden="true"></i></div>
-        </button>
-        <div class="acc-body">
-          <div class="table-wrapper">
-            <table class="table">
-              <thead><tr><th>Evaluación</th><th>Fecha</th><th>Nota</th></tr></thead>
-              <tbody>${rows || `<tr><td colspan="3" class="subtle">Sin evaluaciones.</td></tr>`}</tbody>
-            </table>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-
-  $("#notas-acc").innerHTML = `
-    <div class="acc-headline">INGENIERÍA EN INFORMÁTICA</div>
-    ${items || `<div class="card subtle">No hay notas registradas.</div>`}
-    <div class="row" style="justify-content:flex-end;margin-top:.5rem">
-      <button class="btn btn-secondary" <i class="fa-solid fa-file-arrow-down"></i> Descargar PDF</button>
-    </div>
-  `;
-
-  // responsive en tablas internas
-  $$("#notas-acc table").forEach(responsiveTableEnhance);
-
-  // acordeón
+  // toggle acordeón
   $("#notas-acc").addEventListener("click", (e)=>{
     const head = e.target.closest(".acc-head");
     if(!head) return;
-    const item = head.parentElement;
-    item.classList.toggle("open");
-    const icon = head.querySelector(".acc-icon");
-    if(icon){ icon.classList.toggle("fa-plus"); icon.classList.toggle("fa-minus"); }
+    head.parentElement.classList.toggle("open");
   });
-
-  // PDF (sin columna de estado)
-  
 }
+
+
 
 
 async function ensureCalendarLib(){ /* igual que antes */ 
@@ -970,24 +968,31 @@ window.renderPagos = renderPagos;
 /* ================== ROUTER ================== */
 function render(section){
   STATE.section = section;
-  const titles = { "dashboard":"Dashboard","mis-clases":"Mis Clases","tareas":"Tareas y Notas","calendario":"Calendario","perfil":"Perfil","pagos":"Pagos" };
+  const titles = {
+    "dashboard":"Dashboard",
+    "mis-clases":"Mis Clases",
+    "notas":"Notas",
+    "calendario":"Calendario",
+    "perfil":"Perfil",
+    "pagos":"Pagos"
+  };
   setTitle(titles[section] || "Dashboard");
   $$(".menu a").forEach(a=>{
     const active = a.dataset.section===section;
     a.classList.toggle("active", active);
     if(active) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
   });
-  // al navegar, cerrar el drawer si está abierto
   closeDrawer();
 
   if(section==="dashboard")   return renderDashboard();
   if(section==="mis-clases")  return renderMisClases();
-  if(section==="tareas")      return renderTareas();
+  if(section==="notas")       return renderNotas();   // <- aquí
   if(section==="calendario")  return renderCalendario();
   if(section==="perfil")      return renderPerfil();
   if(section==="pagos")       return renderPagos();
   return renderDashboard();
 }
+
 
 /* ================== DRAWER (hamburguesa) ================== */
 function openDrawer(){
