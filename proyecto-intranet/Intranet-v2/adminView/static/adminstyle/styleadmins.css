@@ -230,6 +230,9 @@ html[data-theme="dark"] .theme-switch .thumb{left:25px}
 /* ====== Rejilla principal: gráficos y bloques inferiores ====== */
 .panel-grid{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-top:.2rem}
 .panel-bottom{margin-top:1rem}
+/* Panel inferior: al quitar “Actividad reciente”, que quede una sola columna */
+.panel-bottom.one{ grid-template-columns: 1fr; }
+
 @media (max-width:1200px){.panel-grid{grid-template-columns:1fr}}
 .btn-compact{padding:.45rem .7rem;border-radius:9px}
 

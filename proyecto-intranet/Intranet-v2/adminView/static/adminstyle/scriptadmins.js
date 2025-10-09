@@ -98,15 +98,10 @@ const content = {
       <!-- Meta chips + selector -->
       <div class="page-meta">
         <div class="chips">
-          <span class="chip"><i class="fa-regular fa-calendar"></i> Año: 2025</span>
-          <span class="chip"><i class="fa-solid fa-graduation-cap"></i> Matrícula total: 90</span>
-          <span class="chip"><i class="fa-solid fa-chalkboard-user"></i> Profesores: 11</span>
+          <!-- Mantener solo Matrícula total -->
+          <span class="chip"><i class="fa-solid fa-graduation-cap"></i> Matrícula total: <b>90</b></span>
         </div>
-        <select id="range-select" class="select select-compact">
-          <option>Últimos 6 meses</option>
-          <option>Últimos 12 meses</option>
-          <option>Este año</option>
-        </select>
+        
       </div>
 
       <!-- Acciones rápidas -->
@@ -156,35 +151,37 @@ const content = {
         </div>
       </div>
 
-      <!-- Pagos + Actividad -->
-      <div class="panel-grid panel-bottom">
+      <!-- Pagos (solo) -->
+      <div class="panel-grid panel-bottom one">
         <div class="card">
           <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
             <span>Pagos pendientes</span>
-            <button id="btn-export-csv" class="btn btn-secondary btn-compact"><i class="fa-solid fa-file-arrow-down"></i> Exportar CSV</button>
+            <button id="btn-export-csv" class="btn btn-secondary btn-compact">
+              <i class="fa-solid fa-file-arrow-down"></i> Exportar CSV
+            </button>
           </div>
           <div class="table-wrapper">
             <table class="data-table" id="tbl-pagos">
-              <thead><tr><th>Apoderado</th><th>RUT</th><th>Curso</th><th>Mes</th><th>Monto</th><th>Acción</th></tr></thead>
+              <thead>
+                <tr><th>Apoderado</th><th>RUT</th><th>Curso</th><th>Mes</th><th>Monto</th><th>Acción</th></tr>
+              </thead>
               <tbody>
-                <tr><td>Juan Pérez</td><td>12.345.678-9</td><td>1°B</td><td>Sept</td><td>$50.000</td><td><button class="btn btn-secondary">Recordar</button></td></tr>
-                <tr><td>María López</td><td>11.222.333-4</td><td>3°B</td><td>Sept</td><td>$60.000</td><td><button class="btn btn-secondary">Recordar</button></td></tr>
+                <tr>
+                  <td>Juan Pérez</td><td>12.345.678-9</td><td>1°B</td><td>Sept</td><td>$50.000</td>
+                  <td><button class="btn btn-secondary">Recordar</button></td>
+                </tr>
+                <tr>
+                  <td>María López</td><td>11.222.333-4</td><td>3°B</td><td>Sept</td><td>$60.000</td>
+                  <td><button class="btn btn-secondary">Recordar</button></td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
-
-        <div class="card">
-          <h3 class="card-title">Actividad reciente</h3>
-          <ul class="activity-list">
-            <li><i class="fa-solid fa-user-plus"></i> Se agregó <b>Paulina Muñoz</b> a 1° Básico B <span>hoy</span></li>
-            <li><i class="fa-solid fa-receipt"></i> Pago registrado de <b>Juan Pérez</b> <span>ayer</span></li>
-            <li><i class="fa-solid fa-paper-plane"></i> Comunicado enviado a <b>8° Básico A</b> <span>hace 2 días</span></li>
-          </ul>
-        </div>
       </div>
     `
   },
+
 
   estudiantes: {
     title: 'Navegador de Cursos',
