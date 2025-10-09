@@ -831,46 +831,32 @@ function renderPagosContent(){
       <div class="card">
         <h3 class="section-title" style="margin-bottom:.5rem">Detalle ${y}</h3>
         <div class="table-wrapper pay-scroll">
-          <table class="pay-table pay-compact" id="tbl-pagos" aria-label="Detalle de pagos ${y}">
-            <thead>
-              <tr>
-                <th style="width:42px;text-align:center">
-                  <input id="chk-all" type="checkbox" aria-label="Seleccionar todas" />
-                </th>
-                <th style="width:18%">Mes</th>
-                <th style="width:22%">Vencimiento</th>
-                <th style="width:18%">Monto</th>
-                <th style="width:16%">Estado</th>
-                <th style="width:26%;text-align:right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(r=>{
-                const st = pagoEstado(r);
-                const id = String(r.id);
-                const selectable = !r.pagada;
-                const checked = selectable && selectedIds.has(id) ? "checked" : "";
-                return `
-                  <tr data-id="${id}">
-                    <td style="text-align:center">
-                      <input type="checkbox" class="chk-pay" ${selectable?"":"disabled"} ${checked} aria-label="Seleccionar cuota ${mesNombre(r.mes)}"/>
-                    </td>
-                    <td><strong>${mesNombre(r.mes)}</strong></td>
-                    <td>${fmtDate(r.fecha_vencimiento)}</td>
-                    <td>${clp(r.importe)}</td>
-                    <td>${tagHtml(st)}</td>
-                    <td>
-                      <div class="pay-actions">
-                        <button class="btn btn-chip ${selectable?'':'btn-secondary'}" data-act="quickpay" ${selectable?'':'disabled'}>Pagar</button>
-                        <button class="btn btn-chip btn-secondary" data-act="rcpt" ${r.pagada?'':'disabled'}>Comprobante</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-              }).join("")}
-            </tbody>
-          </table>
-        </div>
+           <table class="pay-table" id="tbl-pagos">
+    <thead>...</thead>
+    <tbody>
+      ${rows.map(r=>{
+        const st = pagoEstado(r);
+        const id = String(r.id);
+        return `
+          <tr data-id="${id}">
+            <td data-label="Seleccionar">
+              <input type="checkbox" class="chk-pay" ${r.pagada?"disabled":""}/>
+            </td>
+            <td data-label="Mes"><strong>${mesNombre(r.mes)}</strong></td>
+            <td data-label="Vencimiento">${fmtDate(r.fecha_vencimiento)}</td>
+            <td data-label="Monto">${clp(r.importe)}</td>
+            <td data-label="Estado">${tagHtml(st)}</td>
+            <td data-label="Acciones">
+              <div class="pay-actions">
+                <button class="btn btn-chip">Pagar</button>
+                <button class="btn btn-chip btn-secondary">Comprobante</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("")}
+    </tbody>
+  </table>
         <div id="pay-toolbar" style="margin-top:.8rem"></div>
       </div>
 
