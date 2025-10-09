@@ -226,218 +226,202 @@ function toggleTheme(){
 }
 
 /* ================== SECCIONES (renderers) ================== */
-async function renderDashboard(){ /* ...igual que antes... */ 
+async function renderDashboard(){
   setTitle("Dashboard");
-  mount(`
-    <h2 class="section-title">Dashboard</h2>
-    <div class="grid" id="db-cards">${skeleton(2)}</div>
-    <div class="card" style="margin-top:1rem">
-      <h3 class="section-title" style="margin-bottom:.5rem">Eventos próximos</h3>
-      <div id="db-events">${skeleton(3)}</div>
-    </div>
-  `);
-  const [clases, eventos] = await Promise.all([api.getClases(), api.getEventos()]);
+  const [clases, perfil] = await Promise.all([api.getClases(), api.getPerfil()]);
   const proms = clases.map(c=>c.promedio).filter(Number.isFinite);
-  const promGeneral = proms.length ? (Math.round((proms.reduce((a,b)=>a+b,0)/proms.length)*10)/10).toFixed(1) : "-";
-  $("#db-cards").innerHTML = `
-    ${UI.CardStat("Promedio general", promGeneral, "linear-gradient(90deg,#0f294c,#cda758)")}
-    ${UI.CardStat("Asignaturas", clases.length, "linear-gradient(90deg,#0f294c,#cda758)")}
-    ${UI.CardStat("Próximos eventos", eventos.length, "linear-gradient(90deg,#0f294c,#cda758)")}
-  `;
-  $("#db-events").innerHTML = eventos.map(e=>{
-    const d = new Date(e.date+"T00:00:00");
-    const dia = String(d.getDate()).padStart(2,"0");
-    const mes = d.toLocaleString("es-CL",{month:"short"});
-    return `<div class="row">
-      <div class="class-icon" style="width:46px;height:46px">
-        <div style="font-weight:700">${dia}</div>
-        <div style="font-size:.75rem;color:#666">${mes}</div>
-      </div>
+  const promGeneral = proms.length
+    ? (Math.round((proms.reduce((a,b)=>a+b,0)/proms.length)*10)/10).toFixed(1)
+    : "-";
+
+  mount(`
+    <section class="hero" style="background-image:
+      linear-gradient(90deg, rgba(15,41,76,.90), rgba(205,167,88,.55)),
+      url('${STATIC_URL}img/campus.jpg')">
       <div>
-        <div><strong>${e.title}</strong> · <span class="subtle">${e.asignatura}</span></div>
-        <div class="subtle">${fmtDate(e.date)}</div>
+        <h2 class="hero-title">¡Bienvenido, ${perfil.nombre}!</h2>
+        <p class="hero-sub">${perfil.curso} · RUT ${perfil.rut}</p>
+        <div class="hero-badges">
+          <span class="badge-soft">Portal Alumno</span>
+          <span class="badge-soft">Colegio San Agustín de Hipona</span>
+        </div>
       </div>
-    </div>`;
-  }).join("") || `<div class="subtle">No hay eventos próximos.</div>`;
+    </section>
+
+    <section class="grid wide-stats" style="margin-top:1rem" id="db-cards">
+      ${UI.CardStat("Promedio general", promGeneral, "linear-gradient(90deg,#0f294c,#cda758)")}
+      ${UI.CardStat("Asignaturas", clases.length, "linear-gradient(90deg,#0f294c,#cda758)")}
+    </section>
+  `);
 }
 
-async function renderMisClases(){ /* ...igual que en la versión anterior... */ 
+
+
+
+// Helper de icono/color por ramo
+const SUBJECT_UI = {
+  mat: { icon:"fa-square-root-variable", color:"#0EA5E9" },
+  cie: { icon:"fa-flask",               color:"#F97316" },
+  len: { icon:"fa-book-open",           color:"#10B981" },
+  his: { icon:"fa-globe",               color:"#F43F5E" },
+  ing: { icon:"fa-language",            color:"#6366F1" },
+  _d:  { icon:"fa-book",                color:"var(--primary)" }
+};
+const getSubjUI = (id)=> SUBJECT_UI[id] || SUBJECT_UI._d;
+
+async function renderMisClases(){
   setTitle("Mis Clases");
+  const clases = await api.getClases();
+
+  // Temas por ramo a partir de las tareas (sin agregar nada a la BD)
+  const temasDe = (asig)=>{
+    const items = (DATA.tareas||[])
+      .filter(t=>t.asignatura===asig)
+      .sort((a,b)=> new Date(a.fecha) - new Date(b.fecha))
+      .map(t=>{
+        let base = t.titulo || "";
+        // toma la parte antes de “–” o “-” como tema
+        if (base.includes("–")) base = base.split("–")[0];
+        else if (base.includes("-")) base = base.split("-")[0];
+        base = base.trim() || t.titulo.trim();
+        return { fecha: t.fecha, tema: base };
+      });
+
+    // quitar duplicados de tema manteniendo orden
+    const seen = new Set(), out = [];
+    for (const it of items){
+      if (!seen.has(it.tema)){ seen.add(it.tema); out.push(it); }
+    }
+    return out;
+  };
+
   mount(`
     <h2 class="section-title">Mis Clases</h2>
-    <p class="subtle">Resumen de tus asignaturas del año.</p>
-    <section class="grid" id="clases-grid">${skeleton(4)}</section>
+    <p class="subtle">Toca una asignatura para ver los temas que se abordarán durante el semestre.</p>
+
+    <div class="acc" id="clases-list">
+      ${clases.map(c=>{
+        const temas = temasDe(c.nombre);
+        return `
+          <div class="acc-item">
+            <button class="acc-head">
+              <i class="fa-solid fa-book acc-icon"></i>
+              <div class="acc-title">
+                <div class="cls-name">${c.nombre}</div>
+                <div class="cls-subtle">Prof. ${c.profesor}</div>
+              </div>
+              <i class="fa-solid fa-chevron-down acc-caret"></i>
+            </button>
+            <div class="acc-body">
+              <div class="acc-body-in">
+                ${temas.length ? `
+                  <ul class="syllabus">
+                    ${temas.map(t=>`<li><span class="sy-date">${fmtDate(t.fecha)}</span><span class="sy-dot"></span>${t.tema}</li>`).join("")}
+                  </ul>
+                ` : `<div class="subtle">Aún no hay temas planificados a partir de las tareas.</div>`}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
   `);
-  const clases = await api.getClases();
-  $("#clases-grid").innerHTML = clases.map(c=>`
-    <article class="class-card">
-      <div class="class-head">
-        <div class="class-icon">📘</div>
-        <div>
-          <h4 class="class-name">${c.nombre}</h4>
-          <p class="class-teacher">Prof. ${c.profesor}</p>
-        </div>
-      </div>
-      <div class="subtle">Promedio: <strong>${c.promedio ?? "-"}</strong></div>
-      ${UI.Progress(c.progreso)}
-      <div class="row" style="justify-content:flex-end;margin-top:.6rem">
-        <button class="btn btn-secondary" data-action="clase-detalle" data-id="${c.id}">Ver detalles</button>
-      </div>
-    </article>
-  `).join("");
-  document.addEventListener("click", onClaseDetalle, { once:true });
-  function onClaseDetalle(e){
-    const btn = e.target.closest("[data-action='clase-detalle']");
-    if(!btn) { document.addEventListener("click", onClaseDetalle, { once:true }); return; }
-    e.preventDefault(); renderClaseDetalle(btn.dataset.id);
-  }
+
+  // abrir/cerrar acordeón
+  $("#clases-list").addEventListener("click",(e)=>{
+    const head = e.target.closest(".acc-head");
+    if(!head) return;
+    head.closest(".acc-item").classList.toggle("open");
+  });
 }
 
-async function renderClaseDetalle(id){ /* ...igual; omito por espacio (sin cambios relevantes) ... */ 
-  const clase = (await api.getClases()).find(c=>c.id===id);
-  if(!clase) return renderMisClases();
-  mount(`
-    <div class="row" style="justify-content:space-between;margin-bottom:.5rem">
-      <div class="row">
-        <button class="btn btn-secondary" id="back-classes"><i class="fa-solid fa-arrow-left"></i> Volver</button>
-        <h2 class="section-title" style="margin:0">${clase.nombre}</h2>
-      </div>
+
+
+
+
+
+
+// --- Helper de acordeón ---
+function accItemHtml(id, title, bodyHTML, open=false, icon="fa-file-lines"){
+  return `
+    <div class="acc-item ${open?'open':''}">
+      <button class="acc-head" data-acc="${id}">
+        <i class="fa-solid ${icon} acc-icon"></i>
+        <span class="acc-title">${title}</span>
+        <i class="fa-solid fa-chevron-down acc-caret"></i>
+      </button>
+      <div class="acc-body"><div class="acc-body-in">${bodyHTML}</div></div>
     </div>
-    <div class="grid">
-      <div class="class-card">
-        <div class="class-head">
-          <div class="class-icon">📘</div>
-          <div>
-            <h4 class="class-name" style="margin:0">${clase.nombre}</h4>
-            <p class="class-teacher">Prof. ${clase.profesor}</p>
+  `;
+}
+
+
+
+
+// JS — nueva sección "Notas" tipo acordeón (sin estado)
+async function renderTareas(){
+  setTitle("Notas");
+  mount(`
+    <h2 class="section-title">Notas</h2>
+    <p class="subtle">Revisa tus notas por cada ramo. Toca un ramo para ver sus evaluaciones.</p>
+    <section id="notas-acc">${skeleton(4)}</section>
+  `);
+
+  const tareas = await api.getTareas();
+  const byAsig = tareas.reduce((m,t)=>{ (m[t.asignatura] ||= []).push(t); return m; }, {});
+  const items = Object.entries(byAsig).map(([asig, arr])=>{
+    const notas = arr.map(x=>x.nota).filter(n=>typeof n==="number");
+    const prom  = notas.length ? (Math.round((notas.reduce((a,b)=>a+b,0)/notas.length)*10)/10).toFixed(1) : "--";
+    const rows  = arr.map(t=>`
+      <tr>
+        <td>${t.titulo}</td>
+        <td>${fmtDate(t.fecha)}</td>
+        <td>${t.nota!=null?`<span class="grade">${t.nota}</span>`:"--"}</td>
+      </tr>
+    `).join("");
+    return `
+      <article class="acc-item">
+        <button class="acc-head" data-acc="${asig}">
+          <div class="acc-title">${asig}</div>
+          <div class="acc-grade">Nota final <b>${prom}</b> <i class="fa-solid fa-plus acc-icon" aria-hidden="true"></i></div>
+        </button>
+        <div class="acc-body">
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Evaluación</th><th>Fecha</th><th>Nota</th></tr></thead>
+              <tbody>${rows || `<tr><td colspan="3" class="subtle">Sin evaluaciones.</td></tr>`}</tbody>
+            </table>
           </div>
         </div>
-        <p class="subtle">Promedio actual: <strong>${clase.promedio ?? "-"}</strong></p>
-        ${UI.Progress(clase.progreso)}
-      </div>
-      <div class="class-card">
-        <div class="row" role="tablist" aria-label="Subsecciones">
-          <button class="btn btn-secondary" data-tab="material">Material</button>
-          <button class="btn btn-secondary" data-tab="asistencia">Asistencia</button>
-          <button class="btn btn-secondary" data-tab="notas">Notas</button>
-        </div>
-        <div id="tab-body" style="margin-top:.8rem">${skeleton(2)}</div>
-      </div>
+      </article>
+    `;
+  }).join("");
+
+  $("#notas-acc").innerHTML = `
+    <div class="acc-headline">INGENIERÍA EN INFORMÁTICA</div>
+    ${items || `<div class="card subtle">No hay notas registradas.</div>`}
+    <div class="row" style="justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" <i class="fa-solid fa-file-arrow-down"></i> Descargar PDF</button>
     </div>
-  `);
-  const body = $("#tab-body");
-  const renderTab = (t) => {
-    if(t==="asistencia"){
-      body.innerHTML = `
-        <table class="table" id="tabla-asistencia">
-          <thead><tr><th>Mes</th><th>Asistencia</th></tr></thead>
-          <tbody><tr><td>Ago</td><td>96%</td></tr><tr><td>Sep</td><td>94%</td></tr></tbody>
-        </table>`;
-      responsiveTableEnhance("#tabla-asistencia");
-    } else if(t==="notas"){
-      body.innerHTML = `
-        <table class="table" id="tabla-notas">
-          <thead><tr><th>Evaluación</th><th>Fecha</th><th>Nota</th></tr></thead>
-          <tbody><tr><td>Prueba 1</td><td>05/Sep</td><td><span class="grade">6.2</span></td></tr>
-                 <tr><td>Tarea</td><td>18/Sep</td><td><span class="grade">6.0</span></td></tr></tbody>
-        </table>`;
-      responsiveTableEnhance("#tabla-notas");
-    } else {
-      body.innerHTML = `<ul><li>Programa de la asignatura (PDF)</li><li>Guía 1: Funciones</li></ul>`;
-    }
-  };
-  renderTab("material");
-  $("#back-classes").addEventListener("click", (e)=>{e.preventDefault();renderMisClases();});
-  $$("[data-tab]").forEach(b=>b.addEventListener("click",()=>renderTab(b.dataset.tab)));
+  `;
+
+  // responsive en tablas internas
+  $$("#notas-acc table").forEach(responsiveTableEnhance);
+
+  // acordeón
+  $("#notas-acc").addEventListener("click", (e)=>{
+    const head = e.target.closest(".acc-head");
+    if(!head) return;
+    const item = head.parentElement;
+    item.classList.toggle("open");
+    const icon = head.querySelector(".acc-icon");
+    if(icon){ icon.classList.toggle("fa-plus"); icon.classList.toggle("fa-minus"); }
+  });
+
+  // PDF (sin columna de estado)
+  
 }
 
-async function renderTareas(){ /* igual que antes, con responsiveTableEnhance */ 
-  setTitle("Tareas y Notas");
-  const saved = { asig: STATE.filters.asig || "", estado: STATE.filters.estado || "", orden: STATE.filters.orden || "fecha_desc" };
-  mount(`
-    <h2 class="section-title">Tareas y Notas</h2>
-    <div class="row" style="flex-wrap:wrap;gap:.6rem;margin:.3rem 0 1rem 0">
-      <label class="subtle"></label>
-      <select id="flt-asig" class="input" style="max-width:220px"></select>
-      <div class="row" role="group" aria-label="Estado">
-        <button class="btn btn-secondary" data-est=""          ${saved.estado===""?'aria-pressed="true"':''}>Todas</button>
-        <button class="btn btn-secondary" data-est="pending"   ${saved.estado==="pending"?'aria-pressed="true"':''}>Pendientes</button>
-        <button class="btn btn-secondary" data-est="submitted" ${saved.estado==="submitted"?'aria-pressed="true"':''}>Entregadas</button>
-        <button class="btn btn-secondary" data-est="graded"    ${saved.estado==="graded"?'aria-pressed="true"':''}>Calificadas</button>
-      </div>
-      <div class="row" style="margin-left:auto">
-        <label class="subtle"></label>
-        <select id="flt-orden" class="input" style="max-width:180px">
-          <option value="fecha_desc">Fecha ↓</option>
-          <option value="fecha_asc">Fecha ↑</option>
-          <option value="nota_desc">Nota ↓</option>
-          <option value="nota_asc">Nota ↑</option>
-        </select>
-        <button class="btn btn-secondary" id="btn-pdf-tareas" title="Descargar PDF"><i class="fa-solid fa-file-arrow-down"></i> Descargar PDF</button>
-      </div>
-    </div>
-    <div class="card" style="padding:0" id="tareas-card"><div style="padding:1rem">${skeleton(4)}</div></div>
-  `);
-  const tareas = await api.getTareas();
-  const asigs = Array.from(new Set(tareas.map(t=>t.asignatura)));
-  $("#flt-asig").innerHTML = `<option value="">Todas</option>${asigs.map(a=>`<option>${a}</option>`).join("")}`;
-  $("#flt-asig").value = saved.asig; $("#flt-orden").value = saved.orden;
-  let estado = saved.estado;
-
-  const paint = () => {
-    let rows = tareas.filter(t => (saved.asig ? t.asignatura===saved.asig : true))
-                     .filter(t => (estado ? t.estado===estado : true));
-    const byDate = (a,b)=> new Date(a.fecha)-new Date(b.fecha);
-    const byNota = (a,b)=> (a.nota??-99) - (b.nota??-99);
-    if(saved.orden==="fecha_desc") rows = [...rows].sort((a,b)=> byDate(b,a));
-    if(saved.orden==="fecha_asc")  rows = [...rows].sort(byDate);
-    if(saved.orden==="nota_desc")  rows = [...rows].sort((a,b)=> byNota(b,a));
-    if(saved.orden==="nota_asc")   rows = [...rows].sort(byNota);
-
-    $("#tareas-card").innerHTML = `
-      <table class="table" id="tabla-tareas">
-        <thead><tr><th>Asignatura</th><th>Título</th><th>Entrega</th><th>Estado</th><th>Nota</th></tr></thead>
-        <tbody>
-          ${rows.map(t=>`
-            <tr>
-              <td>${t.asignatura}</td>
-              <td>${t.titulo}</td>
-              <td>${fmtDate(t.fecha)}</td>
-              <td>${UI.TagEstado(t.estado)}</td>
-              <td>${t.nota!=null?`<span class="grade">${t.nota}</span>`:"-"}</td>
-            </tr>
-          `).join("") || `<tr><td colspan="5" class="subtle">Sin resultados.</td></tr>`}
-        </tbody>
-      </table>`;
-    responsiveTableEnhance("#tabla-tareas");
-  };
-  $("#flt-asig").addEventListener("change", e=>{ saved.asig = e.target.value; persist(); paint(); });
-  $("#flt-orden").addEventListener("change", e=>{ saved.orden = e.target.value; persist(); paint(); });
-  $$("[data-est]").forEach(b=>{
-    b.addEventListener("click", ()=>{ estado = b.dataset.est || ""; $$("[data-est]").forEach(x=>x.removeAttribute("aria-pressed")); b.setAttribute("aria-pressed","true"); saved.estado = estado; persist(); paint(); });
-  });
-  const persist = ()=> localStorage.setItem("student_filters", JSON.stringify(saved));
-  paint();
-
-  $("#btn-pdf-tareas").addEventListener("click", async ()=>{
-    const perfil = await api.getPerfil();
-    const total = DATA.tareas.length;
-    const pendientes  = DATA.tareas.filter(t=>t.estado==="pending").length;
-    const entregadas  = DATA.tareas.filter(t=>t.estado==="submitted").length;
-    const calificadas = DATA.tareas.filter(t=>t.estado==="graded").length;
-    const tareasSummary = `
-      <div class="summary">
-        <div class="chip">Total tareas: ${total}</div>
-        <div class="chip">Pendientes: ${pendientes}</div>
-        <div class="chip">Entregadas: ${entregadas}</div>
-        <div class="chip">Calificadas: ${calificadas}</div>
-      </div>`;
-    const academicSummary = await buildAcademicSummaryHTML();
-    const preHTML = `${academicSummary}${tareasSummary}`;
-    const tableHTML = $("#tareas-card").innerHTML;
-    exportToPDFWithHeader("tareas.pdf","Informe de Tareas y Notas", tableHTML, { preHTML, student: perfil, logoUrl: getLogoUrl(), photoUrl: getStudentPhotoUrl(), watermarkText: "INTRANET" });
-  });
-}
 
 async function ensureCalendarLib(){ /* igual que antes */ 
   if (window.FullCalendar && window.FullCalendar.Calendar) return true;
@@ -449,125 +433,180 @@ async function ensureCalendarLib(){ /* igual que antes */
   }).catch(()=>false);
   return !!(window.FullCalendar && window.FullCalendar.Calendar);
 }
+// Eventos personalizados del alumno (tareas/pruebas) sin recordatorios
+const CE_KEY = "student_custom_events";
+function getCustomEvents(){ try { return JSON.parse(localStorage.getItem(CE_KEY)||"[]"); } catch(_) { return []; } }
+function saveCustomEvents(arr){ localStorage.setItem(CE_KEY, JSON.stringify(arr)); }
+function toISO(dateStr, timeStr){ if(!dateStr) return null; const t = timeStr && timeStr.length ? timeStr : "00:00"; return `${dateStr}T${t}`; }
 
-async function renderCalendario(){ /* igual que antes (sin cambios) */ 
+
+async function renderCalendario(){
   setTitle("Calendario");
   mount(`
     <h2 class="section-title">Calendario</h2>
+
+    <div class="card" style="margin-bottom:1rem">
+      <h3 class="section-title" style="margin:0 0 .6rem 0">Agregar evento</h3>
+      <div class="row" style="flex-wrap:wrap;gap:.5rem">
+        <input id="ev-title" class="input" placeholder="Título (p.ej. Prueba Unidad 2)" style="min-width:220px">
+        <select id="ev-type" class="input" aria-label="Tipo">
+          <option value="tarea">Tarea</option>
+          <option value="examen">Prueba</option>
+        </select>
+        <select id="ev-subj" class="input" aria-label="Asignatura" style="min-width:200px"></select>
+        <input id="ev-date" class="input" type="date" aria-label="Fecha">
+        <input id="ev-time" class="input" type="time" aria-label="Hora">
+        <button id="ev-add" class="btn">Agregar</button>
+      </div>
+    </div>
+
     <div class="row" style="gap:.5rem;margin-bottom:.6rem">
       <label class="subtle">Filtrar:</label>
       <select id="flt-cal" class="input" style="max-width:220px"><option value="">Todas las asignaturas</option></select>
     </div>
+
     <div id="calendar" class="card">${skeleton(4)}</div>
   `);
-  const eventos = await api.getEventos();
-  const asigs = Array.from(new Set(eventos.map(e=>e.asignatura)));
+
+  // Solo usamos asignaturas y eventos del alumno (sin eventos del profesor)
+  const clases = await api.getClases();
+  const asigs = Array.from(new Set(clases.map(c=>c.nombre)));
+  $("#ev-subj").innerHTML = `<option value="">Asignatura…</option>${asigs.map(a=>`<option>${a}</option>`).join("")}`;
   $("#flt-cal").innerHTML += asigs.map(a=>`<option>${a}</option>`).join("");
+
   const loaded = await ensureCalendarLib();
+  const mapCustom = (arr)=> arr.map(ev=>({
+    id: `c-${ev.id}`,
+    title: `${ev.title} · ${ev.asignatura}`,
+    start: ev.iso,
+    className: ev.type==="examen" ? "event-examen" : "event-tarea",
+    extendedProps: { kind: ev.type, subj: ev.asignatura }
+  }));
+
   if(!loaded){
-    $("#calendar").innerHTML = `
-      <div class="card subtle" style="margin-bottom:1rem">No se pudo cargar el calendario interactivo. Mostrando una lista simple.</div>
-      <table class="table" id="table-cal-fallback">
-        <thead><tr><th>Fecha</th><th>Evento</th><th>Asignatura</th><th>Tipo</th></tr></thead>
-        <tbody id="cal-tbody"></tbody>
-      </table>`;
-    const paintFallback = () => {
+    // Fallback silencioso (lista simple, sin mensajes)
+    const draw = ()=>{
       const v = $("#flt-cal").value;
-      const rows = eventos.filter(e=> v? e.asignatura===v : true )
-        .map(e=>`<tr><td>${fmtDate(e.date)}</td><td>${e.title}</td><td>${e.asignatura}</td><td>${e.type}</td></tr>`)
-        .join("") || `<tr><td colspan="4" class="subtle">Sin eventos.</td></tr>`;
-      $("#cal-tbody").innerHTML = rows;
-      responsiveTableEnhance("#table-cal-fallback");
+      const customs = mapCustom(getCustomEvents())
+        .filter(e=> !v || e.extendedProps.subj===v)
+        .sort((a,b)=> new Date(a.start)-new Date(b.start));
+      $("#calendar").innerHTML = `
+        <table class="table" id="cal-fallback">
+          <thead><tr><th>Fecha</th><th>Evento</th></tr></thead>
+          <tbody>${customs.map(x=>`<tr><td>${fmtDate(x.start)}</td><td>${x.title}</td></tr>`).join("")}</tbody>
+        </table>`;
+      responsiveTableEnhance("#cal-fallback");
     };
-    $("#flt-cal").addEventListener("change", paintFallback);
-    paintFallback();
+    $("#ev-add").addEventListener("click", ()=>{
+      const title=($("#ev-title").value||"").trim(), type=$("#ev-type").value, subj=$("#ev-subj").value, iso=toISO($("#ev-date").value,$("#ev-time").value);
+      if(!title || !subj || !iso) return;
+      const ev={ id:Date.now(), title, type, asignatura:subj, iso };
+      saveCustomEvents([...getCustomEvents(), ev]);
+      $("#ev-title").value=""; $("#ev-date").value=""; $("#ev-time").value="";
+      draw();
+    });
+    $("#flt-cal").addEventListener("change", draw);
+    draw();
     return;
   }
+
+  // FullCalendar: solo eventos del alumno
   const el = $("#calendar"); el.innerHTML = "";
   const cal = new FullCalendar.Calendar(el, {
     initialView: "dayGridMonth",
     locale: "es",
+    firstDay: 1,
     height: 520,
-    headerToolbar: { left:"prev,next today", center:"title", right:"dayGridMonth,timeGridWeek,listWeek" },
-    events: eventos.map(e=>({ id: e.id, title: `${e.title} · ${e.asignatura}`, start: e.date, className: e.type==="examen" ? "event-examen" : "event-tarea" }))
-  });
-  cal.on("eventClick", (info)=>{
-    const e = eventos.find(x=> String(x.id)===String(info.event.id));
-    if(!e) return;
-    UI.Modal.show("Detalle de evento", `
-      <div><strong>${e.title}</strong></div>
-      <div class="subtle">${fmtDate(e.date)} · ${e.asignatura}</div>
-      <div class="subtle">Tipo: ${e.type}</div>`);
+    dayMaxEvents: 3,
+    headerToolbar: { left:"prev,next", center:"title", right:"dayGridMonth,timeGridWeek,listWeek" },
+    events: mapCustom(getCustomEvents()),
+    eventContent: (arg)=>{
+      const wrap = document.createElement("div");
+      wrap.className = "fc-pill";
+      wrap.innerHTML = `<span class="fc-dot"></span>${arg.event.title}`;
+      return { domNodes:[wrap] };
+    }
   });
   cal.render();
+
+  // Agregar evento (solo alumno)
+  $("#ev-add").addEventListener("click", ()=>{
+    const title=($("#ev-title").value||"").trim();
+    const type=$("#ev-type").value;
+    const subj=$("#ev-subj").value;
+    const iso=toISO($("#ev-date").value,$("#ev-time").value);
+    if(!title || !subj || !iso) return; // sin mensajes
+
+    const ev = { id: Date.now(), title, type, asignatura: subj, iso };
+    saveCustomEvents([...getCustomEvents(), ev]);
+
+    cal.addEvent({
+      id: `c-${ev.id}`,
+      title: `${ev.title} · ${ev.asignatura}`,
+      start: ev.iso,
+      className: type==="examen" ? "event-examen" : "event-tarea",
+      extendedProps: { kind:type, subj:subj }
+    });
+
+    $("#ev-title").value=""; $("#ev-date").value=""; $("#ev-time").value="";
+  });
+
+  // Filtro por asignatura
   $("#flt-cal").addEventListener("change", ()=>{
     const v = $("#flt-cal").value;
     cal.getEvents().forEach(ev=>{
-      const show = !v || (ev.title || "").includes(v);
+      const show = !v || ev.extendedProps.subj===v;
       ev.setProp("display", show ? "auto" : "none");
     });
   });
 }
 
-async function renderPerfil(){ /* igual que antes (sin cambios funcionales) */ 
+
+
+
+// JS: reemplaza por completo la función
+async function renderPerfil(){
   setTitle("Perfil");
   const perf = await api.getPerfil();
-  const currentPhoto = getStudentPhotoUrl();
+  const ini = ((perf.nombre||"").match(/\b\p{L}/gu)||[]).slice(0,2).join("").toUpperCase() || "A";
+
   mount(`
-    <h2 class="section-title">Perfil</h2>
-    <div class="grid">
-      <div class="class-card">
-        <div class="class-head">
-          <div class="avatar" style="width:56px;height:56px">
-            <img class="avatar-photo" src="${currentPhoto}" alt="" onerror="this.style.display='none'">
-            <span class="avatar-initials">FH</span>
-          </div>
-          <div>
-            <div class="class-name" style="margin:0">${perf.nombre}</div>
-            <div class="subtle">${perf.curso}</div>
-          </div>
-        </div>
-        <div class="subtle" style="margin-top:.6rem">
-          <div><strong>Correo:</strong> ${perf.correo}</div>
-          <div><strong>RUT:</strong> ${perf.rut}</div>
-          <div><strong>Teléfono:</strong> ${perf.telefono}</div>
-        </div>
-      </div>
-      <div class="class-card">
-        <h4 class="class-name" style="margin:0 0 .6rem 0">Foto (vista previa)</h4>
-        <div class="row">
-          <input type="file" id="input-foto" accept="image/*" class="input" />
-          <button class="btn btn-secondary" id="btn-clear-foto">Quitar</button>
-        </div>
-        <div id="preview" style="margin-top:.8rem">
-          <img src="${currentPhoto}" alt="Foto actual" style="max-width:160px;border-radius:12px;border:1px solid var(--border)" onerror="this.style.display='none'"/>
-        </div>
-        <p class="help">Se guarda localmente en tu navegador (no se sube al servidor).</p>
-      </div>
-    </div>
+    <section class="profile-hero"
+      style="background-image:
+        linear-gradient(0deg, rgba(15,41,76,.80), rgba(15,41,76,.35)),
+        url('${STATIC_URL}img/campus.jpg')">
+      <div class="prof-avatar" aria-hidden="true">${ini}</div>
+      <h2 class="prof-name">${perf.nombre}</h2>
+      <div class="prof-username">${(perf.correo||"").split("@")[0]||"—"}</div>
+      <div class="prof-meta">${perf.curso} · RUT ${perf.rut}</div>
+    </section>
+
+    <section class="prof-grid">
+      <article class="prof-card">
+        <h3 class="prof-title">Información básica</h3>
+        <dl class="prof-dl">
+          <div class="prof-row"><dt>Nombre completo</dt><dd>${perf.nombre}</dd></div>
+          <div class="prof-row"><dt>Curso</dt><dd>${perf.curso}</dd></div>
+          <div class="prof-row"><dt>RUT</dt><dd>${perf.rut}</dd></div>
+          <div class="prof-row"><dt>Correo</dt><dd>${perf.correo}</dd></div>
+          <div class="prof-row"><dt>Teléfono</dt><dd>${perf.telefono}</dd></div>
+        </dl>
+      </article>
+
+      <article class="prof-card">
+        <h3 class="prof-title">Información del apoderado</h3>
+        <dl class="prof-dl">
+          <div class="prof-row"><dt>Nombre</dt><dd>—</dd></div>
+          <div class="prof-row"><dt>Parentesco</dt><dd>—</dd></div>
+          <div class="prof-row"><dt>Teléfono</dt><dd>—</dd></div>
+          <div class="prof-row"><dt>Correo</dt><dd>—</dd></div>
+        </dl>
+      </article>
+    </section>
   `);
-  applyStudentPhotoToDOM();
-  $("#input-foto").addEventListener("change", (e)=>{
-    const file = e.target.files?.[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const dataUrl = ev.target.result;
-      try { localStorage.setItem(PHOTO_KEY, dataUrl); } catch (err) { alert("No se pudo guardar la foto (límite de almacenamiento del navegador)."); }
-      $("#preview").innerHTML = `<img src="${dataUrl}" style="max-width:160px;border-radius:12px;border:1px solid var(--border)" alt="Preview" />`;
-      applyStudentPhotoToDOM();
-    };
-    reader.readAsDataURL(file);
-  });
-  $("#btn-clear-foto").addEventListener("click", ()=>{
-    localStorage.removeItem(PHOTO_KEY);
-    $("#preview").innerHTML = `<div class="subtle">Sin foto.</div>`;
-    applyStudentPhotoToDOM();
-  });
 }
-function applyStudentPhotoToDOM(){
-  const url = getStudentPhotoUrl();
-  $$(".avatar-photo").forEach(img=>{ img.src = url; img.style.display = "block"; });
-}
+
+
 
 /* ================== PAGOS (sin cambios) ================== */
 /* =============== PAGOS (multi-selección, resumen, bloqueo + CSV) =============== */
@@ -710,16 +749,14 @@ function renderPagosLocked(){
 function renderPagosContent(){
   setTitle("Pagos");
 
-  // Año por defecto
   const years = uniqueYearsFromMensualidades();
   if (!STATE.pagosYear) STATE.pagosYear = years[years.length-1];
 
-  // selección múltiple en memoria
   let selectedIds = new Set();
 
   const syncSelectionWithYear = () => {
-    const validIds = new Set(rowsByYear(STATE.pagosYear).map(r=>String(r.id)));
-    selectedIds = new Set([...selectedIds].filter(id=>validIds.has(id)));
+    const valid = new Set(rowsByYear(STATE.pagosYear).map(r=>String(r.id)));
+    selectedIds = new Set([...selectedIds].filter(id=>valid.has(id)));
   };
 
   const openPayModal = (rowsSel)=>{
@@ -736,13 +773,9 @@ function renderPagosContent(){
     `);
     $("#m-cancel")?.addEventListener("click", UI.Modal.hide);
     $("#m-confirm")?.addEventListener("click", ()=>{
-      // DEMO: marcar como pagadas en memoria
       const ids = new Set(rowsSel.map(r=>String(r.id)));
-      (DATA.mensualidades||[]).forEach(r=>{
-        if (ids.has(String(r.id))) r.pagada = true;
-      });
+      (DATA.mensualidades||[]).forEach(r=>{ if(ids.has(String(r.id))) r.pagada = true; });
       UI.Modal.hide();
-      // limpiamos selección y repintamos
       selectedIds.clear();
       paint();
     });
@@ -750,35 +783,29 @@ function renderPagosContent(){
 
   const paintToolbar = ()=>{
     const all = rowsByYear(STATE.pagosYear);
-    const selected = all.filter(r=>selectedIds.has(String(r.id)));
-    const total = selected.reduce((a,r)=>a+(Number(r.importe)||0),0);
-    const visible = selected.length > 0;
-
+    const sel = all.filter(r=>selectedIds.has(String(r.id)));
+    const total = sel.reduce((a,r)=>a+(Number(r.importe)||0),0);
     const host = $("#pay-toolbar");
-    if (!host) return;
-
-    host.innerHTML = visible ? `
-      <div class="card" style="position:sticky; bottom:0; z-index:5; border:1px dashed var(--border,#e5e7eb); background:var(--card,#fff)">
+    host.innerHTML = sel.length ? `
+      <div class="card" style="position:sticky; bottom:0; z-index:5; border:1px dashed var(--border); background:var(--card)">
         <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:.6rem">
-          <div class="subtle"><b>${selected.length}</b> cuota(s) seleccionada(s)</div>
+          <div class="subtle"><b>${sel.length}</b> cuota(s) seleccionada(s)</div>
           <div class="row" style="gap:.5rem">
             <div class="subtle">Total a pagar: <b>${clp(total)}</b></div>
-            <button class="btn" id="btn-pay-selected">Pagar seleccionadas</button>
+            <button class="btn btn-chip" id="btn-pay-selected">Pagar seleccionadas</button>
           </div>
         </div>
       </div>
     ` : "";
-    if (visible){
-      $("#btn-pay-selected")?.addEventListener("click", ()=> openPayModal(selected));
-    }
+    if(sel.length) $("#btn-pay-selected")?.addEventListener("click", ()=>openPayModal(sel));
   };
 
   const paint = ()=>{
     syncSelectionWithYear();
 
-    const y   = STATE.pagosYear;
-    const res = resumenYear(y);
-    const rows = rowsByYear(y);
+    const y     = STATE.pagosYear;
+    const sum   = resumenYear(y);
+    const rows  = rowsByYear(y);
 
     mount(`
       <div class="page-header">
@@ -789,34 +816,34 @@ function renderPagosContent(){
           <select id="pay-year" class="input" aria-label="Seleccionar año" style="min-width:120px">
             ${years.map(yr=>`<option value="${yr}" ${yr===y?"selected":""}>${yr}</option>`).join("")}
           </select>
-          <button id="btn-select-pending" class="btn btn-secondary" title="Seleccionar pendientes/atrasadas">Seleccionar todas</button>
-          <button id="btn-clear-selection" class="btn btn-secondary" title="Limpiar selección">Limpiar</button>
-          <button id="btn-export-csv" class="btn btn-secondary" title="Exportar CSV">Exportar CSV</button>
-          <button id="pay-lock" class="btn btn-secondary" title="Bloquear acceso">Bloquear</button>
+          <button id="btn-select-pending" class="btn btn-secondary">Seleccionar todas</button>
+          <button id="btn-clear-selection" class="btn btn-secondary">Limpiar</button>
+          <button id="btn-export-csv" class="btn btn-secondary">Exportar CSV</button>
+          <button id="pay-lock" class="btn btn-secondary">Bloquear</button>
         </div>
       </div>
 
       <section class="grid" style="margin-bottom:1rem">
-        <div class="class-card"><div class="subtle">Saldo por pagar</div><div style="font-weight:800;font-size:1.7rem">${clp(res.saldo)}</div></div>
-        <div class="class-card"><div class="subtle">Cuotas pagadas</div><div style="font-weight:800;font-size:1.7rem">${res.pagadas} / 12</div></div>
-        <div class="class-card"><div class="subtle">Pendientes</div><div style="font-weight:800;font-size:1.7rem">${res.pendientes}</div></div>
-        <div class="class-card"><div class="subtle">Atrasadas</div><div style="font-weight:800;font-size:1.7rem">${res.atrasadas}</div></div>
+        <div class="class-card"><div class="subtle">Saldo por pagar</div><div style="font-weight:800;font-size:1.7rem">${clp(sum.saldo)}</div></div>
+        <div class="class-card"><div class="subtle">Cuotas pagadas</div><div style="font-weight:800;font-size:1.7rem">${sum.pagadas} / 12</div></div>
+        <div class="class-card"><div class="subtle">Pendientes</div><div style="font-weight:800;font-size:1.7rem">${sum.pendientes}</div></div>
+        <div class="class-card"><div class="subtle">Atrasadas</div><div style="font-weight:800;font-size:1.7rem">${sum.atrasadas}</div></div>
       </section>
 
       <div class="card">
         <h3 class="section-title" style="margin-bottom:.5rem">Detalle ${y}</h3>
-        <div class="table-wrapper">
-          <table class="data-table" id="tbl-pagos">
+        <div class="table-wrapper pay-scroll">
+          <table class="pay-table pay-compact" id="tbl-pagos" aria-label="Detalle de pagos ${y}">
             <thead>
               <tr>
-                <th style="width:38px;text-align:center">
+                <th style="width:42px;text-align:center">
                   <input id="chk-all" type="checkbox" aria-label="Seleccionar todas" />
                 </th>
-                <th>Mes</th>
-                <th>Vencimiento</th>
-                <th>Monto</th>
-                <th>Estado</th>
-                <th style="text-align:right">Acciones</th>
+                <th style="width:18%">Mes</th>
+                <th style="width:22%">Vencimiento</th>
+                <th style="width:18%">Monto</th>
+                <th style="width:16%">Estado</th>
+                <th style="width:26%;text-align:right">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -826,19 +853,22 @@ function renderPagosContent(){
                 const selectable = !r.pagada;
                 const checked = selectable && selectedIds.has(id) ? "checked" : "";
                 return `
-                <tr data-id="${id}">
-                  <td style="text-align:center">
-                    <input type="checkbox" class="chk-pay" ${selectable?"":"disabled"} ${checked} aria-label="Seleccionar cuota ${mesNombre(r.mes)}"/>
-                  </td>
-                  <td>${mesNombre(r.mes)}</td>
-                  <td>${fmtDate(r.fecha_vencimiento)}</td>
-                  <td>${clp(r.importe)}</td>
-                  <td>${tagHtml(st)}</td>
-                  <td style="text-align:right;white-space:nowrap">
-                    <button class="btn ${selectable?'':'btn-secondary'}" data-act="quickpay" ${selectable?'':'disabled'}>Pagar</button>
-                    <button class="btn btn-secondary" data-act="rcpt" ${r.pagada?'':'disabled'}>Comprobante</button>
-                  </td>
-                </tr>`;
+                  <tr data-id="${id}">
+                    <td style="text-align:center">
+                      <input type="checkbox" class="chk-pay" ${selectable?"":"disabled"} ${checked} aria-label="Seleccionar cuota ${mesNombre(r.mes)}"/>
+                    </td>
+                    <td><strong>${mesNombre(r.mes)}</strong></td>
+                    <td>${fmtDate(r.fecha_vencimiento)}</td>
+                    <td>${clp(r.importe)}</td>
+                    <td>${tagHtml(st)}</td>
+                    <td>
+                      <div class="pay-actions">
+                        <button class="btn btn-chip ${selectable?'':'btn-secondary'}" data-act="quickpay" ${selectable?'':'disabled'}>Pagar</button>
+                        <button class="btn btn-chip btn-secondary" data-act="rcpt" ${r.pagada?'':'disabled'}>Comprobante</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
               }).join("")}
             </tbody>
           </table>
@@ -854,52 +884,40 @@ function renderPagosContent(){
       </details>
     `);
 
-    responsiveTableEnhance("#tbl-pagos");
-
-    // Cambios de año
+    // Año
     $("#pay-year")?.addEventListener("change", e=>{ STATE.pagosYear = Number(e.target.value); paint(); });
 
-    // Exportar y bloqueo
+    // Exportar / bloquear
     $("#btn-export-csv")?.addEventListener("click", ()=>exportPagosCSV(STATE.pagosYear));
     $("#pay-lock")?.addEventListener("click", ()=>{ clearUnlock(); renderPagos(); });
 
-    // Seleccionar todas pendientes+atrasadas
+    // Seleccionar pendientes + atrasadas
     $("#btn-select-pending")?.addEventListener("click", ()=>{
-      rows.forEach(r=>{
-        const st = pagoEstado(r).key;
-        if (st!=="paid") selectedIds.add(String(r.id));
-      });
-      paint(); // repinta para reflejar checks
+      rows.forEach(r=>{ const k=pagoEstado(r).key; if(k!=="paid") selectedIds.add(String(r.id)); });
+      paint(); // repinta para refrescar checks y toolbar
     });
 
-    // Limpiar selección
-    $("#btn-clear-selection")?.addEventListener("click", ()=>{
-      selectedIds.clear();
-      paint();
-    });
+    // Limpiar
+    $("#btn-clear-selection")?.addEventListener("click", ()=>{ selectedIds.clear(); paint(); });
 
-    // Checkbox maestro
+    // Maestro
     $("#chk-all")?.addEventListener("change", (e)=>{
-      if (e.target.checked){
-        rows.forEach(r=>{ if(!r.pagada) selectedIds.add(String(r.id)); });
-      } else {
-        rows.forEach(r=> selectedIds.delete(String(r.id)));
-      }
+      if(e.target.checked){ rows.forEach(r=>{ if(!r.pagada) selectedIds.add(String(r.id)); }); }
+      else { rows.forEach(r=> selectedIds.delete(String(r.id))); }
       paint();
     });
 
-    // Checks por fila
+    // Checks fila
     $("#tbl-pagos")?.addEventListener("change", (e)=>{
       const chk = e.target.closest(".chk-pay");
       if(!chk) return;
-      const tr = chk.closest("tr");
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      if (chk.checked) selectedIds.add(id); else selectedIds.delete(id);
+      const id = chk.closest("tr")?.dataset?.id;
+      if(!id) return;
+      if(chk.checked) selectedIds.add(id); else selectedIds.delete(id);
       paintToolbar();
     });
 
-    // Acciones por fila
+    // Acciones
     $("#tbl-pagos")?.addEventListener("click", (e)=>{
       const btn = e.target.closest("button[data-act]");
       if(!btn) return;
@@ -908,11 +926,8 @@ function renderPagosContent(){
       const row = rows.find(r=>String(r.id)===id);
       if(!row) return;
 
-      if (btn.dataset.act === "quickpay" && !row.pagada){
-        // Shortcut: pagar solo esta
-        openPayModal([row]);
-      }
-      if (btn.dataset.act === "rcpt" && row.pagada){
+      if(btn.dataset.act==="quickpay" && !row.pagada) openPayModal([row]);
+      if(btn.dataset.act==="rcpt" && row.pagada){
         UI.Modal.show("Comprobante", `
           <p>Comprobante para <b>${mesNombre(row.mes)} ${row.anio}</b>.</p>
           <p class="subtle">* Aquí se generaría el PDF o link al comprobante oficial.</p>
@@ -924,7 +939,7 @@ function renderPagosContent(){
       }
     });
 
-    // TTL (conteo regresivo)
+    // TTL
     const ttlSpan = $("#pay-ttl");
     if (ttlIntervalId) clearInterval(ttlIntervalId);
     const tick = ()=>{
@@ -935,12 +950,12 @@ function renderPagosContent(){
     tick();
     ttlIntervalId = setInterval(tick, 1000);
 
-    // primera pintura de toolbar
     paintToolbar();
   };
 
   paint();
 }
+
 
 /** Entrada pública */
 function renderPagos(){
@@ -992,25 +1007,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("#btn-theme").addEventListener("click", toggleTheme);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ if(STATE.theme==="auto") applyTheme("auto"); });
 
-  // navegación
   $$(".menu a").forEach(a=>a.addEventListener("click",(e)=>{e.preventDefault();render(a.dataset.section);} ));
 
-  // modal
   $("#modal-close").addEventListener("click", UI.Modal.hide);
   $("#modal-ok").addEventListener("click", UI.Modal.hide);
   $("#modal .modal-backdrop").addEventListener("click", UI.Modal.hide);
 
-  // hamburguesa
   const hb = $("#btn-hamburger");
   const backdrop = $("#drawer-backdrop");
   if(hb){ hb.addEventListener("click", ()=>{ const open = document.documentElement.classList.contains("drawer-open"); open ? closeDrawer() : openDrawer(); }); }
   if(backdrop){ backdrop.addEventListener("click", closeDrawer); }
   document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeDrawer(); });
 
-  // cerrar drawer al clickear un item del menú
-  $$(".menu a").forEach(a=>a.addEventListener("click", closeDrawer));
-
-  applyStudentPhotoToDOM();
+  // ensureMenuAriaLabels ya existente
   ensureMenuAriaLabels();
+
   render("dashboard");
 });
+;
