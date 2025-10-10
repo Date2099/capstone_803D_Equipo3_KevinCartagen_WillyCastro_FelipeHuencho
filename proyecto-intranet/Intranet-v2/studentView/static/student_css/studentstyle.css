@@ -435,3 +435,146 @@ body{
 
 /* Entradas (foto) – solo estilo visual si se mantiene el input en el DOM */
 #input-foto{width:100%; max-width:100%; padding:.5rem; font-size:1rem}
+
+/* ================== RESPONSIVE ================== */
+
+/* Contenedor principal */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Ajustes generales */
+.card, .class-card, .table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Botones y inputs en móviles */
+input, select, button {
+  font-size: 0.95rem;
+  max-width: 100%;
+}
+
+/* Acordeones más amigables */
+.acc-head {
+  padding: 0.8rem;
+  flex-wrap: wrap;
+  text-align: left;
+}
+
+.acc-title {
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+/* Tablas responsive */
+.responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border: 0;
+}
+.responsive thead {
+  display: none;
+}
+.responsive tr {
+  display: block;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+.responsive td {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+.responsive td::before {
+  content: attr(data-label);
+  font-weight: 600;
+  margin-right: 0.6rem;
+  color: var(--muted);
+}
+
+/* Grillas adaptables */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .grid.wide-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .grid.wide-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Modal adaptable */
+#modal .modal-content {
+  width: 95%;
+  max-width: 480px;
+  margin: auto;
+}
+/* Drawer full screen en móviles */
+@media (max-width: 768px) {
+  .drawer {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+/* ================== TABLAS RESPONSIVE ================== */
+@media (max-width: 768px) {
+  .pay-table,
+  .data-table {
+    border: 0;
+  }
+
+  .pay-table thead,
+  .data-table thead {
+    display: none;
+  }
+
+  .pay-table tbody tr,
+  .data-table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    background: var(--color-card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pay-table tbody tr td,
+  .data-table tbody tr td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+    border: none;
+  }
+
+  .pay-table tbody tr td::before,
+  .data-table tbody tr td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-right: 0.6rem;
+    text-transform: capitalize;
+  }
+
+  /* Botones dentro de tarjetas */
+  .pay-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
