@@ -662,6 +662,18 @@ function initAnnouncements(){
     document.getElementById('an-body').value='';
   });
 }
+function responsiveTableEnhance(tableSelector) {
+  const table = document.querySelector(tableSelector);
+  if (!table || table.dataset.enhanced) return;
+  const heads = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach(tr => {
+    Array.from(tr.children).forEach((td, i) => td.setAttribute("data-label", heads[i] || ""));
+  });
+  table.classList.add("responsive");
+  table.dataset.enhanced = "1";
+}
+
+
 
 /*************** Navegación ***************/
 menuLinks.forEach(a=>{
