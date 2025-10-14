@@ -1,692 +1,569 @@
-/*************************
- * Sidebar responsive
- *************************/
-const toggleBtn = document.getElementById('toggle');
-const sidebar   = document.getElementById('sidebar');
-const mq        = window.matchMedia('(max-width: 768px)');
+/* =========================================================
+   scriptadmins.js — Vista Admin COMPLETO y Responsivo
+   Reemplaza el archivo entero con este contenido.
+========================================================= */
 
-// Estado inicial sidebar (pc abierto / móvil cerrado)
-function updateSidebar(){
-  if (mq.matches) sidebar.classList.add('closed');
-  else sidebar.classList.remove('closed');
+/* ---------- Selectores base ---------- */
+const sidebar   = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle');
+const mainEl    = document.getElementById('main-content');
+const topTitle  = document.getElementById('topbar-title');
+const mq        = window.matchMedia('(max-width: 768px)');
+const themeSwitch = document.getElementById('theme-switch');
+
+let currentSection = 'tablero';
+let adminChartInstance = null;
+
+/* ---------- Backdrop mobile ---------- */
+let backdrop = document.getElementById('sidebar-backdrop');
+if (!backdrop) {
+  backdrop = document.createElement('div');
+  backdrop.id = 'sidebar-backdrop';
+  backdrop.className = 'sidebar-backdrop';
+  document.body.appendChild(backdrop);
 }
+function openSidebar(){ sidebar.classList.remove('closed'); backdrop.classList.add('show'); }
+function closeSidebar(){ sidebar.classList.add('closed'); backdrop.classList.remove('show'); }
+
+/* ---------- Sidebar toggle/responsive ---------- */
+function updateSidebar() { mq.matches ? closeSidebar() : (sidebar.classList.remove('closed'), backdrop.classList.remove('show')); }
 updateSidebar();
 mq.addEventListener('change', updateSidebar);
 
-// Toggle manual
 toggleBtn.addEventListener('click', () => {
-  sidebar.classList.toggle('closed');
+  if (sidebar.classList.contains('closed')) openSidebar();
+  else closeSidebar();
 });
 
-// Click fuera del sidebar en móvil
 document.addEventListener('click', (e) => {
   if (!mq.matches) return;
-  const clickInside = sidebar.contains(e.target) || toggleBtn.contains(e.target);
-  if (!clickInside) sidebar.classList.add('closed');
+  const insideSidebar = sidebar.contains(e.target);
+  const onToggle = toggleBtn.contains(e.target);
+  const onBackdrop = e.target === backdrop;
+  if ((!insideSidebar && !onToggle) || onBackdrop) closeSidebar();
 });
 
-// Gestos táctiles básicos
-let touchStartX = 0;
-document.addEventListener('touchstart', (e) => {
-  if (!mq.matches) return;
-  touchStartX = e.touches[0].clientX;
-});
-document.addEventListener('touchend', (e) => {
-  if (!mq.matches) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  if (touchStartX < 200 && dx > 50) sidebar.classList.remove('closed'); // abrir
-  if (dx < -50) sidebar.classList.add('closed');                        // cerrar
-});
-
-/*************************
- * Tema oscuro (persistente)
- *************************/
-const themeSwitch = document.getElementById('theme-switch');
-const root = document.documentElement;
-
-(function initTheme(){
-  const saved = localStorage.getItem('theme') || 'light';
-  if (saved === 'dark'){
-    root.setAttribute('data-theme','dark');
-    themeSwitch.checked = true;
-  } else {
-    root.setAttribute('data-theme','light');
-  }
-})();
-themeSwitch.addEventListener('change', () => {
+/* ---------- Tema claro/oscuro ---------- */
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(mode){
+  if (mode === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  if (themeSwitch) themeSwitch.checked = mode === 'dark';
+}
+applyTheme(savedTheme ? savedTheme : (prefersDark.matches ? 'dark' : 'light'));
+themeSwitch?.addEventListener('change', () => {
   const mode = themeSwitch.checked ? 'dark' : 'light';
-  root.setAttribute('data-theme', mode);
   localStorage.setItem('theme', mode);
+  applyTheme(mode);
+  if (currentSection === 'tablero') renderAdminDashboardChart();
 });
 
-/*************************
- * Router / plantillas
- *************************/
-const main = document.getElementById('main-content');
-const menuLinks = document.querySelectorAll('.menu a[data-section]');
-const topbarTitle = document.getElementById('topbar-title');
+/* ---------- Modal simple ---------- */
+const modal       = document.getElementById('modal');
+const modalBody   = document.getElementById('modal-body');
+const modalHead   = document.getElementById('modal-title');
+const modalFoot   = document.getElementById('modal-foot');
+const modalClose  = document.getElementById('modal-close');
 
-let chart1 = null;
-let chart2 = null;
+function openModal({title='', body='', foot=''}) {
+  modalHead.textContent = title;
+  modalBody.innerHTML = body;
+  modalFoot.innerHTML = foot || `<button class="btn btn-secondary" id="modal-ok">Cerrar</button>`;
+  modal.classList.add('show');
+  document.getElementById('modal-ok')?.addEventListener('click', closeModal);
+}
+function closeModal(){ modal.classList.remove('show'); }
+modalClose?.addEventListener('click', closeModal);
+modal?.addEventListener('click', e => { if (e.target.classList.contains('modal-backdrop')) closeModal(); });
 
-/* Datos fake de ejemplo */
+/* ---------- Datos mock ---------- */
 const studentData = {
-  'pk-a': [{ id:'SAH-PK-001', name:'Ana Contreras', parent:'Luis Contreras', status:'Activo' }],
+  'pk-a': [{ id: 'SAH-PK-001', name: 'Ana Contreras', parent: 'Luis Contreras', status: 'Activo' }],
+  'k-a':  [{ id: 'SAH-K-005',  name: 'Benjamín Soto', parent: 'Carla Soto', status: 'Activo' }],
   '1b-a': [
-    { id:'SAH-1B-012', name:'Carlos Díaz', parent:'Mariela Soto', status:'Activo' },
-    { id:'SAH-1B-013', name:'Daniela Espinoza', parent:'Jorge Espinoza', status:'Activo' }
+    { id: 'SAH-1B-012', name: 'Carlos Díaz',     parent: 'Mariela Soto',  status: 'Activo' },
+    { id: 'SAH-1B-013', name: 'Daniela Espinoza',parent: 'Jorge Espinoza',status: 'Activo' }
   ],
+  '8b-a': [{ id: 'SAH-8B-080', name: 'Elena Martínez',  parent: 'Roberto Martínez', status: 'Activo' }],
+  '1m-a': [{ id: 'SAH-1M-095', name: 'Francisco Núñez', parent: 'Teresa Núñez',     status: 'Activo' }],
   '4m-a': [
-    { id:'SAH-4M-101', name:'Fernanda Muñoz', parent:'Ricardo Muñoz', status:'Activo' },
-    { id:'SAH-4M-102', name:'Gabriel Rojas', parent:'Verónica Rojas', status:'Inactivo' },
-    { id:'SAH-4M-103', name:'Hugo Salazar', parent:'Mónica Salazar', status:'Activo' }
+    { id: 'SAH-4M-101', name: 'Fernanda Muñoz', parent: 'Ricardo Muñoz',  status: 'Activo' },
+    { id: 'SAH-4M-102', name: 'Gabriel Rojas',  parent: 'Verónica Rojas', status: 'Inactivo' },
+    { id: 'SAH-4M-103', name: 'Hugo Salazar',   parent: 'Mónica Salazar', status: 'Activo' }
   ]
 };
 
-/* Usuarios (front-only CRUD) */
-let USERS = [
-  { id:'U-001', nombre:'Sr. Admin', email:'admin@colegio.cl', rol:'Administración', activo:true,  deleted:false },
-  { id:'U-002', nombre:'Felipe Huencho', email:'felipe@colegio.cl', rol:'Alumno',        activo:true,  deleted:false },
-  { id:'U-003', nombre:'María Ríos',    email:'maria.rios@colegio.cl', rol:'Profesor',   activo:false, deleted:false }
-];
-
-/* Contenido de secciones */
-const content = {
-  tablero: {
+/* ---------- Vistas: HTML de cada sección ---------- */
+const contentData = {
+  'tablero': {
     title: 'Panel de Control',
-    html: `
-      <!-- Meta chips + selector -->
-      <div class="page-meta">
-        <div class="chips">
-          <!-- Mantener solo Matrícula total -->
-          <span class="chip"><i class="fa-solid fa-graduation-cap"></i> Matrícula total: <b>90</b></span>
-        </div>
-        
-      </div>
+  html: `
+    <div class="kpi-grid">
+      <div class="card kpi"><div class="kpi-icon students"><i class="fa-solid fa-user-graduate"></i></div><div class="kpi-info"><div class="num">90</div><div class="label">Estudiantes</div></div></div>
+      <div class="card kpi"><div class="kpi-icon parents"><i class="fa-solid fa-user-group"></i></div><div class="kpi-info"><div class="num">152</div><div class="label">Padres</div></div></div>
+      <div class="card kpi"><div class="kpi-icon teachers"><i class="fa-solid fa-chalkboard-user"></i></div><div class="kpi-info"><div class="num">11</div><div class="label">Profesores</div></div></div>
+      <div class="card kpi"><div class="kpi-icon revenue"><i class="fa-solid fa-dollar-sign"></i></div><div class="kpi-info"><div class="num">$18.5M</div><div class="label">Ingresos del Mes</div></div></div>
+    </div>
 
-      <!-- Acciones rápidas -->
-      <div class="quick-actions">
-        <div class="quick-pill"><i class="fa-solid fa-user-plus"></i><span>Nuevo alumno</span></div>
-        <div class="quick-pill"><i class="fa-solid fa-paper-plane"></i><span>Enviar comunicado</span></div>
-        <div class="quick-pill"><i class="fa-solid fa-receipt"></i><span>Revisar pagos</span></div>
-        <div class="quick-pill"><i class="fa-solid fa-user-gear"></i><span>Administrar usuarios</span></div>
-      </div>
+    <div class="quick-actions" style="margin:1rem 0">
+      <button class="quick-pill" data-action="nuevo-alumno"><i class="fa-solid fa-user-plus"></i> Nuevo alumno</button>
+      <button class="quick-pill" data-action="comunicado"><i class="fa-solid fa-bullhorn"></i> Enviar comunicado</button>
+      <button class="quick-pill" data-action="pagos"><i class="fa-solid fa-wallet"></i> Revisar pagos</button>
+      <button class="quick-pill" data-action="usuarios"><i class="fa-solid fa-user-gear"></i> Administrar usuarios</button>
+    </div>
 
-      <!-- KPIs -->
-      <div class="kpi-row">
-        <div class="card kpi">
-          <div class="kpi-icon students"><i class="fa-solid fa-user-graduate"></i></div>
-          <div><div class="num">90</div><div class="label">Estudiantes</div></div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-icon parents"><i class="fa-solid fa-user-group"></i></div>
-          <div><div class="num">152</div><div class="label">Padres</div></div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-icon teachers"><i class="fa-solid fa-chalkboard-user"></i></div>
-          <div><div class="num">11</div><div class="label">Profesores</div></div>
-        </div>
-        <div class="card kpi">
-          <div class="kpi-icon revenue"><i class="fa-solid fa-dollar-sign"></i></div>
-          <div><div class="num">$18.5M</div><div class="label">Ingresos del Mes</div></div>
+    <div class="mini-cards">
+      <div class="card mini">
+        <i class="fa-solid fa-percent"></i>
+        <div>
+          <div style="font-weight:700">Tasa pago mes</div>
+          <div class="progress"><div class="progress-bar" style="width:93%"></div></div>
+          <small class="muted">93% · 84/90</small>
         </div>
       </div>
-
-      <!-- Mini métricas -->
-      <div class="mini-cards">
-        <div class="card mini"><i class="fa-solid fa-chart-line"></i> <span>Tasa pago mes:</span> <b>93%</b></div>
-        <div class="card mini"><i class="fa-solid fa-user-check"></i> <span>Asistencia promedio:</span> <b>92%</b></div>
-        <div class="card mini"><i class="fa-solid fa-bullhorn"></i> <span>Comunicados enviados:</span> <b>8</b></div>
-      </div>
-
-      <!-- Gráficos lado a lado -->
-      <div class="panel-grid">
-        <div class="card chart-card">
-          <h3 class="card-title">Ingresos vs. Gastos</h3>
-          <div class="chart-container"><canvas id="kpi-chart"></canvas></div>
-        </div>
-        <div class="card chart-card">
-          <h3 class="card-title">Distribución por Nivel</h3>
-          <div class="chart-container"><canvas id="dist-chart"></canvas></div>
+      <div class="card mini">
+        <i class="fa-solid fa-user-check"></i>
+        <div>
+          <div style="font-weight:700">Asistencia promedio</div>
+          <canvas id="spark-asistencia" height="36"></canvas>
+          <small class="muted">Últimos 7 días</small>
         </div>
       </div>
+      <div class="card mini">
+        <i class="fa-solid fa-paper-plane"></i>
+        <div>
+          <div style="font-weight:700">Comunicados enviados</div>
+          <div style="font-size:1.1rem;font-weight:800">8</div>
+          <small class="muted">2 pendientes</small>
+        </div>
+      </div>
+    </div>
 
-      <!-- Pagos (solo) -->
-      <div class="panel-grid panel-bottom one">
-        <div class="card">
-          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-            <span>Pagos pendientes</span>
-            <button id="btn-export-csv" class="btn btn-secondary btn-compact">
-              <i class="fa-solid fa-file-arrow-down"></i> Exportar CSV
-            </button>
+    <div class="panel-grid">
+      <div class="card chart-card">
+        <h3 class="card-title">Resumen Financiero 2025</h3>
+        <div class="chart-container"><canvas id="admin-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Cobranza del mes</h3>
+        <div class="flex-col gap-8">
+          <div style="width:100%;max-width:260px;margin:auto">
+            <canvas id="donut-cobranza" height="220"></canvas>
           </div>
-          <div class="table-wrapper">
-            <table class="data-table" id="tbl-pagos">
-              <thead>
-                <tr><th>Apoderado</th><th>RUT</th><th>Curso</th><th>Mes</th><th>Monto</th><th>Acción</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Juan Pérez</td><td>12.345.678-9</td><td>1°B</td><td>Sept</td><td>$50.000</td>
-                  <td><button class="btn btn-secondary">Recordar</button></td>
-                </tr>
-                <tr>
-                  <td>María López</td><td>11.222.333-4</td><td>3°B</td><td>Sept</td><td>$60.000</td>
-                  <td><button class="btn btn-secondary">Recordar</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <ul class="list-clean">
+            <li><span class="dot dot-paid"></span> Pagado <strong>$15.3M</strong></li>
+            <li><span class="dot dot-pending"></span> Pendiente <strong>$2.1M</strong></li>
+            <li><span class="dot dot-overdue"></span> Atrasado <strong>$1.1M</strong></li>
+          </ul>
         </div>
       </div>
-    `
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+      <h3 class="card-title">Actividad reciente</h3>
+      <ul class="timeline">
+        <li><span class="time">09:40</span> Pago de <strong>Juan Pérez</strong> — $230.000</li>
+        <li><span class="time">09:12</span> Comunicado “Reunión apoderados” a 1°B</li>
+        <li><span class="time">08:50</span> Agregado <strong>Ana Soto</strong> a 8°A</li>
+      </ul>
+    </div>
+  `
   },
-
-
-  estudiantes: {
+  'estudiantes': {
     title: 'Navegador de Cursos',
     html: `
-      <div class="period-card">
-        <div class="period-head"><i class="fa-solid fa-seedling"></i><h3 class="card-title" style="margin:0">Preescolar</h3></div>
-        <div class="period-body">
-          <div class="course-cell js-view-course" data-course-id="pk-a" data-course-name="Pre-Kínder A">
-            <div class="course-title">Pre-Kínder A</div>
-            <div class="course-meta">Prof. Jefa: Carmen Soto</div>
-            <div class="course-stats"><i class="fa-solid fa-user"></i> 1 Alumno</div>
-          </div>
-          <div class="course-cell">
-            <div class="course-title">Kínder A</div>
-            <div class="course-meta">Prof. Jefa: Mónica Bravo</div>
-            <div class="course-stats"><i class="fa-solid fa-user"></i> 0 Alumno</div>
-          </div>
-        </div>
+      <div class="page-header">
+        <h2>Navegador de Cursos</h2>
+        <button class="btn" id="add-course"><i class="fa-solid fa-plus"></i> Agregar Curso</button>
       </div>
-
-      <div class="period-card">
-        <div class="period-head"><i class="fa-solid fa-pencil"></i><h3 class="card-title" style="margin:0">Educación Básica</h3></div>
-        <div class="period-body">
-          ${[1,2,3,4,5,6,7,8].map(n => `
-            <div class="course-cell ${n===1||n===2||n===8 ? 'js-view-course':''}" 
-                 data-course-id="${n===1?'1b-a': (n===8?'8b-a':'')}" 
-                 data-course-name="${n}° Básico A">
-              <div class="course-title">${n}° Básico A</div>
-              <div class="course-meta">Prof. Jefe: ${(n%2? 'Laura Pérez':'Inés Morales')}</div>
-              <div class="course-stats"><i class="fa-solid fa-user"></i> ${n===1?2:n===8?1:0} Alumno(s)</div>
-            </div>
-          `).join('')}
+      <div class="course-grid">
+        <div class="course-card js-view-course" data-course-id="pk-a" data-course-name="Pre-Kinder A">
+          <div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div>
+          <div class="course-card-info"><h4>Pre-Kinder A</h4><p>Prof. Jefa: Carmen Soto</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div>
         </div>
-      </div>
-
-      <div class="period-card">
-        <div class="period-head"><i class="fa-solid fa-graduation-cap"></i><h3 class="card-title" style="margin:0">Educación Media</h3></div>
-        <div class="period-body">
-          ${[1,2,3,4].map(n => `
-            <div class="course-cell ${n===4?'js-view-course':''}" 
-                 data-course-id="${n===4?'4m-a':''}" data-course-name="${['I','II','III','IV'][n-1]}° Medio A">
-              <div class="course-title">${['I','II','III','IV'][n-1]}° Medio A</div>
-              <div class="course-meta">Prof. Jefe: ${['Arturo Vidal','Carolina Neira','Marcelo Salas','Mario Vargas'][n-1]}</div>
-              <div class="course-stats"><i class="fa-solid fa-user"></i> ${n===4?3:0} Alumno(s)</div>
-            </div>
-          `).join('')}
+        <div class="course-card js-view-course" data-course-id="k-a" data-course-name="Kinder A">
+          <div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div>
+          <div class="course-card-info"><h4>Kinder A</h4><p>Prof. Jefa: Mónica Bravo</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div>
         </div>
-      </div>
-    `
+        <div class="course-card js-view-course" data-course-id="1b-a" data-course-name="1° Básico A">
+          <div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div>
+          <div class="course-card-info"><h4>1° Básico A</h4><p>Prof. Jefa: Laura Pérez</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 2 Alumnos</span></div>
+        </div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>2° Básico A</h4><p>Prof. Jefe: Juan Torres</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>3° Básico A</h4><p>Prof. Jefa: Inés Morales</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>4° Básico A</h4><p>Prof. Jefe: Carlos Rojas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>5° Básico A</h4><p>Prof. Jefe: Esteban Paredes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>6° Básico A</h4><p>Prof. Jefa: Sandra Fuentes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>7° Básico A</h4><p>Prof. Jefe: Miguel Ángel</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card js-view-course" data-course-id="8b-a" data-course-name="8° Básico A">
+          <div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div>
+          <div class="course-card-info"><h4>8° Básico A</h4><p>Prof. Jefa: Rosa Espinoza</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1</span></div>
+        </div>
+        <div class="course-card js-view-course" data-course-id="1m-a" data-course-name="I° Medio A">
+          <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div class="course-card-info"><h4>I° Medio A</h4><p>Prof. Jefe: Arturo Vidal</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1</span></div>
+        </div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>II° Medio A</h4><p>Prof. Jefa: Carolina Neira</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>III° Medio A</h4><p>Prof. Jefe: Marcelo Salas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
+        <div class="course-card js-view-course" data-course-id="4m-a" data-course-name="IV° Medio A">
+          <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div class="course-card-info"><h4>IV° Medio A</h4><p>Prof. Jefe: Mario Vargas</p></div>
+          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 3</span></div>
+        </div>
+      </div>`
   },
-
-  'agregar-alumno':{
-    title:'Alumnos Registrados',
-    html:`
+  'agregar-alumno': {
+    title: 'Agregar Alumno',
+    html: `
       <div class="card">
-        <h3 class="card-title">Alumnos Registrados</h3>
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr><th>RUT</th><th>Nombre</th><th>Apellido</th><th>Apoderado</th><th>RUT Apoderado</th><th>Email</th><th>Teléfono</th><th>Comuna</th><th>Curso</th><th>Fecha Ingreso</th><th>Estado</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>11.222.333-4</td><td>Juanito</td><td>Pérez</td><td>Luis Pérez</td><td>11.111.111-1</td><td>luis.perez@mail.com</td><td>912345678</td><td>Santiago</td><td>1° Básico A</td><td>01/03/2023</td><td>Activo</td></tr>
-              <tr><td>22.333.444-5</td><td>María</td><td>González</td><td>Carmen González</td><td>22.222.222-2</td><td>carmen.g@mail.com</td><td>987654321</td><td>Providencia</td><td>2° Básico B</td><td>01/03/2023</td><td>Activo</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `
+        <h3 class="card-title">Agregar Alumno</h3>
+        <form id="form-add-student" class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem">
+          <div class="field"><label class="label">Nombre</label><input class="input" name="nombre" required></div>
+          <div class="field"><label class="label">RUT</label><input class="input" name="rut" required></div>
+          <div class="field"><label class="label">Apoderado</label><input class="input" name="apoderado"></div>
+          <div class="field"><label class="label">Curso</label>
+            <select class="select" name="curso" required>
+              <option value="1b-a">1° Básico A</option>
+              <option value="8b-a">8° Básico A</option>
+              <option value="1m-a">I° Medio A</option>
+              <option value="4m-a">IV° Medio A</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <button class="btn" type="submit"><i class="fa-solid fa-save"></i> Guardar</button>
+          </div>
+        </form>
+      </div>`
   },
-
-  profesores:{
-    title:'Profesores',
-    html:`
+  'profesores': {
+    title: 'Profesores',
+    html: `
       <div class="card">
         <h3 class="card-title">Listado de Profesores</h3>
         <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>RUT</th><th>Nombre</th><th>Curso</th><th>Asignatura</th><th>Email</th><th>Teléfono</th></tr></thead>
+          <table class="data-table" id="table-prof">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Asignatura</th><th>Email</th><th>Acciones</th></tr></thead>
             <tbody>
-              <tr><td>12.345.678-9</td><td>María González</td><td>1° Básico</td><td>Matemáticas</td><td>maria.g@colegio.cl</td><td>+56 9 1234 5678</td></tr>
-              <tr><td>23.456.789-0</td><td>Carlos Vega</td><td>2° Básico</td><td>Historia</td><td>carlos.v@colegio.cl</td><td>+56 9 8765 4321</td></tr>
+              <tr><td>PF-001</td><td>María González</td><td>Matemáticas</td><td>maria.g@colegio.cl</td>
+                  <td><button class="btn btn-compact js-mail" data-mail="maria.g@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
+              <tr><td>PF-002</td><td>Carlos Vega</td><td>Historia</td><td>carlos.v@colegio.cl</td>
+                  <td><button class="btn btn-compact js-mail" data-mail="carlos.v@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
+              <tr><td>PF-003</td><td>Isabel Ríos</td><td>Lenguaje</td><td>isabel.r@colegio.cl</td>
+                  <td><button class="btn btn-compact js-mail" data-mail="isabel.r@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `
+      </div>`
   },
-
-  asignaturas:{
-    title:'Listado de Asignaturas',
-    html:`
+  'asignaturas': {
+    title: 'Asignaturas',
+    html: `
       <div class="card">
-        <h3 class="card-title">Listado de Asignaturas</h3>
+        <h3 class="card-title">Asignaturas</h3>
+        <ul>
+          <li>Matemáticas</li><li>Lenguaje</li><li>Historia</li><li>Ciencias</li>
+        </ul>
+      </div>`
+  },
+  'revision-pagos': {
+    title: 'Revisión de Pagos',
+    html: `
+      <div class="card">
+        <h3 class="card-title">Revisión de Pagos</h3>
         <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>Curso</th><th>Profesor Jefe</th><th>Asignaturas</th><th>Alumnos</th></tr></thead>
+          <table class="data-table" id="table-pagos">
+            <thead><tr><th>Alumno</th><th>Mes</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
-              <tr><td>Kínder</td><td>Ana Morales</td><td>Lenguaje, Matemáticas, Arte</td><td>15</td></tr>
-              <tr><td>1° Básico</td><td>Raúl Pérez</td><td>Matemáticas, Historia, Ciencias</td><td>20</td></tr>
+              <tr><td>Ana Contreras</td><td>Septiembre</td><td>$230.000</td>
+                <td><span class="status status-review">En revisión</span></td>
+                <td><button class="btn btn-compact js-approve" data-id="1"><i class="fa-solid fa-check"></i></button></td></tr>
+              <tr><td>Benjamín Soto</td><td>Septiembre</td><td>$230.000</td>
+                <td><span class="status status-paid">Pagado</span></td>
+                <td><button class="btn btn-compact js-refund" data-id="2"><i class="fa-solid fa-rotate-left"></i></button></td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `
+      </div>`
   },
-
-  asistencias:{
-    title:'Asistencias de Alumnos',
-    html:`
+  'comunicados': {
+    title: 'Comunicados',
+    html: `
       <div class="card">
-        <h3 class="card-title">Asistencias</h3>
-        <details class="attendance-category" open>
-          <summary style="cursor:pointer;padding:.6rem;border-radius:8px;background:var(--color-primary);color:#fff">Prekínder</summary>
-          <div class="table-wrapper" style="margin-top:.6rem">
-            <table class="data-table">
-              <thead><tr><th>Alumno</th><th>RUT</th><th>Promedio</th><th>Asistencia</th><th>Acciones</th></tr></thead>
-              <tbody><tr><td>Ana Pérez</td><td>12.345.678-9</td><td>6.5</td><td>95%</td><td><button class="btn btn-secondary">Mensaje</button></td></tr></tbody>
-            </table>
-          </div>
-        </details>
-      </div>
-    `
+        <h3 class="card-title">Comunicados</h3>
+        <div class="field"><button class="btn" id="new-comm"><i class="fa-solid fa-plus"></i> Nuevo Comunicado</button></div>
+        <ul id="comm-list">
+          <li><strong>15/09/2025:</strong> Examen Final de Matemáticas.</li>
+          <li><strong>18/09/2025:</strong> Feriado - No hay clases.</li>
+        </ul>
+      </div>`
   },
-
-  'revision-pagos':{
-    title:'Revisión de Pagos',
-    html:`
+  'usuarios': {
+    title: 'Usuarios',
+    html: `
       <div class="card">
-        <h3 class="card-title">Pagos</h3>
+        <h3 class="card-title">Usuarios del Sistema</h3>
         <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>RUT Apoderado</th><th>Apoderado</th><th>Fecha</th><th>Monto</th></tr></thead>
+          <table class="data-table" id="table-users">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr></thead>
             <tbody>
-              <tr><td>12.345.678-9</td><td>Juan Pérez</td><td>12/09/2025</td><td>$50.000</td></tr>
-              <tr><td>11.222.333-4</td><td>María López</td><td>15/09/2025</td><td>$60.000</td></tr>
+              <tr><td>U-001</td><td>Sr. Admin</td><td>Administración</td>
+                <td><button class="btn btn-compact js-reset" data-user="U-001"><i class="fa-solid fa-key"></i></button></td></tr>
+              <tr><td>U-002</td><td>Felipe Huencho</td><td>Alumno</td>
+                <td><button class="btn btn-compact js-reset" data-user="U-002"><i class="fa-solid fa-key"></i></button></td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `
-  },
-
-  comunicados:{
-    title:'Comunicados',
-    html:`
-      <div class="card">
-        <h3 class="card-title">Publicar Comunicado</h3>
-        <div class="field">
-          <label class="label">Título</label>
-          <input class="input" id="an-title" placeholder="Título">
-        </div>
-        <div class="field">
-          <label class="label">Contenido</label>
-          <textarea class="" id="an-body" rows="4" placeholder="Contenido..."></textarea>
-        </div>
-        <div class="field" style="text-align:right">
-          <button class="btn" id="an-publish">Publicar</button>
-        </div>
-
-        <div class="card" style="margin-top:1rem">
-          <h3 class="card-title">Anuncios</h3>
-          <div id="an-list"><p class="course-meta">No hay anuncios publicados.</p></div>
-        </div>
-      </div>
-    `
-  },
-
-  usuarios:{
-    title:'Usuarios',
-    html:`
-      <div class="card">
-        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap">
-          <h3 class="card-title" style="margin:0">Usuarios del Sistema</h3>
-          <div style="display:flex;gap:.5rem">
-            <button class="btn btn-secondary" id="btn-toggle-deleted">Ver eliminados: NO</button>
-            <button class="btn" id="btn-new-user"><i class="fa-solid fa-user-plus"></i> Nuevo usuario</button>
-          </div>
-        </div>
-        <div class="table-wrapper">
-          <table class="data-table" id="tbl-users">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    `
-  },
-
-  pagos:{ title:'Pagos', html:`<div class="card"><p>Resumen de pagos...</p></div>` }
+      </div>`
+  }
 };
+function renderDonutCobranza() {
+  const el = document.getElementById('donut-cobranza');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  const paid=15300000, pending=2100000, overdue=1100000;
 
-/*********************** helpers ***********************/
-function mount(section){
-  const view = content[section];
-  if (!view){
-    main.innerHTML = `<div class="card"><p>Sección no encontrada: ${section}</p></div>`;
-    topbarTitle.textContent = 'Sección';
+  new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels:['Pagado','Pendiente','Atrasado'],
+      datasets:[{ data:[paid,pending,overdue], backgroundColor:['#16a34a','#f59e0b','#ef4444'], borderWidth:0 }]
+    },
+    options:{ responsive:true, cutout:'65%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>`${c.label}: $${Number(c.raw).toLocaleString('es-CL')}` } } } }
+  });
+}
+
+function renderSparkAsistencia() {
+  const el = document.getElementById('spark-asistencia');
+  if (!el) return;
+
+  // Alto fijo y contenedor controlado
+  el.style.height = '36px';
+  const wrap = el.parentElement;
+  if (wrap) { wrap.style.minWidth = '220px'; wrap.style.width = '100%'; }
+
+  // limpiar instancia previa si la hubiera guardada
+  if (el._chart) { el._chart.destroy(); }
+
+  const data = [88, 91, 92, 90, 93, 94, 92];
+  const ctx = el.getContext('2d');
+
+  el._chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map((_, i) => i + 1),
+      datasets: [{
+        data,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false, suggestedMin: 80, suggestedMax: 100 } },
+      elements: { line: { capBezierPoints: true } }
+    }
+  });
+}
+
+
+
+/* ---------- Render: Tablero (Chart.js) ---------- */
+function renderAdminDashboardChart() {
+  const canvas = document.getElementById('admin-chart');
+  if (!canvas) return;
+  if (adminChartInstance) adminChartInstance.destroy();
+
+  const container = canvas.closest('.chart-container');
+  if (container) {
+    const h = Math.max(240, Math.min(420, Math.round(window.innerHeight * 0.38)));
+    container.style.height = h + 'px';
+  }
+
+  const ctx = canvas.getContext('2d');
+  const height = canvas.clientHeight || 320;
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  const dark = document.documentElement.hasAttribute('data-theme');
+  grad.addColorStop(0, dark ? 'rgba(201,156,46,0.95)' : 'rgba(16,43,78,0.95)');
+  grad.addColorStop(1, dark ? 'rgba(201,156,46,0.65)' : 'rgba(16,43,78,0.65)');
+
+  const labels = ['Abr','May','Jun','Jul','Ago','Sep'];
+  const dataValues = [12000,15000,14000,18000,17000,18500];
+
+  adminChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Ingresos', data: dataValues, backgroundColor: grad, borderRadius: 10, borderSkipped: false, barThickness: 'flex', maxBarThickness: 64 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (ctx) => 'Ingresos: $' + Number(ctx.parsed?.y ?? ctx.raw).toLocaleString('es-CL') }
+        }
+      },
+      scales: {
+        x: { grid: { display:false }, ticks: { font: { weight: 700 } } },
+        y: {
+          beginAtZero: true,
+          suggestedMax: Math.max(...dataValues) * 1.12,
+          grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid') || 'rgba(15,23,42,.06)', borderDash: [4,4] },
+          ticks: { callback: v => '$' + Number(v).toLocaleString('es-CL'), stepSize: 2000 }
+        }
+      },
+      interaction: { mode: 'index', intersect: false }
+    }
+  });
+}
+let resizeRAF;
+window.addEventListener('resize', () => {
+  if (currentSection !== 'tablero') return;
+  cancelAnimationFrame(resizeRAF);
+  resizeRAF = requestAnimationFrame(renderAdminDashboardChart);
+});
+
+/* ---------- Render: tabla alumnos ---------- */
+function renderStudentTable(courseId, courseName) {
+  const students = studentData[courseId] || [];
+  const rows = students.map(s => `
+    <tr>
+      <td>${s.id}</td>
+      <td class="user-cell">
+        <div class="avatar" style="width:36px;height:36px;font-size:.85rem">${s.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div><div style="font-weight:600">${s.name}</div><div style="font-size:.85rem;color:#6b7280">${s.parent}</div></div>
+      </td>
+      <td>${s.status}</td>
+      <td class="action-buttons">
+        <button class="action-btn view btn btn-compact" data-student-id="${s.id}" title="Ver"><i class="fa-solid fa-eye"></i></button>
+        <button class="action-btn delete btn btn-compact btn-danger" data-student-id="${s.id}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="4">No hay alumnos en este curso.</td></tr>`;
+
+  mainEl.innerHTML = `
+    <div class="page-header">
+      <h2>Alumnos — ${courseName}</h2>
+      <button class="btn js-back-to-courses"><i class="fa-solid fa-arrow-left"></i> Volver a Cursos</button>
+    </div>
+    <div class="card">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Alumno</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  topTitle.textContent = `Alumnos — ${courseName}`;
+}
+
+/* ---------- Render genérico + wiring por sección ---------- */
+function renderContent(section) {
+  currentSection = section;
+  const entry = contentData[section];
+  if (!entry) {
+    mainEl.innerHTML = `<div class="card"><p>Sección no encontrada: ${section}</p></div>`;
+    topTitle.textContent = 'Sección';
     return;
   }
-  topbarTitle.textContent = view.title;
-  main.innerHTML = view.html;
+  topTitle.textContent = entry.title;
+  mainEl.innerHTML = entry.html;
 
-  if (section === 'tablero'){ renderCharts(); hookExportCSV(); }
-  if (section === 'estudiantes') hookCourseCards();
-  if (section === 'usuarios') initUsersUI();
-  if (section === 'comunicados') initAnnouncements();
+  if (section === 'tablero') {
+  renderAdminDashboardChart();
+  renderDonutCobranza();
+  renderSparkAsistencia();
 }
+;
 
-function renderCharts(){
-  const c1 = document.getElementById('kpi-chart');
-  const c2 = document.getElementById('dist-chart');
-
-  if (chart1) chart1.destroy();
-  if (chart2) chart2.destroy();
-
-  if (c1){
-    const ctx = c1.getContext('2d');
-    const gradIn = ctx.createLinearGradient(0,0,0,320);
-    gradIn.addColorStop(0,'rgba(106,58,143,0.95)');
-    gradIn.addColorStop(1,'rgba(142,102,170,0.85)');
-    const gradOut = ctx.createLinearGradient(0,0,0,320);
-    gradOut.addColorStop(0,'rgba(16,43,78,0.9)');
-    gradOut.addColorStop(1,'rgba(16,43,78,0.6)');
-
-    const labels = ['Abr','May','Jun','Jul','Ago','Sep'];
-    const ingresos = [12000,15000,14000,18000,17000,18500];
-    const gastos   = [ 8000, 9000,10000,11000,10500,12000];
-
-    chart1 = new Chart(ctx,{
-      type:'bar',
-      data:{
-        labels,
-        datasets:[
-          { label:'Ingresos', data:ingresos, backgroundColor:gradIn, borderRadius:10, borderSkipped:false, maxBarThickness:64 },
-          { label:'Gastos',   data:gastos,   backgroundColor:gradOut, borderRadius:10, borderSkipped:false, maxBarThickness:64 }
-        ]
-      },
-      options:{
-        responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ position:'bottom' } },
-        scales:{
-          x:{ grid:{ display:false } },
-          y:{ beginAtZero:true, grid:{ color:getComputedStyle(document.documentElement).getPropertyValue('--chart-grid') } }
-        }
-      }
+  if (section === 'estudiantes') {
+    mainEl.querySelectorAll('.js-view-course').forEach(card => {
+      card.addEventListener('click', () => renderStudentTable(card.dataset.courseId, card.dataset.courseName));
+    });
+    document.getElementById('add-course')?.addEventListener('click', () => {
+      openModal({
+        title: 'Agregar Curso',
+        body: `<div class="field"><label class="label">Nombre</label><input class="input"></div>
+               <div class="field"><label class="label">Profesor Jefe</label><input class="input"></div>`,
+      });
     });
   }
 
-  if (c2){
-    const ctx2 = c2.getContext('2d');
-    chart2 = new Chart(ctx2,{
-      type:'doughnut',
-      data:{ labels:['Preescolar','Básica','Media'], datasets:[{ data:[12,64,14], backgroundColor:['#4c65a7','#8561c2','#c99c2e'] }] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+  if (section === 'agregar-alumno') {
+    document.getElementById('form-add-student')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      openModal({
+        title: 'Alumno guardado',
+        body: `<p><strong>${fd.get('nombre')}</strong> asignado a <strong>${fd.get('curso')}</strong>.</p>`,
+      });
+      e.currentTarget.reset();
     });
   }
-}
-function hookExportCSV(){
-  const btn = document.getElementById('btn-export-csv');
-  if (!btn) return;
-  btn.addEventListener('click', ()=>{
-    const header = ['Apoderado','RUT','Curso','Mes','Monto'];
-    const rows = [...document.querySelectorAll('#tbl-pagos tbody tr')].map(tr =>
-      [...tr.children].slice(0,5).map(td => td.textContent.trim())
+
+  if (section === 'profesores') {
+    mainEl.querySelectorAll('.js-mail').forEach(b =>
+      b.addEventListener('click', () => openModal({ title:'Enviar correo', body:`<p>Redactar a <strong>${b.dataset.mail}</strong> (simulado)</p>` }))
     );
-    const csv = [header, ...rows].map(r => r.map(v => `"${v.replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'pagos_pendientes.csv';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-}
-
-
-function hookCourseCards(){
-  main.querySelectorAll('.js-view-course').forEach(card=>{
-    card.addEventListener('click',()=>{
-      const id = card.dataset.courseId;
-      const name = card.dataset.courseName || 'Curso';
-      const rows = (studentData[id]||[]).map(s=>`
-        <tr>
-          <td>${s.id}</td>
-          <td><span class="user-badge"><b>${s.name}</b></span><br><small>${s.parent}</small></td>
-          <td>${s.status}</td>
-          <td>
-            <button class="btn btn-secondary">Ver</button>
-            <button class="btn btn-danger js-del-stu" data-id="${s.id}">Eliminar</button>
-          </td>
-        </tr>
-      `).join('') || `<tr><td colspan="4">Sin alumnos.</td></tr>`;
-
-      main.innerHTML = `
-        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem">
-          <h2 style="margin:0">Alumnos — ${name}</h2>
-          <button class="btn js-back"><i class="fa-solid fa-arrow-left"></i> Volver a Cursos</button>
-        </div>
-        <div class="card"><div class="table-wrapper">
-          <table class="data-table"><thead><tr><th>ID</th><th>Alumno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${rows}</tbody></table>
-        </div></div>
-      `;
-      document.querySelector('.js-back').addEventListener('click',()=>mount('estudiantes'));
-    });
-  });
-}
-
-/*************** Modal util ***************/
-const modal      = document.getElementById('modal');
-const modalBody  = document.getElementById('modal-body');
-const modalFoot  = document.getElementById('modal-foot');
-const modalTitle = document.getElementById('modal-title');
-document.getElementById('modal-close').addEventListener('click', hideModal);
-modal.querySelector('.modal-backdrop').addEventListener('click', hideModal);
-
-function showModal(title, bodyHTML, footHTML){
-  modalTitle.textContent = title || '';
-  modalBody.innerHTML = bodyHTML || '';
-  modalFoot.innerHTML = footHTML || '';
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
-}
-function hideModal(){
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
-}
-
-/*************** Usuarios (CRUD front) ***************/
-function initUsersUI(){
-  const tbody = document.querySelector('#tbl-users tbody');
-  const btnNew = document.getElementById('btn-new-user');
-  const btnToggleDeleted = document.getElementById('btn-toggle-deleted');
-  let showDeleted = false;
-
-  function paint(){
-    const rows = USERS
-      .filter(u => showDeleted ? u.deleted : !u.deleted)
-      .map(u => `
-        <tr>
-          <td>${u.id}</td>
-          <td>${u.nombre}</td>
-          <td>${u.email}</td>
-          <td>${u.rol}</td>
-          <td>
-            ${u.deleted ? `<span class="user-badge badge-deleted">Eliminado</span>` :
-              u.activo ? `<span class="user-badge badge-active">Activo</span>` :
-                        `<span class="user-badge">Inactivo</span>`}
-          </td>
-          <td>
-            ${u.deleted
-              ? `<button class="btn btn-secondary js-restore" data-id="${u.id}"><i class="fa-solid fa-rotate-left"></i> Recuperar</button>`
-              : `
-                <button class="btn btn-secondary js-edit" data-id="${u.id}"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-danger js-del" data-id="${u.id}"><i class="fa-solid fa-trash"></i></button>
-              `}
-          </td>
-        </tr>
-      `).join('') || `<tr><td colspan="6">Sin usuarios.</td></tr>`;
-    tbody.innerHTML = rows;
   }
-  paint();
 
-  btnToggleDeleted.addEventListener('click', ()=>{
-    showDeleted = !showDeleted;
-    btnToggleDeleted.textContent = `Ver eliminados: ${showDeleted ? 'SÍ' : 'NO'}`;
-    paint();
-  });
+  if (section === 'revision-pagos') {
+    mainEl.querySelectorAll('.js-approve').forEach(b =>
+      b.addEventListener('click', () => openModal({ title:'Aprobar pago', body:'Pago marcado como aprobado (simulado).' }))
+    );
+    mainEl.querySelectorAll('.js-refund').forEach(b =>
+      b.addEventListener('click', () => openModal({ title:'Reversar pago', body:'Pago marcado para reversa (simulado).' }))
+    );
+  }
 
-  btnNew.addEventListener('click', ()=> editUserModal());
-
-  tbody.addEventListener('click', (e)=>{
-    const editBtn = e.target.closest('.js-edit');
-    const delBtn  = e.target.closest('.js-del');
-    const resBtn  = e.target.closest('.js-restore');
-
-    if (editBtn){
-      const id = editBtn.dataset.id;
-      const user = USERS.find(u=>u.id===id);
-      editUserModal(user);
-    }
-    if (delBtn){
-      const id = delBtn.dataset.id;
-      const user = USERS.find(u=>u.id===id);
-      if (user && confirm(`Eliminar usuario ${user.nombre}?`)){
-        user.deleted = true;
-        paint();
-      }
-    }
-    if (resBtn){
-      const id = resBtn.dataset.id;
-      const user = USERS.find(u=>u.id===id);
-      if (user){
-        user.deleted = false;
-        paint();
-      }
-    }
-  });
-
-  function editUserModal(user){
-    const isEdit = !!user;
-    const data = user ? {...user} : { id:`U-${String(USERS.length+1).padStart(3,'0')}`, nombre:'', email:'', rol:'Alumno', activo:true, deleted:false };
-
-    const body = `
-      <div class="field">
-        <label class="label">ID</label>
-        <input class="input" id="f-id" value="${data.id}" ${isEdit ? 'readonly' : ''}>
-      </div>
-      <div class="field">
-        <label class="label">Nombre</label>
-        <input class="input" id="f-nombre" value="${data.nombre}">
-      </div>
-      <div class="field">
-        <label class="label">Email</label>
-        <input class="input" id="f-email" type="email" value="${data.email}">
-      </div>
-      <div class="field">
-        <label class="label">Rol</label>
-        <select class="select" id="f-rol">
-          ${['Administración','Profesor','Alumno'].map(r=>`<option ${r===data.rol?'selected':''}>${r}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label class="label">Activo</label>
-        <select class="select" id="f-activo">
-          <option value="true" ${data.activo?'selected':''}>Sí</option>
-          <option value="false" ${!data.activo?'selected':''}>No</option>
-        </select>
-      </div>
-    `;
-
-    const foot = `
-      <button class="btn btn-secondary" id="m-cancel">Cancelar</button>
-      <button class="btn" id="m-save">${isEdit ? 'Guardar' : 'Crear'}</button>
-    `;
-
-    showModal(isEdit ? 'Editar usuario' : 'Nuevo usuario', body, foot);
-
-    document.getElementById('m-cancel').addEventListener('click', hideModal);
-    document.getElementById('m-save').addEventListener('click', ()=>{
-      const payload = {
-        id: document.getElementById('f-id').value.trim(),
-        nombre: document.getElementById('f-nombre').value.trim(),
-        email: document.getElementById('f-email').value.trim(),
-        rol: document.getElementById('f-rol').value,
-        activo: document.getElementById('f-activo').value === 'true',
-        deleted: false
-      };
-      if (!payload.nombre || !payload.email){
-        alert('Nombre y Email son obligatorios.');
-        return;
-      }
-      if (isEdit){
-        const ix = USERS.findIndex(u=>u.id===payload.id);
-        if (ix>-1) USERS[ix] = {...USERS[ix], ...payload};
-      } else {
-        USERS.push(payload);
-      }
-      hideModal();
-      paint();
+  if (section === 'comunicados') {
+    document.getElementById('new-comm')?.addEventListener('click', () => {
+      openModal({
+        title:'Nuevo Comunicado',
+        body:`<div class="field"><label class="label">Título</label><input class="input" id="c-title"></div>
+              <div class="field"><label class="label">Contenido</label><textarea class="input" id="c-body"></textarea></div>`,
+        foot:`<button class="btn" id="save-comm"><i class="fa-solid fa-save"></i> Publicar</button>
+              <button class="btn btn-secondary" id="modal-ok">Cancelar</button>`
+      });
+      document.getElementById('save-comm')?.addEventListener('click', () => {
+        const t = document.getElementById('c-title').value || '(sin título)';
+        const list = document.getElementById('comm-list');
+        const today = new Date().toLocaleDateString('es-CL');
+        list.insertAdjacentHTML('beforeend', `<li><strong>${today}:</strong> ${t}</li>`);
+        closeModal();
+      });
     });
+  }
+
+  if (section === 'usuarios') {
+    mainEl.querySelectorAll('.js-reset').forEach(b =>
+      b.addEventListener('click', () => openModal({ title:'Reset de contraseña', body:`Se reseteó la contraseña de <strong>${b.dataset.user}</strong> (simulado).` }))
+    );
   }
 }
 
-/*************** Anuncios (demo) *****************/
-function initAnnouncements(){
-  const btn = document.getElementById('an-publish');
-  const list = document.getElementById('an-list');
-  btn.addEventListener('click', ()=>{
-    const t = document.getElementById('an-title').value.trim();
-    const b = document.getElementById('an-body').value.trim();
-    if (!t || !b){ alert('Completa título y contenido.'); return; }
-    const item = document.createElement('div');
-    item.className = 'card';
-    item.innerHTML = `<h4 style="margin:0 0 .3rem">${t}</h4><p class="course-meta" style="margin:0">${b}</p>`;
-    list.prepend(item);
-    document.getElementById('an-title').value='';
-    document.getElementById('an-body').value='';
-  });
-}
-function responsiveTableEnhance(tableSelector) {
-  const table = document.querySelector(tableSelector);
-  if (!table || table.dataset.enhanced) return;
-  const heads = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
-  table.querySelectorAll("tbody tr").forEach(tr => {
-    Array.from(tr.children).forEach((td, i) => td.setAttribute("data-label", heads[i] || ""));
-  });
-  table.classList.add("responsive");
-  table.dataset.enhanced = "1";
-}
-
-
-
-/*************** Navegación ***************/
-menuLinks.forEach(a=>{
-  a.addEventListener('click', (e)=>{
+/* ---------- Menú lateral: navegación ---------- */
+document.querySelectorAll('.menu a[data-section]').forEach(link => {
+  link.addEventListener('click', (e) => {
     e.preventDefault();
-    menuLinks.forEach(x=>x.classList.remove('active'));
-    a.classList.add('active');
-    const parent = a.closest('details.menu-group');
-    if (parent) parent.open = true;
-    mount(a.dataset.section);
-    if (mq.matches) sidebar.classList.add('closed');
+    const sec = link.dataset.section;
+    if (!sec) return;
+    document.querySelectorAll('.menu a').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    link.closest('details.menu-group') && (link.closest('details.menu-group').open = true);
+    renderContent(sec);
+    if (mq.matches) closeSidebar();
   });
 });
 
-// Arranque
-document.addEventListener('DOMContentLoaded', () => mount('tablero'));
+/* ---------- Carga inicial ---------- */
+renderContent('tablero');

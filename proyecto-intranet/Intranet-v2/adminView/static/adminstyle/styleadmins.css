@@ -272,3 +272,74 @@ html[data-theme="dark"] .theme-switch .thumb{left:25px}
   .btn{display:block;width:100%}
   .card{padding:.85rem}
 }
+/* ===== KPI GRID ===== */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:1rem;
+}
+.kpi{
+  display:flex;align-items:center;gap:1rem;
+  padding:.9rem;border-radius:12px;
+  background:linear-gradient(180deg,#fff,#fbfbfd);
+  border:1px solid var(--color-border);
+  box-shadow:var(--shadow-md);
+}
+.kpi .kpi-icon{
+  width:56px;height:56px;border-radius:999px;
+  display:grid;place-items:center;color:#fff;font-size:1.25rem;
+  box-shadow:0 8px 22px rgba(16,43,78,.18)
+}
+.kpi .students{background:#FB923C}
+.kpi .parents{background:#14B8A6}
+.kpi .teachers{background:#F43F5E}
+.kpi .revenue{background:var(--color-accent)}
+.kpi .num{font-size:1.6rem;font-weight:800}
+
+/* ===== Chart container responsivo ===== */
+.chart-card{padding:.85rem 1rem}
+.chart-container{position:relative;width:100%;min-height:240px;height:320px;border-radius:10px}
+.chart-container canvas{display:block;width:100%!important;height:100%!important}
+
+/* ===== Breakpoints ===== */
+@media (max-width:1200px){
+  .kpi-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
+}
+@media (max-width:768px){
+  .content{padding:1rem}
+  .kpi-grid{grid-template-columns:1fr}
+  .chart-container{min-height:260px;height:280px}
+}
+@media (max-width:480px){
+  .card{padding:.85rem}
+  .btn{display:block;width:100%}
+}
+.flex-col{display:flex;flex-direction:column}
+.gap-8{gap:.8rem}
+.muted{color:var(--color-muted)}
+
+.progress{height:8px;background:var(--color-border);border-radius:999px;margin:.25rem 0 .1rem}
+.progress-bar{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:999px}
+
+.list-clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.list-clean li{display:flex;align-items:center;justify-content:space-between;font-weight:600}
+.dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:.5rem}
+.dot-paid{background:#16a34a}.dot-pending{background:#f59e0b}.dot-overdue{background:#ef4444}
+
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.6rem}
+.timeline li{position:relative;padding-left:2.2rem}
+.timeline li::before{content:"";position:absolute;left:.6rem;top:.3rem;width:10px;height:10px;border-radius:50%;background:var(--color-primary)}
+.timeline .time{font-weight:700;color:var(--color-muted);margin-right:.4rem}
+
+@media (max-width:992px){ .panel-grid{grid-template-columns:1fr} }
+@media (max-width:768px){ .quick-actions{grid-template-columns:1fr 1fr} .mini-cards{grid-template-columns:1fr} }
+@media (max-width:480px){ .quick-actions{grid-template-columns:1fr} }
+
+/* Sparkline y tarjetas mini más estables */
+.card.mini canvas{width:100% !important; height:36px !important}
+.mini-cards{grid-template-columns:repeat(3, minmax(220px,1fr)); gap:.75rem}
+@media (max-width:768px){ .mini-cards{grid-template-columns:1fr} }
+
+.quick-actions{display:grid;grid-template-columns:repeat(4, minmax(220px,1fr)); gap:1rem}
+@media (max-width:992px){ .quick-actions{grid-template-columns:repeat(2, minmax(220px,1fr))} }
+@media (max-width:480px){ .quick-actions{grid-template-columns:1fr} }
