@@ -1,0 +1,127 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finanzas · Pagos</title>
+  <link rel="stylesheet" href="{% static 'finance/finanzas.css' %}">
+</head>
+<body class="finanzas">
+  <section class="page">
+    <header class="page-header">
+      <div class="title">
+        <h2>Finanzas · Pagos</h2>
+        <small class="subtitle">Colegio San Agustín de Hipona · Panel de gestión</small>
+      </div>
+      <div class="toolbar">
+        <select id="f-month" aria-label="Mes">
+          <option value="">Todos los meses</option>
+        </select>
+        <select id="f-status" aria-label="Estado">
+          <option value="">Todos</option>
+          <option value="PENDING">Pendientes</option>
+          <option value="APPROVED">Aprobados</option>
+          <option value="REJECTED">Rechazados</option>
+        </select>
+        <select id="f-method" aria-label="Método">
+          <option value="">Todos los métodos</option>
+          <option>Transferencia</option>
+          <option>Webpay</option>
+          <option>Efectivo</option>
+        </select>
+        <input id="f-q" type="search" placeholder="Buscar alumno, curso o RUT">
+        <button id="btn-export" class="btn ghost"><i class="i i-download"></i>Exportar</button>
+      </div>
+    </header>
+
+    <!-- KPIs -->
+    <section class="kpis">
+      <article class="kpi">
+        <div class="kpi-head"><i class="i i-cash"></i>Ingresos del mes</div>
+        <div class="kpi-val" id="kpi-ingresos">$0</div>
+        <div class="kpi-foot" id="kpi-ingresos-nota">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><i class="i i-clock"></i>Pendientes</div>
+        <div class="kpi-val" id="kpi-pend">0</div>
+        <div class="kpi-foot">Por aprobar</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><i class="i i-check"></i>Aprobados</div>
+        <div class="kpi-val" id="kpi-apr">0</div>
+        <div class="kpi-foot">Pagos validados</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><i class="i i-x"></i>Rechazados</div>
+        <div class="kpi-val" id="kpi-rej">0</div>
+        <div class="kpi-foot">Observados</div>
+      </article>
+    </section>
+
+    <!-- Acciones masivas -->
+    <section class="mass-actions">
+      <div class="left">
+        <button id="btn-approve-selected" class="btn primary"><i class="i i-check"></i>Aprobar seleccionados</button>
+        <button id="btn-reject-selected"  class="btn danger"><i class="i i-x"></i>Rechazar seleccionados</button>
+      </div>
+      <div class="right">
+        <span id="sel-count">0 seleccionados</span>
+      </div>
+    </section>
+
+    <!-- Tabla -->
+    <div class="card">
+      <div class="table" id="tbl">
+        <div class="thead">
+          <span class="th cb"><input type="checkbox" id="cb-all"></span>
+          <button class="th sort" data-k="created_at">Fecha</button>
+          <button class="th sort" data-k="student_name">Alumno</button>
+          <button class="th sort" data-k="course_name">Curso</button>
+          <button class="th sort" data-k="period">Periodo</button>
+          <button class="th sort" data-k="amount_clp">Monto</button>
+          <button class="th sort" data-k="status">Estado</button>
+          <span class="th">Acciones</span>
+        </div>
+        <div id="tbody"><!-- filas por JS --></div>
+        <div class="empty" id="empty" hidden>
+          <i class="i i-empty"></i>
+          <p>No hay resultados con los filtros aplicados.</p>
+        </div>
+      </div>
+
+      <footer class="pager">
+        <div class="rows">Mostrando <span id="page-start">0</span>–<span id="page-end">0</span> de <span id="page-total">0</span></div>
+        <div class="controls">
+          <button id="pg-prev" class="btn ghost" disabled>Anterior</button>
+          <span id="pg-info">1 / 1</span>
+          <button id="pg-next" class="btn ghost" disabled>Siguiente</button>
+          <select id="pg-size">
+            <option>10</option><option selected>20</option><option>50</option>
+          </select>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <template id="row-tpl">
+    <div class="trow">
+      <span class="cb"><input type="checkbox" class="cb-row"></span>
+      <span data-k="created_at"></span>
+      <span data-k="student_name"></span>
+      <span data-k="course_name"></span>
+      <span data-k="period"></span>
+      <span data-k="amount_fmt" class="mono"></span>
+      <span><span class="badge" data-k="status_label"></span></span>
+      <span class="row-actions">
+        <a class="btn ghost btn-voucher" target="_blank">Comprobante</a>
+        <button class="btn approve">Aprobar</button>
+        <button class="btn reject">Rechazar</button>
+      </span>
+    </div>
+  </template>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="{% static 'finance/finanzas.js' %}"></script>
+</body>
+</html>

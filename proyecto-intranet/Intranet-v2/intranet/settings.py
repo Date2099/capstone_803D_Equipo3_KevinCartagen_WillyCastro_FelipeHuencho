@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'studentView',
     'adminView',
     'profesorView',
+    "finance",
 
 ]
 
@@ -133,3 +134,5 @@ LOGIN_REDIRECT_URL = '/inicioSesion/registro/'  # el nombre de la url a donde qu
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

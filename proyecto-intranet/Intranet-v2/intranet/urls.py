@@ -10,5 +10,6 @@ urlpatterns = [
     path('studentView/', include('studentView.urls')),
     path('adminview/', include('adminView.urls')),
     path('profesorView/', include('profesorView.urls')),
+    path("finance/", include("finance.urls")),
 
 ]
