@@ -1,12 +1,44 @@
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 
 
-# Modelo de Usuario
+# ==========================
+#  User Manager (usa RUT)
+# ==========================
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 
-from django.db import models
-from django.contrib.auth.models import AbstractUser
+class CustomUserManager(DjangoUserManager):
+    use_in_migrations = True
 
+    def _create_user(self, rut, email=None, password=None, **extra_fields):
+        if not rut:
+            raise ValueError("El RUT es obligatorio")
+        email = self.normalize_email(email)
+
+        user = self.model(rut=str(rut).strip(), email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, rut, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(rut, email, password, **extra_fields)
+
+    def create_superuser(self, rut, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+        return self._create_user(rut, email, password, **extra_fields)
+
+
+# ==========================
+#  Usuario
+# ==========================
 class User(AbstractUser):
     STUDENT = "student"
     GUARDIAN = "guardian"
@@ -22,18 +54,10 @@ class User(AbstractUser):
         (FINANCE_ADMIN, "Administrador de Finanzas"),
     ]
 
-
-    #  Campo role
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=STUDENT)
-
-
-    #  Eliminamos el campo username de Django
     username = None
-
-    #  Usamos el RUT como campo de login
     rut = models.CharField(max_length=15, unique=True)
 
-    # Datos personales
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=STUDENT)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(null=True, blank=True)
@@ -48,23 +72,39 @@ class User(AbstractUser):
         default="active"
     )
 
-    # Campos específicos por rol
     department = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=150, null=True, blank=True)
     position = models.CharField(max_length=150, null=True, blank=True)
 
-    # Campos de configuración para login
-    USERNAME_FIELD = 'rut'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
+    # 👇 Soluciona conflicto con auth.User
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='core_user_set',   # 👈 nombre único
+        blank=True,
+        help_text='Los grupos a los que pertenece este usuario.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='core_user_permissions_set',  # 👈 nombre único
+        blank=True,
+        help_text='Permisos específicos para este usuario.',
+        verbose_name='user permissions',
+    )
+
+    USERNAME_FIELD = "rut"
+    REQUIRED_FIELDS = ["first_name", "last_name", "email"]
+
+    objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.get_role_display()})"
 
 
 
-
-# Managers por rol
-
+# ==========================
+#  Managers por rol (opcionales)
+# ==========================
 class StudentManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(role=User.STUDENT)
@@ -78,9 +118,9 @@ class GuardianManager(models.Manager):
         return super().get_queryset().filter(role=User.GUARDIAN)
 
 
-
-# Grados y Clases
-
+# ==========================
+#  Grados y Clases
+# ==========================
 class Grade(models.Model):
     curso_id = models.CharField(max_length=5, primary_key=True)
     curso_nombre = models.CharField(max_length=30, unique=True)
@@ -98,16 +138,16 @@ class Class(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['grade', 'year'], name='unique_class_per_year')
+            models.UniqueConstraint(fields=["grade", "year"], name="unique_class_per_year")
         ]
 
     def __str__(self):
         return f"{self.grade} - {self.year}"
 
 
-
-# Asignaturas
-
+# ==========================
+#  Asignaturas
+# ==========================
 class Subject(models.Model):
     name = models.CharField(max_length=100)
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE)
@@ -117,16 +157,16 @@ class Subject(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'class_group'], name='unique_subject_per_class')
+            models.UniqueConstraint(fields=["name", "class_group"], name="unique_subject_per_class")
         ]
 
     def __str__(self):
         return f"{self.name} ({self.class_group})"
 
 
-
-# Matrículas (Enrollment)
-
+# ==========================
+#  Matrículas
+# ==========================
 class Enrollment(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
@@ -143,15 +183,16 @@ class Enrollment(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['student', 'class_group'], name='unique_enrollment')
+            models.UniqueConstraint(fields=["student", "class_group"], name="unique_enrollment")
         ]
 
     def __str__(self):
         return f"{self.student} en {self.class_group}"
 
 
-# Relación Apoderado - Alumno
-
+# ==========================
+#  Relación Apoderado - Alumno
+# ==========================
 class GuardianRelation(models.Model):
     guardian = models.ForeignKey(
         User,
@@ -168,16 +209,16 @@ class GuardianRelation(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['guardian', 'student'], name='unique_guardian_student')
+            models.UniqueConstraint(fields=["guardian", "student"], name="unique_guardian_student")
         ]
 
     def __str__(self):
         return f"{self.guardian} -> {self.student}"
 
 
-
-# Evaluaciones y Resultados
-
+# ==========================
+#  Evaluaciones y Resultados
+# ==========================
 class EvaluationType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -188,14 +229,14 @@ class EvaluationType(models.Model):
 
 class Evaluation(models.Model):
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)  # 🔹 Nueva relación
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     teacher = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.TEACHER}
     )
     evaluation_type = models.ForeignKey(EvaluationType, on_delete=models.CASCADE)
     date = models.DateField()
     description = models.TextField()
-    weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)  # peso evaluación
+    weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -215,16 +256,16 @@ class GradeResult(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['evaluation', 'student'], name='unique_grade_result')
+            models.UniqueConstraint(fields=["evaluation", "student"], name="unique_grade_result")
         ]
 
     def __str__(self):
         return f"{self.student} - {self.evaluation.subject.name}: {self.score}"
 
 
-
-# Asistencia
-
+# ==========================
+#  Asistencia
+# ==========================
 class Attendance(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
@@ -239,29 +280,143 @@ class Attendance(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['student', 'class_group', 'date'], name='unique_attendance')
+            models.UniqueConstraint(fields=["student", "class_group", "date"], name="unique_attendance")
         ]
 
     def __str__(self):
         return f"{self.student} - {self.date}: {'Presente' if self.present else 'Ausente'}"
 
 
-
-# Pagos
-
+# ==========================
+#  Pagos (Versión Fusionada)
+# ==========================
 class Payment(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pendiente"),
+        ("overdue", "Vencido"),
+        ("paid", "Pagado"),
+        ("failed", "Fallido"),
+        ("refunded", "Reembolsado"),
+    ]
+
     student = models.ForeignKey(
-        User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        limit_choices_to={"role": "student"}
     )
+
+    # Datos principales del pago
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     concept = models.CharField(max_length=100, default="Mensualidad")
-    date = models.DateField()
-    status = models.CharField(
-        max_length=20, choices=[("paid", "Pagado"), ("pending", "Pendiente")]
-    )
+
+    # Fechas importantes
+    issue_date = models.DateField(auto_now_add=True, help_text="Fecha de emisión del pago")
+    due_date = models.DateField(null=True, blank=True, help_text="Fecha de vencimiento")
+    paid_at = models.DateField(null=True, blank=True, help_text="Fecha en que se completó el pago")
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+
+    # Transbank 
+    buy_order = models.CharField(max_length=100, blank=True, null=True)
+    session_id = models.CharField(max_length=100, blank=True, null=True)
+    token_ws = models.CharField(max_length=200, blank=True, null=True)
+    authorization_code = models.CharField(max_length=50, blank=True, null=True)
+    payment_type = models.CharField(max_length=50, blank=True, null=True)
+    accounting_date = models.CharField(max_length=20, blank=True, null=True)
+
+    cuotas_ids = models.TextField(blank=True, null=True, help_text="IDs de mensualidades pagadas (separados por coma)")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Propiedades útiles
+    @property
+    def is_overdue(self):
+        """Retorna True si el pago está pendiente y vencido."""
+        from django.utils import timezone
+        return (
+            self.status == "pending"
+            and self.due_date
+            and self.due_date < timezone.localdate()
+        )
+
+    @property
+    def days_late(self):
+        """Cantidad de días de atraso si está vencido."""
+        from django.utils import timezone
+        if self.is_overdue:
+            return (timezone.localdate() - self.due_date).days
+        return 0
+
     def __str__(self):
-        return f"{self.student} - {self.amount} ({self.status})"
+        estado = self.get_status_display()
+        return f"{self.student} - {self.concept}: ${self.amount} ({estado})"
+
+
+# --- PROXIES para Admins separados ---
+class Student(User):
+    objects = StudentManager()
+    class Meta:
+        proxy = True
+        verbose_name = "Alumno"
+        verbose_name_plural = "Alumnos"
+
+class Guardian(User):
+    objects = GuardianManager()
+    class Meta:
+        proxy = True
+        verbose_name = "Apoderado"
+        verbose_name_plural = "Apoderados"
+
+
+class Teacher(User):
+    objects = TeacherManager()
+    class Meta:
+        proxy = True
+        verbose_name = "Profesor"
+        verbose_name_plural = "Profesores"
+
+
+
+# ==========================
+#  Comunicados
+# ==========================
+class Comunicado(models.Model):
+    DESTINO_CHOICES = [
+        ("todos", "Todos los usuarios"),
+        ("curso", "Por curso"),
+        ("manual", "Correo manual"),
+    ]
+
+    asunto = models.CharField(max_length=200, help_text="Título o asunto del comunicado")
+    mensaje = models.TextField(help_text="Contenido del mensaje a enviar")
+    destino = models.CharField(
+        max_length=20,
+        choices=DESTINO_CHOICES,
+        help_text="Destino del comunicado (todos, curso o manual)"
+    )
+
+    # Guarda los correos reales a los que se envió (por ejemplo, separados por coma)
+    destinatarios = models.TextField(
+        blank=True,
+        help_text="Correos separados por coma a los que se envió este comunicado"
+    )
+
+    # Usuario que lo envió
+    enviado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comunicados_enviados"
+    )
+
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-fecha_envio"]
+        verbose_name = "Comunicado"
+        verbose_name_plural = "Comunicados"
+
+    def __str__(self):
+        return f"{self.asunto} - {self.fecha_envio.strftime('%d/%m/%Y %H:%M')}"
