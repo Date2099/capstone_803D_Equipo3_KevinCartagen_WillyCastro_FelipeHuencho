@@ -1,405 +1,724 @@
-// SIDEBAR TOGGLE + RESPONSIVE
-const toggleBtn = document.getElementById('toggle');
-const sidebar = document.getElementById('sidebar');
-const mq = window.matchMedia("(max-width: 768px)");
+// ==============================
+// PANEL ADMIN - SPA INTERACTIVA
+// ==============================
 
-toggleBtn.addEventListener('click', () => {
-  sidebar.classList.toggle('closed');
+// --- Referencias del DOM ---
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle');
+const overlay = document.getElementById('sidebar-overlay');
+const mainContent = document.getElementById('main-content');
+const title = document.getElementById('topbar-title');
+
+// ==========================================
+// Helper para obtener el token CSRF
+// ==========================================
+function getCSRFToken() {
+  const name = "csrftoken";
+  const cookies = document.cookie.split(";");
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + "=")) {
+      return cookie.substring(name.length + 1);
+    }
+  }
+  return null;
+}
+
+// ==========================================
+// Funciones básicas
+// ==========================================
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+function openSidebar() {
+  sidebar.classList.add('open');
+  overlay.classList.add('show');
+  document.body.classList.add('no-scroll');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+  document.body.classList.remove('no-scroll');
+}
+
+// --- Botón toggle y overlay ---
+toggleBtn?.addEventListener('click', () => {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+overlay?.addEventListener('click', closeSidebar);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSidebar();
 });
 
-function updateSidebar() {
-  if (mq.matches) {
-    sidebar.classList.add('closed');
-  } else {
-    sidebar.classList.remove('closed');
+// --- Resaltar item activo ---
+function clearActive() {
+  document.querySelectorAll('.menu a, .menu summary').forEach(el => el.classList.remove('active'));
+}
+const links = document.querySelectorAll('.menu a[data-section]');
+const summaries = document.querySelectorAll('.menu summary');
+summaries.forEach(summary => {
+  summary.addEventListener('click', () => {
+    setTimeout(() => {
+      clearActive();
+      if (summary.parentElement.open) summary.classList.add('active');
+    }, 0);
+  });
+});
+
+// ======================================================
+// 🔹 Ver Cursos
+// ======================================================
+async function cargarVerCursos() {
+  try {
+    const response = await fetch("/administrador/api/ver_cursos/");
+    if (!response.ok) throw new Error("Error al obtener los cursos");
+
+    const data = await response.json();
+    let html = `<div class="ver-cursos">`;
+
+    data.cursos.forEach(c => {
+      html += `
+        <details class="curso-card">
+          <summary class="curso-header">
+            <div class="curso-titulo">${c.curso} - ${c.profesor}</div>
+          </summary>
+          <div class="curso-body">
+            <table class="tabla-notas">
+              <thead>
+                <tr><th>Alumno</th><th>RUT</th><th>Correo</th></tr>
+              </thead>
+              <tbody>
+                ${c.alumnos.map(a => `
+                  <tr>
+                    <td>${a.nombre}</td>
+                    <td>${a.rut}</td>
+                    <td>${a.correo}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </details>`;
+    });
+
+    html += `</div>`;
+    mainContent.innerHTML = html;
+    title.textContent = "Ver Cursos";
+  } catch (error) {
+    console.error("Error al cargar cursos", error);
+    mainContent.innerHTML = `
+      <div class="error-msg">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Error al cargar los cursos
+      </div>`;
   }
 }
-updateSidebar();
-mq.addEventListener('change', updateSidebar);
 
-// Cerrar sidebar al hacer click fuera, solo en mobile
-document.addEventListener('click', (e) => {
-  if (!mq.matches) return; // solo móvil
-  const isClickInsideSidebar = sidebar.contains(e.target);
-  const isClickToggleBtn = toggleBtn.contains(e.target);
-  if (!isClickInsideSidebar && !isClickToggleBtn) {
-    sidebar.classList.add('closed');
+// ======================================================
+// 🔹 Profesores
+// ======================================================
+async function cargarProfesores() {
+  try {
+    const response = await fetch("/administrador/api/ver_profesores/");
+    if (!response.ok) throw new Error("Error al obtener los profesores");
+
+    const data = await response.json();
+
+    let html = `
+      <div class="profesores-lista">
+        <div class="profesores-header">
+          <h2>Listado de Profesores</h2>
+          <button id="btn-nuevo-profesor" class="btn-nuevo">+</button>
+        </div>
+        <table class="tabla-profesores">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Asignatura</th>
+              <th>Título</th>
+              <th>Correo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    data.profesores.forEach(p => {
+      html += `
+        <tr data-id="${p.id}">
+          <td><input type="text" name="first_name" value="${p.first_name} ${p.last_name}" disabled></td>
+          <td><input type="text" name="asignaturas" value="${p.asignaturas}" disabled></td>
+          <td><input type="text" name="title" value="${p.title || ''}" disabled></td>
+          <td><input type="text" name="email" value="${p.email}" disabled></td>
+          <td>
+            <div class="acciones">
+              <button class="btn-editar">Editar</button>
+              <button class="btn-guardar" disabled>Guardar</button>
+              <button class="btn-eliminar">Eliminar</button>
+            </div>
+          </td>
+
+        </tr>`;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>`;
+
+    mainContent.innerHTML = html;
+    title.textContent = "Profesores";
+
+    // --- Botón para nuevo profesor ---
+    document.getElementById("btn-nuevo-profesor")?.addEventListener("click", () => {
+      title.textContent = "Agregar Profesor";
+      mainContent.innerHTML = `
+        <div class="formulario-profesor">
+          <div class="form-top">
+            <h2>Registrar Profesor</h2>
+            <button id="volver-profesores" class="btn-volver">← Volver</button>
+          </div>
+          <form id="form-profesor">
+            <label>RUT:</label>
+            <input type="text" name="rut" required>
+            <label>Nombre:</label>
+            <input type="text" name="first_name" required>
+            <label>Apellido:</label>
+            <input type="text" name="last_name" required>
+            <label>Correo electrónico:</label>
+            <input type="email" name="email" required>
+            <label>Asignatura:</label>
+            <input type="text" name="asignatura" required>
+            <label>Título:</label>
+            <input type="text" name="title">
+            <label>¿Es jefe de curso?</label>
+            <select name="is_head_teacher">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+            <label>Curso asignado:</label>
+            <select name="curso_id">
+              <option value="">Seleccionar curso...</option>
+              <option value="PG">Playgroup</option>
+              <option value="PK">Prekínder</option>
+              <option value="K">Kínder</option>
+              <option value="1">1° Básico</option>
+              <option value="2">2° Básico</option>
+              <option value="3">3° Básico</option>
+              <option value="4">4° Básico</option>
+              <option value="5">5° Básico</option>
+              <option value="6">6° Básico</option>
+              <option value="7">7° Básico</option>
+              <option value="8">8° Básico</option>
+              <option value="1M">1° Medio</option>
+              <option value="2M">2° Medio</option>
+              <option value="3M">3° Medio</option>
+              <option value="4M">4° Medio</option>
+            </select>
+            <label>Año:</label>
+            <input type="number" name="year" value="2025">
+            <div class="form-actions">
+              <button type="submit" class="btn-guardar">Registrar Profesor</button>
+            </div>
+          </form>
+        </div>`;
+
+      document.getElementById("volver-profesores")?.addEventListener("click", async () => {
+        await cargarProfesores();
+      });
+
+      const form = document.getElementById("form-profesor");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = Object.fromEntries(new FormData(form).entries());
+        formData.role = "teacher";
+
+        try {
+          const response = await fetch("/administrador/api/profesores/crear/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCSRFToken(),
+            },
+            body: JSON.stringify(formData),
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            alert("✅ Profesor registrado correctamente.");
+            await cargarProfesores();
+          } else {
+            alert("⚠️ Error: " + (result.error || "No se pudo registrar el profesor."));
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("❌ No se pudo conectar con el servidor.");
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Error al cargar profesores", error);
+    mainContent.innerHTML = `
+      <div class="error-msg">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Error al cargar los profesores
+      </div>`;
+  }
+}
+
+// ======================================================
+// 🎯 Delegación de eventos (Editar / Guardar / Eliminar)
+// ======================================================
+mainContent.addEventListener("click", async (e) => {
+  const btn = e.target;
+  const row = btn.closest("tr");
+
+  if (!btn.classList.contains("btn-editar") &&
+      !btn.classList.contains("btn-guardar") &&
+      !btn.classList.contains("btn-eliminar")) return;
+
+  // --- EDITAR ---
+  if (btn.classList.contains("btn-editar")) {
+    const inputs = row.querySelectorAll("input");
+    inputs.forEach(i => i.disabled = false);
+    row.querySelector(".btn-guardar").disabled = false;
+    row.classList.add("editando");
+    return;
+  }
+
+  // --- GUARDAR ---
+  if (btn.classList.contains("btn-guardar")) {
+    const id = row.dataset.id;
+    const inputs = row.querySelectorAll("input");
+    const data = {};
+    inputs.forEach(i => data[i.name] = i.value.trim());
+
+    try {
+      const response = await fetch(`/administrador/api/profesores/${id}/actualizar/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        btn.textContent = "✅ Guardado";
+        btn.disabled = true;
+        row.classList.remove("editando");
+        inputs.forEach(i => i.disabled = true);
+        setTimeout(() => btn.textContent = "💾 Guardar", 2000);
+      } else {
+        alert("⚠️ Error: " + (result.error || "No se pudo actualizar."));
+      }
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      alert("❌ No se pudo conectar con el servidor.");
+    }
+    return;
+  }
+
+  // --- ELIMINAR ---
+  if (btn.classList.contains("btn-eliminar")) {
+    const id = row.dataset.id;
+    const nombre = row.querySelector('input[name="first_name"]')?.value || "Profesor";
+
+    if (!confirm(`¿Seguro que deseas eliminar al profesor "${nombre}"?`)) return;
+
+    try {
+      const response = await fetch(`/administrador/api/profesores/${id}/eliminar/`, {
+        method: "DELETE",
+        headers: { "X-CSRFToken": getCSRFToken() },
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        row.remove();
+        alert(`🗑️ Profesor "${nombre}" eliminado correctamente.`);
+      } else {
+        alert("⚠️ Error: " + (result.error || "No se pudo eliminar."));
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("❌ No se pudo conectar con el servidor.");
+    }
+    return;
   }
 });
 
-// --- SISTEMA DE CONTENIDO DINÁMICO ---
-const mainContent = document.getElementById('main-content');
-const menuLinks = document.querySelectorAll('.menu a[data-section]');
-const topbarTitle = document.getElementById('topbar-title');
+// ======================================================
+// 🔹 Agregar Alumno (versión completa)
+// ======================================================
+async function cargarAgregarAlumno() {
+  title.textContent = "Agregar Alumno";
 
-let adminChartInstance = null;
+  mainContent.innerHTML = `
+    <div class="formulario-alumno">
+      <div class="form-top">
+        <h2>Registro de Alumno</h2>
+        <button id="volver-cursos" class="btn-volver">← Volver</button>
+      </div>
 
-// Datos de ejemplo para los alumnos por curso
-const studentData = {
-  'pk-a': [{ id: 'SAH-PK-001', name: 'Ana Contreras', parent: 'Luis Contreras', status: 'Activo' }],
-  'k-a': [{ id: 'SAH-K-005', name: 'Benjamín Soto', parent: 'Carla Soto', status: 'Activo' }],
-  '1b-a': [
-    { id: 'SAH-1B-012', name: 'Carlos Díaz', parent: 'Mariela Soto', status: 'Activo' },
-    { id: 'SAH-1B-013', name: 'Daniela Espinoza', parent: 'Jorge Espinoza', status: 'Activo' }
-  ],
-  '8b-a': [{ id: 'SAH-8B-080', name: 'Elena Martínez', parent: 'Roberto Martínez', status: 'Activo' }],
-  '1m-a': [{ id: 'SAH-1M-095', name: 'Francisco Núñez', parent: 'Teresa Núñez', status: 'Activo' }],
-  '4m-a': [
-    { id: 'SAH-4M-101', name: 'Fernanda Muñoz', parent: 'Ricardo Muñoz', status: 'Activo' },
-    { id: 'SAH-4M-102', name: 'Gabriel Rojas', parent: 'Verónica Rojas', status: 'Inactivo' },
-    { id: 'SAH-4M-103', name: 'Hugo Salazar', parent: 'Mónica Salazar', status: 'Activo' }
-  ]
-};
+      <form id="form-alumno" class="form-alumno">
+        <div class="form-section">
+          <h3>Datos del Alumno</h3>
 
-const contentData = {
-  'tablero': {
-    title: 'Panel de Control',
-    html: `
-      <div class="kpi-grid">
-        <div class="card kpi"><div class="kpi-icon students"><i class="fa-solid fa-user-graduate"></i></div><div class="kpi-info"><div class="num">90</div><div class="label">Estudiantes</div></div></div>
-        <div class="card kpi"><div class="kpi-icon parents"><i class="fa-solid fa-user-group"></i></div><div class="kpi-info"><div class="num">152</div><div class="label">Padres</div></div></div>
-        <div class="card kpi"><div class="kpi-icon teachers"><i class="fa-solid fa-chalkboard-user"></i></div><div class="kpi-info"><div class="num">11</div><div class="label">Profesores</div></div></div>
-        <div class="card kpi"><div class="kpi-icon revenue"><i class="fa-solid fa-dollar-sign"></i></div><div class="kpi-info"><div class="num">$18.5M</div><div class="label">Ingresos del Mes</div></div></div>
-      </div>
-      <div class="card chart-card">
-        <h3 class="card-title">Resumen Financiero 2025</h3>
-        <div class="chart-container"><canvas id="admin-chart"></canvas></div>
-      </div>
-    `
-  },
-  'estudiantes': {
-    title: 'Navegador de Cursos',
-    html: `
-      <div class="page-header">
-        <h2>Navegador de Cursos</h2>
-        <button class="btn"><i class="fa-solid fa-plus"></i> Agregar Curso</button>
-      </div>
-      <div class="course-grid">
-        <div class="course-card js-view-course" data-course-id="pk-a" data-course-name="Pre-Kinder A"><div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div><div class="course-card-info"><h4>Pre-Kinder A</h4><p>Prof. Jefa: Carmen Soto</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div></div>
-        <div class="course-card js-view-course" data-course-id="k-a" data-course-name="Kinder A"><div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div><div class="course-card-info"><h4>Kinder A</h4><p>Prof. Jefa: Mónica Bravo</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div></div>
-        <div class="course-card js-view-course" data-course-id="1b-a" data-course-name="1° Básico A"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>1° Básico A</h4><p>Prof. Jefa: Laura Pérez</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 2 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>2° Básico A</h4><p>Prof. Jefe: Juan Torres</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>3° Básico A</h4><p>Prof. Jefa: Inés Morales</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>4° Básico A</h4><p>Prof. Jefe: Carlos Rojas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>5° Básico A</h4><p>Prof. Jefe: Esteban Paredes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>6° Básico A</h4><p>Prof. Jefa: Sandra Fuentes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>7° Básico A</h4><p>Prof. Jefe: Miguel Ángel</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card js-view-course" data-course-id="8b-a" data-course-name="8° Básico A"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>8° Básico A</h4><p>Prof. Jefa: Rosa Espinoza</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div></div>
-        <div class="course-card js-view-course" data-course-id="1m-a" data-course-name="I° Medio A"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>I° Medio A</h4><p>Prof. Jefe: Arturo Vidal</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>II° Medio A</h4><p>Prof. Jefa: Carolina Neira</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>III° Medio A</h4><p>Prof. Jefe: Marcelo Salas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0 Alumnos</span></div></div>
-        <div class="course-card js-view-course" data-course-id="4m-a" data-course-name="IV° Medio A"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>IV° Medio A</h4><p>Prof. Jefe: Mario Vargas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 3 Alumnos</span></div></div>
-      </div>
-    `
-  },
-  'agregar-alumno': {
-    title: 'Agregar Alumno',
-    html: `
-      <h3 class="card-title">Agregar Alumno (datos brutos)</h3>
-      <div class="card">
-        <p>Formulario simulado (solo datos de ejemplo)</p>
-        <ul>
-          <li>Nombre: Juanito Pérez</li>
-          <li>RUT: 11.222.333-4</li>
-          <li>Curso: 1° Básico A</li>
-        </ul>
-      </div>
-    `
-  },
-  'profesores': {
-    title: 'Profesores',
-    html: `
-      <h3 class="card-title">Listado de Profesores</h3>
-      <div class="card">
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Asignatura</th><th>Email</th></tr></thead>
-            <tbody>
-              <tr><td>PF-001</td><td>María González</td><td>Matemáticas</td><td>maria.g@colegio.cl</td></tr>
-              <tr><td>PF-002</td><td>Carlos Vega</td><td>Historia</td><td>carlos.v@colegio.cl</td></tr>
-              <tr><td>PF-003</td><td>Isabel Ríos</td><td>Lenguaje</td><td>isabel.r@colegio.cl</td></tr>
-            </tbody>
-          </table>
+          <label>RUT:</label>
+          <input type="text" name="rut" placeholder="Ej: 21.345.678-9" required>
+
+          <label>Nombres:</label>
+          <input type="text" name="nombres" required>
+
+          <label>Apellidos:</label>
+          <input type="text" name="apellidos" required>
+
+          <label>Fecha de Nacimiento:</label>
+          <input type="date" name="fecha_nacimiento" required>
+
+          <label>Comuna:</label>
+          <input type="text" name="comuna" placeholder="Ej: San Antonio">
+
+          <label>Curso:</label>
+          <select name="curso" required>
+            <option value="">Seleccionar curso...</option>
+            <option value="PG">Playgroup</option>
+            <option value="PK">Prekínder</option>
+            <option value="K">Kínder</option>
+            <option value="1">1° Básico</option>
+            <option value="2">2° Básico</option>
+            <option value="3">3° Básico</option>
+            <option value="4">4° Básico</option>
+            <option value="5">5° Básico</option>
+            <option value="6">6° Básico</option>
+            <option value="7">7° Básico</option>
+            <option value="8">8° Básico</option>
+            <option value="1M">1° Medio</option>
+            <option value="2M">2° Medio</option>
+            <option value="3M">3° Medio</option>
+            <option value="4M">4° Medio</option>
+          </select>
+
+          <label>Estado:</label>
+          <select name="estado_alumno">
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+          </select>
         </div>
-      </div>
-    `
-  },
-  'asignaturas': {
-    title: 'Asignaturas',
-    html: `
-      <h3 class="card-title">Asignaturas</h3>
-      <div class="card">
-        <ul>
-          <li>Matemáticas</li>
-          <li>Lenguaje</li>
-          <li>Historia</li>
-          <li>Ciencias</li>
-        </ul>
-      </div>
-    `
-  },
-  'horarios': {
-    title: 'Horarios',
-    html: `
-      <h3 class="card-title">Horarios</h3>
-      <div class="card">
-        <p>Horario ejemplo: 08:00 - 12:30 (Lun-Vie)</p>
-      </div>
-    `
-  },
-  'revision-pagos': {
-    title: 'Revisión de Pagos',
-    html: `
-      <h3 class="card-title">Revisión de Pagos</h3>
-      <div class="card">
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>Alumno</th><th>Mes</th><th>Monto</th><th>Estado</th></tr></thead>
-            <tbody>
-              <tr><td>Ana Contreras</td><td>Septiembre</td><td>$230.000</td><td><span class="status status-review">En revisión</span></td></tr>
-              <tr><td>Benjamín Soto</td><td>Septiembre</td><td>$230.000</td><td><span class="status status-paid">Pagado</span></td></tr>
-            </tbody>
-          </table>
+
+        <div class="form-section">
+          <h3>Datos del Apoderado</h3>
+
+          <label>RUT Apoderado:</label>
+          <input type="text" name="rut_apoderado" required>
+
+          <label>Nombre Apoderado:</label>
+          <input type="text" name="nombre_apoderado" required>
+
+          <label>Correo Apoderado:</label>
+          <input type="email" name="email_apoderado" placeholder="ejemplo@correo.com">
+
+          <label>Teléfono:</label>
+          <input type="text" name="telefono_apoderado" placeholder="+56 9 1234 5678">
         </div>
-      </div>
-    `
-  },
-  'comunicados': {
-    title: 'Comunicados',
-    html: `
-      <h3 class="card-title">Comunicados</h3>
-      <div class="card">
-        <ul>
-          <li><strong>15/09/2025:</strong> Examen Final de Matemáticas.</li>
-          <li><strong>18/09/2025:</strong> Feriado - No hay clases.</li>
-        </ul>
-      </div>
-    `
-  },
-  'usuarios': {
-    title: 'Usuarios',
-    html: `
-      <h3 class="card-title">Usuarios del Sistema</h3>
-      <div class="card">
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th></tr></thead>
-            <tbody>
-              <tr><td>U-001</td><td>Sr. Admin</td><td>Administración</td></tr>
-              <tr><td>U-002</td><td>Felipe Huencho</td><td>Alumno</td></tr>
-            </tbody>
-          </table>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-guardar">Registrar Alumno</button>
         </div>
-      </div>
-    `
-  },
-  'pagos': {
-    title: 'Pagos',
-    html: `
-      <h3 class="card-title">Resumen de Pagos</h3>
-      <div class="card">
-        <p>Total Pendiente: $230.000</p>
-        <p>Pagos realizados (meses): Abril, Mayo, Junio, Julio</p>
-      </div>
-    `
-  }
-};
+      </form>
+    </div>
+  `;
 
-// Render chart for tablero (estético mejorado)
-function renderAdminDashboardChart() {
-  const canvas = document.getElementById('admin-chart');
-  if (!canvas) return;
-  if (adminChartInstance) {
-    adminChartInstance.destroy();
-  }
+  // 🔙 Botón para volver al listado de cursos
+  document.getElementById("volver-cursos")?.addEventListener("click", async () => {
+    await cargarVerCursos();
+  });
 
-  // asegurar que el contenedor tenga una altura explícita
-  const container = canvas.closest('.chart-container');
-  if (container) {
-    container.style.height = '320px';
-    container.style.maxHeight = '420px';
-  }
+  // 📨 Envío del formulario
+  const form = document.getElementById("form-alumno");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
 
-  const ctx = canvas.getContext('2d');
+    try {
+      const response = await fetch("/administrador/api/registrar_alumno/", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        body: formData,
+      });
 
-  // crear degradado dinámico según la altura actual
-  const height = container ? Math.max(220, container.clientHeight) : 320;
-  const grad = ctx.createLinearGradient(0, 0, 0, height);
-  grad.addColorStop(0, 'rgba(106,58,143,0.95)');
-  grad.addColorStop(1, 'rgba(142,102,170,0.85)');
+      const result = await response.json();
 
-  const labels = ['Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep'];
-  const dataValues = [12000, 15000, 14000, 18000, 17000, 18500];
-
-  adminChartInstance = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Ingresos',
-        data: dataValues,
-        backgroundColor: grad,
-        borderRadius: 10,
-        borderSkipped: false,
-        barThickness: 'flex',
-        maxBarThickness: 64
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#121212',
-          titleColor: '#ffffff',
-          bodyColor: '#ffffff',
-          padding: 10,
-          callbacks: {
-            label: (ctx) => {
-              const v = ctx.parsed?.y ?? ctx.raw;
-              return 'Ingresos: $' + Number(v).toLocaleString('es-CL');
-            }
-          }
-        }
-      },
-      layout: { padding: { top: 6, bottom: 6, left: 6, right: 6 } },
-      scales: {
-        x: {
-          grid: { display: false, drawBorder: false },
-          ticks: { color: '#374151', font: { weight: 700 } }
-        },
-        y: {
-          beginAtZero: true,
-          suggestedMax: Math.max(...dataValues) * 1.12,
-          grid: {
-            color: 'rgba(15,23,42,0.06)',
-            borderDash: [4, 4]
-          },
-          ticks: {
-            color: '#6b7280',
-            callback: value => '$' + Number(value).toLocaleString('es-CL'),
-            stepSize: 2000
-          }
-        }
-      },
-      interaction: { mode: 'index', intersect: false }
+      if (response.ok) {
+        alert(result.message || "✅ Alumno registrado correctamente.");
+        form.reset();
+      } else {
+        alert("⚠️ Error: " + (result.error || "No se pudo registrar el alumno."));
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ No se pudo conectar con el servidor.");
     }
   });
 }
 
-function renderStudentTable(courseId, courseName) {
-  const students = studentData[courseId] || [];
-  let rows = students.map(s => `
-    <tr>
-      <td>${s.id}</td>
-      <td class="user-cell">
-        <div class="avatar" style="width:36px;height:36px;font-size:.85rem">${s.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div>
-          <div style="font-weight:600">${s.name}</div>
-          <div style="font-size:.85rem;color:#6b7280">${s.parent}</div>
-        </div>
-      </td>
-      <td>${s.status}</td>
-      <td class="action-buttons">
-        <button class="action-btn view" data-student-id="${s.id}" title="Ver"><i class="fa-solid fa-eye"></i></button>
-        <button class="action-btn delete" data-student-id="${s.id}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-      </td>
-    </tr>
-  `).join('') || `<tr><td colspan="4">No hay alumnos en este curso.</td></tr>`;
 
-  mainContent.innerHTML = `
-    <div class="page-header">
-      <h2>Alumnos — ${courseName}</h2>
-      <button class="btn js-back-to-courses"><i class="fa-solid fa-arrow-left"></i> Volver a Cursos</button>
+async function cargarVerPagos() {
+  try {
+    const response = await fetch("/administrador/api/ver_pagos/");
+    if (!response.ok) throw new Error("Error al obtener los pagos");
+    const data = await response.json();
+
+    let html = `<div class="ver-pagos">`;
+    const secciones = [
+      { titulo: " Pendientes",   key: "pendientes"},
+      { titulo: " Pagados",      key: "pagados" },
+      { titulo: " Fallidos",     key: "fallidos" },
+      { titulo: " Reembolsados", key: "reembolsados" },
+    ];
+
+    secciones.forEach(sec => {
+      const pagosPorMes = data[sec.key] || {};
+      if (Object.keys(pagosPorMes).length === 0) return;
+
+      html += `<section class="bloque-pagos">
+        <h3 style="color:${sec.color}">${sec.titulo}</h3>`;
+
+      Object.entries(pagosPorMes).forEach(([mes, pagos]) => {
+        html += `
+          <details class="mes-card">
+            <summary>${mes}</summary>
+            <table class="tabla-pagos">
+              <thead>
+                <tr><th>Alumno</th><th>Concepto</th><th>Monto</th><th>Fecha</th></tr>
+              </thead>
+              <tbody>
+                ${pagos.map(p => `
+                  <tr>
+                    <td>${p.alumno}</td>
+                    <td>${p.concepto}</td>
+                    <td>${p.monto}</td>
+                    <td>${p.fecha}</td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </details>`;
+      });
+
+      html += `</section>`;
+    });
+
+    html += `</div>`;
+    mainContent.innerHTML = html;
+    title.textContent = "Revisión de Pagos";
+  } catch (error) {
+    console.error("Error al cargar pagos", error);
+    mainContent.innerHTML = `
+      <div class="error-msg">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Error al cargar los pagos.
+      </div>`;
+  }
+}
+
+
+
+
+
+async function cargarComunicados() {
+  title.textContent = "Comunicados";
+
+mainContent.innerHTML = `
+  <div class="comunicados-layout">
+    
+    <!-- 📤 COLUMNA IZQUIERDA -->
+    <div class="comunicados-form">
+      <h2><i class="fa-solid fa-bullhorn"></i> Enviar Comunicado</h2>
+
+      <form id="form-comunicado">
+        <div class="form-group">
+          <label>Asunto:</label>
+          <input type="text" name="asunto" placeholder="Escribe el asunto del mensaje..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Mensaje:</label>
+          <textarea name="mensaje" rows="6" placeholder="Escribe aquí el comunicado..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Enviar a:</label>
+          <select name="destino" id="destino">
+            <option value="todos">Todos los usuarios</option>
+            <option value="curso">Por curso</option>
+            <option value="alumno">Alumno específico</option>
+            <option value="manual">Correo manual</option>
+          </select>
+        </div>
+
+        <div id="filtro-curso" class="filtro-extra">
+          <label>Seleccionar curso:</label>
+          <input type="text" name="curso_id" placeholder="Ej: 4to Medio A">
+        </div>
+
+        <div id="filtro-alumno" class="filtro-extra">
+          <label>RUT del alumno:</label>
+          <input type="text" name="rut" placeholder="Ej: 12345678-9">
+        </div>
+
+        <div id="filtro-manual" class="filtro-extra">
+          <label>Correo electrónico destino:</label>
+          <input type="email" name="email_manual" placeholder="Ej: nombre@correo.com">
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-guardar">Enviar Comunicado</button>
+        </div>
+      </form>
     </div>
-    <div class="card">
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead><tr><th>ID</th><th>Alumno</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody>${rows}</tbody>
+
+    <!-- 📋 COLUMNA DERECHA -->
+    <div class="comunicados-lista">
+      <div class="header-lista">
+        <h3><i class="fa-solid fa-address-book"></i> Listado de Apoderados</h3>
+        <input type="text" id="buscar-apoderado" placeholder=" Buscar alumno, RUT o apoderado... AUN NO LISTA ESTA FUNCION">
+      </div>
+
+
+      <div class="tabla-wrapper">
+        <table class="tabla-apoderados">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>RUT</th>
+              <th>Apoderado</th>
+              <th>Correo</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-apoderados-body">
+            <tr><td colspan="4">Cargando datos...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
-  `;
-  topbarTitle.textContent = `Alumnos — ${courseName}`;
-}
+  </div>
+`;
 
-// renderContent general
-function renderContent(section) {
-  const entry = contentData[section];
-  if (!entry) {
-    mainContent.innerHTML = `<div class="card"><p>Sección no encontrada: ${section}</p></div>`;
-    topbarTitle.textContent = 'Sección';
-    return;
-  }
-  topbarTitle.textContent = entry.title;
-  mainContent.innerHTML = entry.html;
 
-  if (section === 'tablero') {
-    renderAdminDashboardChart();
-  }
-
-  // Añadir listeners para tarjetas de curso (si existen)
-  const courseCards = mainContent.querySelectorAll('.js-view-course');
-  courseCards.forEach(card => {
-    card.addEventListener('click', () => {
-      const id = card.dataset.courseId;
-      const name = card.dataset.courseName || card.querySelector('.course-card-info h4')?.textContent || 'Curso';
-      renderStudentTable(id, name);
-      // actualizar active en menú
-      document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
-    });
+  // Mostrar filtros dinámicos
+  const destino = document.getElementById("destino");
+  destino.addEventListener("change", (e) => {
+    document.querySelectorAll(".filtro-extra").forEach(div => div.style.display = "none");
+    if (e.target.value === "curso") document.getElementById("filtro-curso").style.display = "block";
+    if (e.target.value === "alumno") document.getElementById("filtro-alumno").style.display = "block";
+    if (e.target.value === "manual") document.getElementById("filtro-manual").style.display = "block";
   });
-}
 
-// Menu click listeners
-menuLinks.forEach(link => {
-  link.addEventListener('click', (e) => {
+  // Cargar lista de apoderados
+  await cargarApoderadosEnTabla();
+
+  // Envío del formulario
+  const form = document.getElementById("form-comunicado");
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const sec = link.dataset.section;
-    if (!sec) return;
-    // marcar activo
-    menuLinks.forEach(l => l.classList.remove('active'));
+    const formData = new FormData(form);
+    try {
+      const response = await fetch("/administrador/api/enviar_comunicado/", {
+        method: "POST",
+        body: formData,
+        headers: { "X-CSRFToken": getCSRFToken() },
+      });
+      const result = await response.json();
+      alert("✅ " + result.message);
+      form.reset();
+    } catch (error) {
+      console.error("Error al enviar comunicado:", error);
+      alert("❌ Error al conectar con el servidor.");
+    }
+  });
+}
+
+// 🔹 Función auxiliar: carga apoderados desde API
+async function cargarApoderadosEnTabla() {
+  const tbody = document.getElementById("tabla-apoderados-body");
+  try {
+    const response = await fetch("/administrador/api/listar_apoderados/");
+    const data = await response.json();
+
+    tbody.innerHTML = "";
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">No hay apoderados registrados.</td></tr>`;
+      return;
+    }
+
+    data.forEach(item => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${item.alumno}</td>
+          <td>${item.rut}</td>
+          <td>${item.apoderado}</td>
+          <td>${item.email || "—"}</td>
+        </tr>
+      `;
+    });
+  } catch (error) {
+    console.error("Error al cargar apoderados:", error);
+    tbody.innerHTML = `<tr><td colspan="4">Error al cargar datos.</td></tr>`;
+  }
+}
+
+
+
+
+// ======================================================
+// 🔹 Navegación SPA
+// ======================================================
+links.forEach(link => {
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    clearActive();
     link.classList.add('active');
-    // abrir details padres si aplica
-    const parentDetails = link.closest('details.menu-group');
-    if (parentDetails) parentDetails.open = true;
-    renderContent(sec);
-    // en mobile cerrar sidebar
-    if (mq.matches) sidebar.classList.add('closed');
+    const section = link.getAttribute('data-section');
+
+    switch (section) {
+      case 'tablero':
+        title.textContent = "Panel de Control";
+        mainContent.innerHTML = "<h1>Bienvenido</h1>";
+        break;
+      case 'estudiantes':
+        await cargarVerCursos();
+        break;
+      case 'profesores':
+        await cargarProfesores();
+        break;
+      case 'agregar-alumno':
+        await cargarAgregarAlumno();
+        break;
+      case 'revision-pagos':
+        await cargarVerPagos();
+        break;
+      case 'comunicados':     
+        await cargarComunicados(); 
+        break;
+
+
+      default:
+        mainContent.innerHTML = `<h1>${link.textContent}</h1><p>Sección "${section}" en construcción...</p>`;
+        title.textContent = link.textContent.trim();
+    }
+
+    if (isMobile()) closeSidebar();
   });
 });
 
-// Delegación para botones dentro del main (volver, ver, eliminar)
-mainContent.addEventListener('click', e => {
-  const bt = e.target.closest('.js-back-to-courses');
-  if (bt) {
-    renderContent('estudiantes');
-    // re-mark menu active
-    menuLinks.forEach(l => l.classList.remove('active'));
-    const estudiantesLink = document.querySelector('.menu a[data-section="estudiantes"]');
-    if (estudiantesLink) estudiantesLink.classList.add('active');
-    return;
-  }
 
-  const viewBtn = e.target.closest('.action-btn.view');
-  if (viewBtn) {
-    const sid = viewBtn.dataset.studentId;
-    alert('Ver alumno: ' + sid + ' (simulado)');
-    return;
-  }
 
-  const delBtn = e.target.closest('.action-btn.delete');
-  if (delBtn) {
-    const sid = delBtn.dataset.studentId;
-    if (confirm('Eliminar alumno ' + sid + ' (simulado)?')) {
-      // aquí solo simulamos la eliminación del DOM
-      delBtn.closest('tr').remove();
-    }
-    return;
-  }
-});
 
-// Carga inicial
-renderContent('tablero');
+
+
+
+
+
+

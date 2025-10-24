@@ -1,10 +1,9 @@
+from django.urls import path
+from . import views
 
-from django.contrib import admin
-from django.urls import path, include
-from django.contrib.auth.views import LoginView
-from .views import student
+app_name = "studentView"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('student/', student, name='student'),
+    path('', views.dashboard, name='dashboard'),
+    path("perfil-data/", views.perfil_data, name="perfil_data"),
 ]
