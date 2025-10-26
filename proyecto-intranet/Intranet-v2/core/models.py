@@ -165,6 +165,48 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.class_group})"
+    
+
+
+
+class SubjectSchedule(models.Model):
+    # Días de la semana: 0=Lunes ... 4=Viernes
+    MON, TUE, WED, THU, FRI = range(5)
+    DOW_CHOICES = [
+        (MON, "Lunes"),
+        (TUE, "Martes"),
+        (WED, "Miércoles"),
+        (THU, "Jueves"),
+        (FRI, "Viernes"),
+    ]
+
+    subject = models.ForeignKey(
+        "core.Subject",  # o Subject si está en el mismo archivo
+        on_delete=models.CASCADE,
+        related_name="schedules",
+    )
+    day_of_week = models.PositiveSmallIntegerField(choices=DOW_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        ordering = ["day_of_week", "start_time"]
+        constraints = [
+            # Asegura que la hora de término sea mayor a la de inicio
+            models.CheckConstraint(
+                check=models.Q(end_time__gt=models.F("start_time")),
+                name="sched_end_after_start",
+            ),
+            # (Opcional) evita duplicar exactamente el mismo bloque para una asignatura
+            models.UniqueConstraint(
+                fields=["subject", "day_of_week", "start_time", "end_time"],
+                name="uniq_subject_timeslot",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.subject} • {self.get_day_of_week_display()} {self.start_time}-{self.end_time}"
+
 
 
 # ==========================
