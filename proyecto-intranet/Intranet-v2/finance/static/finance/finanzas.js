@@ -1,4 +1,5 @@
-/* JS responsive: sin optional chaining, drawer móvil, tema, KPIs animadas */
+// static/finance/finanzas.js
+// Dashboard tipo LIRMI + móvil + tema
 
 var DATA = [
   {id:1, created_at:"2025-10-15 09:10", student_name:"Ana Díaz",  student_rut:"19.111.222-3", course_name:"8° Básico A",  period:"2025-09", amount_clp:35000, status:"PENDING",  method:"Transferencia", evidence_url:"#"},
@@ -13,9 +14,15 @@ var INCOME_DATA = [
   {id:103, date:"2025-09-28 12:05", student:"Ignacio Soto", rut:"16.888.777-6", course:"IV° Medio A", method:"Webpay",        period:"2025-09", amount:35000},
 ];
 var EXPENSE_DATA = [
-  {id:201, date:"2025-10-03", vendor:"Tecno SA",   memo:"Licencias software",          cc:"TI",              doc:"FA-001223", amount:1200000},
-  {id:202, date:"2025-10-02", vendor:"Luz Centro", memo:"Electricidad Campus",         cc:"Servicios",       doc:"FC-88912",  amount:430000},
-  {id:203, date:"2025-09-29", vendor:"Papelería",  memo:"Útiles administrativos",      cc:"Administración",  doc:"BO-5521",   amount:98000},
+  {id:201, date:"2025-10-03", vendor:"Tecno SA",   memo:"Licencias software",     cc:"TI",             doc:"FA-001223", amount:1200000},
+  {id:202, date:"2025-10-02", vendor:"Luz Centro", memo:"Electricidad Campus",    cc:"Servicios",      doc:"FC-88912",  amount:430000},
+  {id:203, date:"2025-09-29", vendor:"Papelería",  memo:"Útiles administrativos", cc:"Administración", doc:"BO-5521",   amount:98000},
+];
+var MOROSIDAD_NIVELES = [
+  {nivel:"Preescolar",   pct:10},
+  {nivel:"Primaria",     pct:16},
+  {nivel:"Secundaria",   pct:14},
+  {nivel:"Bachillerato", pct:12},
 ];
 
 var $  = function(s){ return document.querySelector(s); };
@@ -64,7 +71,7 @@ function init(){
   });
   if(localStorage.getItem("finz.theme")==="1") document.body.classList.add("theme-dark");
 
-  // Meses selector
+  // Meses
   var months = Array.from(new Set(DATA.map(function(r){return r.period;}))).sort().reverse();
   var selM=$("#f-month");
   if(selM && selM.options.length===1){ months.forEach(function(m){ var o=document.createElement("option"); o.value=m; o.textContent=m; selM.appendChild(o); }); }
@@ -104,18 +111,21 @@ function init(){
   on($("#btn-export"), "click", exportCSV);
   on($("#btn-export-2"),"click", exportCSV);
 
-  // Atajo buscar
+  // Accesos
   on(document,"keydown",function(e){
     var mac=(navigator.platform||"").toUpperCase().indexOf("MAC")>=0;
     var mod=mac?e.metaKey:e.ctrlKey; if(!mod) return;
     if((e.key||"").toLowerCase()==="k"){ e.preventDefault(); var q=$("#f-q"); if(q) q.focus(); }
   });
 
-  // Feedback botón
-  on(document,"pointerdown",function(e){ var b=e.target.closest?e.target.closest(".btn"):null; if(!b) return; b.classList.add("press"); setTimeout(function(){b.classList.remove("press");},160); });
-
+  // Router y render inicial
   setupRouter();
   render();
+
+  // Resumen financiero
+  renderIngresosChart();
+  renderMorosidadPanel();
+  renderDonuts();
 }
 
 function setupRouter(){
@@ -226,13 +236,13 @@ function updateStatus(id,to){
   var i=DATA.findIndex(function(x){return x.id===id;}); if(i<0) return;
   if(DATA[i].status===to) return;
   if(!confirm((to==="APPROVED"?"Aprobar":"Rechazar")+" pago de "+DATA[i].student_name+"?")) return;
-  DATA[i].status=to; toast(to==="APPROVED"?"Pago aprobado":"Pago rechazado"); render();
+  DATA[i].status=to; toast(to==="APPROVED"?"Pago aprobado":"Pago rechazado"); render(); renderDonuts();
 }
 function bulkUpdate(to){
   if(state.sel.size===0) return;
   if(!confirm((to==="APPROVED"?"Aprobar":"Rechazar")+" "+state.sel.size+" seleccionado(s)?")) return;
   var c=0; DATA.forEach(function(r){ if(state.sel.has(r.id)&&r.status==="PENDING"){ r.status=to; c++; }});
-  toast(c+" registro(s) "+(to==="APPROVED"?"aprobado(s)":"rechazado(s)")); state.sel.clear(); var cb=$("#cb-all"); if(cb) cb.checked=false; render();
+  toast(c+" registro(s) "+(to==="APPROVED"?"aprobado(s)":"rechazado(s)")); state.sel.clear(); var cb=$("#cb-all"); if(cb) cb.checked=false; render(); renderDonuts();
 }
 function updateSelUI(){ var sc=$("#sel-count"); if(sc) sc.textContent=state.sel.size+" seleccionados"; }
 function exportCSV(){
@@ -240,6 +250,87 @@ function exportCSV(){
   var header=["Fecha","Alumno","RUT","Curso","Periodo","Monto","Estado","Método"];
   var body=rows.map(function(r){ return [r.created_at,r.student_name,r.student_rut,r.course_name,r.period,money(r.amount_clp),label(r.status),r.method]; });
   csvDownload("reporte_finanzas.csv",[header].concat(body));
+}
+
+/* ===== Gráfico columnas ===== */
+function renderIngresosChart(){
+  var ctx = document.getElementById("chart-ingresos"); if(!ctx || !window.Chart) return;
+  var meses = ["Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  var proyectado = new Array(meses.length).fill(10000000);
+  var recaudado  = [3000000,4200000,3600000,5200000,4800000,5400000,6000000,0,0,0];
+
+  new Chart(ctx.getContext("2d"),{
+    type:"bar",
+    data:{ labels:meses, datasets:[
+      { label:"Recaudado", data:recaudado, backgroundColor:"rgba(205,167,88,0.95)", borderColor:"#0F294C", borderWidth:1},
+      { label:"Proyectado", data:proyectado, backgroundColor:"rgba(15,41,76,0.18)", borderColor:"#0F294C", borderWidth:1}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true}},
+      scales:{ y:{ beginAtZero:true, ticks:{ callback:function(v){return "$"+new Intl.NumberFormat("es-CL").format(v);} } } } }
+  });
+}
+
+/* ===== Panel morosidad ===== */
+function renderMorosidadPanel(){
+  var totalAlumnos = 800, morosos = 120;
+  var pct = Math.round((morosos/totalAlumnos)*100);
+  var p = $("#moro-percent"); if(p) p.textContent = pct+"%";
+  var ul = $("#moro-breakdown"); if(!ul) return;
+  ul.innerHTML = MOROSIDAD_NIVELES.map(function(i){
+    return '<li><span>'+i.nivel+'</span><strong>'+i.pct+'%</strong></li>';
+  }).join("");
+}
+
+/* ===== Donuts ===== */
+var _donut1,_donut2;
+function renderDonuts(){
+  if(!window.Chart) return;
+  var counts = {APPROVED:0,PENDING:0,REJECTED:0};
+  DATA.forEach(function(p){ counts[p.status]++; });
+  var total = DATA.length||1;
+  var estadosData = [
+    Math.round(100*counts.APPROVED/total),
+    Math.round(100*counts.REJECTED/total),
+    Math.round(100*counts.PENDING/total)
+  ];
+  var estadosLabels = ["Aceptados","Rechazados","Pendientes"];
+
+  var mediosCnt = {};
+  DATA.forEach(function(p){ mediosCnt[p.method]=(mediosCnt[p.method]||0)+1; });
+  var mediosLabels = Object.keys(mediosCnt);
+  var mediosData = mediosLabels.map(function(k){ return Math.round(100*mediosCnt[k]/total); });
+
+  var ctx1 = document.getElementById("chart-estados");
+  var ctx2 = document.getElementById("chart-medios");
+  if(ctx1){
+    if(_donut1) _donut1.destroy();
+    var estColors = ["#16a34a","#ef4444","#f59e0b"];
+    _donut1 = new Chart(ctx1.getContext("2d"),{
+      type:"doughnut",
+      data:{ labels:estadosLabels, datasets:[{ data:estadosData, backgroundColor:estColors, borderColor:"#fff", borderWidth:2 }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:"62%"}
+    });
+    $("#legend-estados").innerHTML = estadosLabels.map(function(l,i){
+      return '<li><span><span class="dot" style="background:'+estColors[i]+'"></span>'+l+
+             '</span><strong>'+estadosData[i]+'%</strong></li>';
+    }).join("");
+  }
+  if(ctx2){
+    if(_donut2) _donut2.destroy();
+    var mediosColors = mediosLabels.map(function(_,i){ return i%2? "rgba(15,41,76,0.55)" : "#CDA758"; });
+    _donut2 = new Chart(ctx2.getContext("2d"),{
+      type:"doughnut",
+      data:{ labels:mediosLabels, datasets:[{ data:mediosData, backgroundColor:mediosColors, borderColor:"#fff", borderWidth:2 }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:"62%"}
+    });
+    $("#legend-medios").innerHTML = mediosLabels.map(function(l,i){
+      return '<li><span><span class="dot" style="background:'+mediosColors[i]+'"></span>'+l+
+             '</span><strong>'+mediosData[i]+'%</strong></li>';
+    }).join("");
+  }
+  var f = new Date().toLocaleDateString("es-CL");
+  var eu=$("#estado-update"); if(eu) eu.textContent="Actualizado al "+f;
+  var mu=$("#medios-update"); if(mu) mu.textContent="Actualizado al "+f;
 }
 
 /* Ingresos */

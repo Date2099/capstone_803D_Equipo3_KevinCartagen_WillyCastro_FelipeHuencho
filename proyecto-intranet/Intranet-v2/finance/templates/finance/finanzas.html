@@ -1,3 +1,4 @@
+<!-- templates/finanzas.html -->
 {% load static %}
 <!doctype html>
 <html lang="es">
@@ -14,18 +15,12 @@
   <aside class="sidebar" id="side">
     <div class="brand">
       <div class="logo">FZ</div>
-      <div class="brand-text">
-        <strong>Finanzas</strong>
-        <small>Colegio San Agustín</small>
-      </div>
+      <div class="brand-text"><strong>Finanzas</strong><small>Colegio San Agustín</small></div>
     </div>
 
     <div class="user">
       <div class="avatar">FA</div>
-      <div class="meta">
-        <strong>Finanzas Admin</strong>
-        <small>Administración</small>
-      </div>
+      <div class="meta"><strong>Finanzas Admin</strong><small>Administración</small></div>
     </div>
 
     <nav class="menu">
@@ -46,40 +41,52 @@
     <header class="topbar">
       <button id="btn-toggle" class="burger" aria-label="Menú"><span></span></button>
       <h1>Panel de Finanzas</h1>
-      <div class="top-actions">
-        <button id="btn-theme" class="btn ghost" type="button" title="Tema">Tema</button>
-      </div>
+      <div class="top-actions"><button id="btn-theme" class="btn ghost" type="button" title="Tema">Tema</button></div>
       <div class="top-user">FA</div>
     </header>
 
     <section class="content">
 
-      <!-- DASHBOARD -->
+      <!-- ===== DASHBOARD ===== -->
       <div id="sec-dashboard" class="view is-visible animate-in">
 
+        <!-- KPIs -->
         <div class="kpis">
-          <article class="kpi">
-            <div class="kpi-head">Ingresos del mes</div>
-            <div class="kpi-val odometer" id="kpi-ingresos" data-value="0">$0</div>
-            <div class="kpi-foot" id="kpi-periodo">Periodo —</div>
-          </article>
-          <article class="kpi">
-            <div class="kpi-head">Pendientes</div>
-            <div class="kpi-val odometer" id="kpi-pend" data-value="0">0</div>
-            <div class="kpi-foot">Por aprobar</div>
-          </article>
-          <article class="kpi">
-            <div class="kpi-head">Aprobados</div>
-            <div class="kpi-val odometer" id="kpi-apr" data-value="0">0</div>
-            <div class="kpi-foot">Validados</div>
-          </article>
-          <article class="kpi">
-            <div class="kpi-head">Rechazados</div>
-            <div class="kpi-val odometer" id="kpi-rej" data-value="0">0</div>
-            <div class="kpi-foot">Observados</div>
-          </article>
+          <article class="kpi"><div class="kpi-head">Ingresos del mes</div><div class="kpi-val odometer" id="kpi-ingresos" data-value="0">$0</div><div class="kpi-foot" id="kpi-periodo">Periodo —</div></article>
+          <article class="kpi"><div class="kpi-head">Pendientes</div><div class="kpi-val odometer" id="kpi-pend" data-value="0">0</div><div class="kpi-foot">Por aprobar</div></article>
+          <article class="kpi"><div class="kpi-head">Aprobados</div><div class="kpi-val odometer" id="kpi-apr" data-value="0">0</div><div class="kpi-foot">Validados</div></article>
+          <article class="kpi"><div class="kpi-head">Rechazados</div><div class="kpi-val odometer" id="kpi-rej" data-value="0">0</div><div class="kpi-foot">Observados</div></article>
         </div>
 
+        <!-- Resumen tipo LIRMI -->
+        <div class="grid-analytics">
+          <div class="card">
+            <div class="card-head"><h3>Ingresos proyectados vs recaudados</h3><small id="anio-lbl">Año 2025</small></div>
+            <div class="chart-wrap"><canvas id="chart-ingresos" aria-label="Ingresos"></canvas></div>
+          </div>
+
+          <aside class="card panel-morosidad">
+            <div class="card-head"><h3>Estudiantes morosos</h3></div>
+            <div class="moro-kpi"><span id="moro-percent">0%</span><small>del total</small></div>
+            <p class="moro-desc">Distribución por nivel.</p>
+            <ul class="moro-list" id="moro-breakdown"></ul>
+          </aside>
+        </div>
+
+        <div class="grid-analytics">
+          <div class="card">
+            <div class="card-head"><h3>Estados de pagos</h3><small id="estado-update">Actualizado</small></div>
+            <div class="donut-wrap"><canvas id="chart-estados"></canvas></div>
+            <ul class="legend" id="legend-estados"></ul>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Medios de pago</h3><small id="medios-update">Actualizado</small></div>
+            <div class="donut-wrap"><canvas id="chart-medios"></canvas></div>
+            <ul class="legend" id="legend-medios"></ul>
+          </div>
+        </div>
+
+        <!-- Tabla -->
         <div class="card">
           <div class="card-head sticky">
             <h3>Pagos registrados</h3>
@@ -98,9 +105,7 @@
               </select>
               <select id="f-month" title="Periodo"><option value="">Periodo</option></select>
               <input id="f-q" type="search" placeholder="Buscar alumno, curso o RUT" autocomplete="off">
-              <div class="filters-actions">
-                <button id="btn-export" class="btn" type="button"><i class="i"></i> Exportar CSV</button>
-              </div>
+              <div class="filters-actions"><button id="btn-export" class="btn" type="button"><i class="i"></i> Exportar CSV</button></div>
             </div>
           </div>
 
@@ -133,9 +138,7 @@
           <div class="pager">
             <div class="pager-left">
               <label>Tamaño
-                <select id="pg-size">
-                  <option>10</option><option selected>20</option><option>50</option>
-                </select>
+                <select id="pg-size"><option>10</option><option selected>20</option><option>50</option></select>
               </label>
               <span class="muted">Mostrando <b id="page-start">0</b>-<b id="page-end">0</b> de <b id="page-total">0</b></span>
             </div>
@@ -148,7 +151,7 @@
         </div>
       </div>
 
-      <!-- INGRESOS -->
+      <!-- ===== INGRESOS ===== -->
       <div id="sec-ingresos" class="view animate-in">
         <div class="card">
           <div class="card-head">
@@ -160,16 +163,13 @@
             </div>
           </div>
           <div class="table">
-            <div class="thead">
-              <span>Fecha</span><span>Alumno</span><span>Curso</span>
-              <span>Método</span><span>Periodo</span><span>Monto</span>
-            </div>
+            <div class="thead"><span>Fecha</span><span>Alumno</span><span>Curso</span><span>Método</span><span>Periodo</span><span>Monto</span></div>
             <div id="ing-tbody"></div>
           </div>
         </div>
       </div>
 
-      <!-- GASTOS -->
+      <!-- ===== GASTOS ===== -->
       <div id="sec-gastos" class="view animate-in">
         <div class="card">
           <div class="card-head">
@@ -181,16 +181,13 @@
             </div>
           </div>
           <div class="table">
-            <div class="thead">
-              <span>Fecha</span><span>Proveedor</span><span>Glosa</span>
-              <span>Centro de Costo</span><span>Documento</span><span>Monto</span>
-            </div>
+            <div class="thead"><span>Fecha</span><span>Proveedor</span><span>Glosa</span><span>Centro de Costo</span><span>Documento</span><span>Monto</span></div>
             <div id="gas-tbody"></div>
           </div>
         </div>
       </div>
 
-      <!-- REPORTES -->
+      <!-- ===== REPORTES ===== -->
       <div id="sec-reportes" class="view animate-in">
         <div class="kpis">
           <article class="kpi"><div class="kpi-head">Ingresos (muestra)</div><div class="kpi-val odometer" id="rep-ing" data-value="0">$0</div><div class="kpi-foot">Mes actual</div></article>
@@ -200,9 +197,7 @@
         </div>
 
         <div class="card">
-          <div class="card-head">
-            <h3>Exportación rápida</h3><span class="pill">CSV</span>
-          </div>
+          <div class="card-head"><h3>Exportación rápida</h3><span class="pill">CSV</span></div>
           <div class="filters-grid mid">
             <select id="rep-month"><option value="">Todos los meses</option></select>
             <select id="rep-type">
@@ -210,9 +205,7 @@
               <option value="ing">Solo ingresos</option>
               <option value="gas">Solo gastos</option>
             </select>
-            <div class="filters-actions">
-              <button id="rep-export" class="btn" type="button"><i class="i"></i> Descargar</button>
-            </div>
+            <div class="filters-actions"><button id="rep-export" class="btn" type="button"><i class="i"></i> Descargar</button></div>
           </div>
         </div>
       </div>
@@ -223,10 +216,7 @@
   <!-- Row template -->
   <template id="row-tpl">
     <div class="trow fade">
-      <span>
-        <label class="cb"><input type="checkbox" class="cb-row"></label>
-        <span data-k="created_at"></span>
-      </span>
+      <span><label class="cb"><input type="checkbox" class="cb-row"></label><span data-k="created_at"></span></span>
       <span data-k="student_name"></span>
       <span data-k="course_name"></span>
       <span class="muted" data-k="method"></span>
@@ -242,6 +232,7 @@
   </template>
 
   <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="{% static 'finance/finanzas.js' %}"></script>
 </body>
 </html>

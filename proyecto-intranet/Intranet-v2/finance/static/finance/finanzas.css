@@ -1,5 +1,5 @@
-/* Rework responsive + tema + animaciones */
-
+/* static/finance/finanzas.css */
+/* Rework responsive + tema + animaciones. Paleta colegio respetada. */
 :root{
   --navy:#0F294C; --navy-2:#0D2240; --gold:#CDA758; --gold-2:#E9D29B;
   --bg:#F5F6F8; --panel:#FFFFFF; --ink:#0f172a; --muted:#6B7280; --br:#E6E8EB;
@@ -13,8 +13,11 @@ body.theme-dark{
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);transition:background .2s,color .2s}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);
+  transition:background .2s,color .2s; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none
+}
 
 .finz-app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
 .main{display:flex;flex-direction:column;min-width:0}
@@ -24,7 +27,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);tran
 .sidebar{
   background:linear-gradient(180deg,var(--navy),var(--navy-2));
   color:#e9eef9; display:flex; flex-direction:column; gap:16px; padding:18px;
-  z-index:10;
+  z-index:100; will-change:transform;
 }
 .brand{display:flex;gap:12px;align-items:center}
 .logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
@@ -47,14 +50,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);tran
 .drawer-backdrop{
   position:fixed; inset:0; background:rgba(2,6,23,.35);
   backdrop-filter:saturate(120%) blur(2px);
-  opacity:0; pointer-events:none; transition:.18s; z-index:9;
+  opacity:0; pointer-events:none; transition:.18s; z-index:90;
 }
 .drawer-backdrop.show{opacity:1; pointer-events:auto}
 
 /* Topbar */
 .topbar{
   height:64px; background:var(--panel); border-bottom:1px solid var(--br);
-  display:flex; align-items:center; gap:12px; padding:0 18px; position:sticky; top:0; z-index:3;
+  display:flex; align-items:center; gap:12px; padding:0 18px env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  position:sticky; top:0; z-index:3;
 }
 .burger{width:38px;height:38px;border-radius:10px;border:1px solid var(--br);background:var(--panel);cursor:pointer}
 .burger span,.burger span::before,.burger span::after{display:block;width:18px;height:2px;background:var(--ink);margin:0 auto;content:""}
@@ -87,6 +91,22 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);tran
 .kpi-foot{color:var(--muted);font-size:12px;margin-top:2px}
 @keyframes pop{from{transform:scale(.98);opacity:.5}to{transform:scale(1);opacity:1}}
 
+/* Resumen analítico tipo LIRMI */
+.grid-analytics{display:grid;grid-template-columns:1.7fr 1fr;gap:16px}
+.chart-wrap{width:100%;height:320px}
+.panel-morosidad{background:#fdeef3;border-color:#f8cfe0}
+.moro-kpi{display:flex;align-items:baseline;gap:8px}
+.moro-kpi span{font-size:32px;font-weight:800;color:#b4235a}
+.moro-desc{color:#6b0f2d;margin:6px 0 10px}
+.moro-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.moro-list li{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--br);border-radius:12px;padding:8px 10px}
+
+/* Donuts y leyendas */
+.donut-wrap{width:100%;height:260px}
+.legend{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.legend li{display:flex;justify-content:space-between;align-items:center}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+
 /* Filters */
 .filters-grid{display:grid;grid-template-columns:160px 160px 160px 1fr auto;gap:10px}
 .filters-grid.short{grid-template-columns:160px 1fr auto}
@@ -94,12 +114,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);tran
 .filters-actions{display:flex;gap:8px;justify-content:flex-end}
 input[type="search"], select{
   border:1px solid var(--br); background:var(--panel); color:var(--ink);
-  border-radius:12px; padding:10px 12px; min-height:40px; width:100%; transition:box-shadow .15s,border .15s
+  border-radius:12px; padding:10px 12px; min-height:40px; width:100%; transition:box-shadow .15s,border .15s;
+  -webkit-appearance:none; appearance:none;
 }
 input[type="search"]:focus, select:focus{outline:none;box-shadow:0 0 0 3px rgba(205,167,88,.25);border-color:var(--gold)}
 
-/* Bulk bar */
-.bulkbar{display:flex;align-items:center;justify-content:space-between;border:1px dashed var(--br);border-radius:12px;padding:10px;margin:8px 0}
+/* Bulk bar (desktop por defecto) */
+.bulkbar{display:flex;align-items:center;justify-content:space-between;border:1px dashed var(--br);border-radius:12px;padding:10px;margin:8px 0; position:static;width:100%}
 .cb{display:inline-flex;align-items:center;gap:8px}
 
 /* Tabla */
@@ -130,7 +151,7 @@ input[type="search"]:focus, select:focus{outline:none;box-shadow:0 0 0 3px rgba(
 
 /* Toast */
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);
-  background:#0b1220;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 10px 26px rgba(2,6,23,.25);z-index:10}
+  background:#0b1220;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 10px 26px rgba(2,6,23,.25);z-index:200}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Views */
@@ -145,9 +166,12 @@ body.nav-collapsed .brand-text,
 body.nav-collapsed .user .meta,
 body.nav-collapsed .menu .item span{display:none}
 
-/* ===== Mobile <640px: drawer + tarjetas ===== */
+/* ===== Mobile <640px: optimizado ===== */
 @media (max-width:640px){
   .finz-app{grid-template-columns:1fr}
+  body.nav-open{overflow:hidden}
+
+  /* Sidebar como drawer */
   .sidebar{
     position:fixed; left:0; top:0; bottom:0; width:86%;
     max-width:320px; transform:translateX(-100%);
@@ -155,40 +179,82 @@ body.nav-collapsed .menu .item span{display:none}
   }
   body.nav-open .sidebar{transform:translateX(0)}
   body.nav-open .drawer-backdrop{display:block}
-  .topbar{position:sticky; top:0}
-  .burger{width:42px;height:42px}
+
+  /* Topbar con áreas seguras */
+  .topbar{position:sticky; top:0; padding-right:calc(18px + env(safe-area-inset-right)); padding-left:calc(18px + env(safe-area-inset-left))}
+  .burger{width:44px;height:44px}
   .top-actions{display:none}
-  .content{padding:14px; gap:14px}
-  .kpis{grid-template-columns:1fr; gap:12px}
+
+  /* Layout y tarjetas */
+  .content{padding:12px; gap:12px}
+  .kpis{grid-template-columns:1fr; gap:10px}
   .kpi{padding:12px 14px}
   .kpi-val{font-size:24px}
+
+  /* Resumen analítico */
+  .grid-analytics{grid-template-columns:1fr}
+  .chart-wrap{height:220px}
+
+  /* Filtros en columna y botones anchos */
   .filters-grid,
   .filters-grid.short,
   .filters-grid.mid{grid-template-columns:1fr; gap:8px}
   .filters-actions{justify-content:stretch}
   .filters-actions .btn{width:100%}
+  select, input[type="search"]{min-height:44px; font-size:16px}
+
+  /* Tabla -> tarjetas legibles */
   .thead{display:none}
   #tbody .trow{
     display:grid; grid-template-columns:1fr;
-    gap:10px; padding:12px 14px; border-top:1px solid var(--br);
+    gap:8px; padding:10px 12px; border-top:1px solid var(--br);
+    background:var(--panel);
   }
+  /* Etiqueta a la izquierda, valor a la derecha */
   #tbody .trow > span[data-k],
   #tbody .trow > span.muted,
-  #tbody .trow > span.mono{display:flex; justify-content:space-between; align-items:center}
-  #tbody .trow [data-k="created_at"]::before{content:"Fecha"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="student_name"]::before{content:"Alumno"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="course_name"]::before{content:"Curso"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="method"]::before{content:"Método"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="period"]::before{content:"Periodo"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="amount_fmt"]::before{content:"Monto"; color:var(--muted); margin-right:8px}
-  #tbody .trow [data-k="status_label"]::before{content:"Estado"; color:var(--muted); margin-right:8px}
-  .row-actions{grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  #tbody .trow > span.mono{
+    display:grid; grid-template-columns:96px 1fr; align-items:center; column-gap:8px;
+    min-height:28px; word-break:break-word;
+  }
+  #tbody .trow > span[data-k]::before,
+  #tbody .trow > span.muted::before,
+  #tbody .trow > span.mono::before{justify-self:start; color:var(--muted); font-weight:600}
+  #tbody .trow [data-k="created_at"]::before{content:"Fecha"}
+  #tbody .trow [data-k="student_name"]::before{content:"Alumno"}
+  #tbody .trow [data-k="course_name"]::before{content:"Curso"}
+  #tbody .trow [data-k="method"]::before{content:"Método"}
+  #tbody .trow [data-k="period"]::before{content:"Periodo"}
+  #tbody .trow [data-k="amount_fmt"]::before{content:"Monto"}
+  /* Estado con espacio correcto */
+  #tbody .trow [data-k="status_label"]{display:grid; grid-template-columns:96px 1fr; align-items:center; column-gap:8px}
+  #tbody .trow [data-k="status_label"]::before{content:"Estado"; color:var(--muted); font-weight:600}
+
+  /* Acciones por fila */
+  .row-actions{grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:2px}
+  .row-actions .btn{min-height:42px}
   .row-actions .btn.ghost{grid-column:1/-1}
-  .pager{flex-direction:column; align-items:stretch; gap:8px}
+
+  /* Barra masiva fija al fondo */
+  .card{padding-bottom:88px} /* reserva de espacio */
+  .bulkbar{
+    position:sticky; bottom:0; left:0; right:0;
+    margin:12px -16px 0; padding:10px 12px;
+    background:var(--panel); z-index:6;
+    border:1px dashed var(--br); border-radius:0 0 12px 12px;
+    box-shadow:0 -8px 18px rgba(2,6,23,.10);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 10px);
+  }
+  .bulkbar .btn{min-height:42px}
+  .bulkbar .btn.ghost{display:none} /* oculta botón duplicado en móvil */
+
+  /* Paginación */
+  .pager{flex-direction:column; align-items:stretch; gap:8px; padding-bottom:8px}
   .pager-left{display:flex; justify-content:space-between; align-items:center}
   .pager-right{display:flex; gap:8px; justify-content:space-between}
   .pager .btn{flex:1}
-  select, input[type="search"]{min-height:44px; font-size:16px}
+
+  /* Botones táctiles globales */
   .btn{min-height:44px}
 }
 
@@ -204,3 +270,43 @@ body.nav-collapsed .menu .item span{display:none}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .thead,.trow{grid-template-columns:200px 1fr .9fr 110px 110px 110px 120px 200px}
 }
+
+/* Movimiento reducido */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+/* ===== Ingresos (móvil) ===== */
+#ing-tbody .trow{
+  display:grid; grid-template-columns:1fr;
+  gap:8px; padding:10px 12px; border:1px solid var(--br);
+  border-radius:12px; margin-bottom:10px; background:var(--panel);
+}
+#ing-tbody .trow > span{
+  display:grid; grid-template-columns:96px 1fr; column-gap:8px; align-items:center;
+  min-height:28px; word-break:break-word;
+}
+#ing-tbody .trow > span::before{color:var(--muted); font-weight:600}
+#ing-tbody .trow > span:nth-child(1)::before{content:"Fecha"}
+#ing-tbody .trow > span:nth-child(2)::before{content:"Alumno"}
+#ing-tbody .trow > span:nth-child(3)::before{content:"Curso"}
+#ing-tbody .trow > span:nth-child(4)::before{content:"Método"}
+#ing-tbody .trow > span:nth-child(5)::before{content:"Periodo"}
+#ing-tbody .trow > span:nth-child(6)::before{content:"Monto"}
+
+/* ===== Gastos (móvil) ===== */
+#gas-tbody .trow{
+  display:grid; grid-template-columns:1fr;
+  gap:8px; padding:10px 12px; border:1px solid var(--br);
+  border-radius:12px; margin-bottom:10px; background:var(--panel);
+}
+#gas-tbody .trow > span{
+  display:grid; grid-template-columns:130px 1fr; column-gap:8px; align-items:center;
+  min-height:28px; word-break:break-word;
+}
+#gas-tbody .trow > span::before{color:var(--muted); font-weight:600}
+#gas-tbody .trow > span:nth-child(1)::before{content:"Fecha"}
+#gas-tbody .trow > span:nth-child(2)::before{content:"Proveedor"}
+#gas-tbody .trow > span:nth-child(3)::before{content:"Glosa"}
+#gas-tbody .trow > span:nth-child(4)::before{content:"Centro de Costo"}
+#gas-tbody .trow > span:nth-child(5)::before{content:"Documento"}
+#gas-tbody .trow > span:nth-child(6)::before{content:"Monto"}
