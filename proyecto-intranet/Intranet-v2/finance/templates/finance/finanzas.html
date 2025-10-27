@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Finanzas · Colegio San Agustín</title>
+  <link rel="icon" href="{% static 'finance/favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'finance/finanzas.css' %}">
 </head>
 <body class="finz-app">
@@ -28,63 +29,59 @@
     </div>
 
     <nav class="menu">
-      <a href="#" class="item active" data-section="dashboard">
-        <i class="i"></i><span>Dashboard</span>
-      </a>
-      <a href="#" class="item" data-section="ingresos">
-        <i class="i"></i><span>Ingresos</span>
-      </a>
-      <a href="#" class="item" data-section="gastos">
-        <i class="i"></i><span>Gastos</span>
-      </a>
-      <a href="#" class="item" data-section="reportes">
-        <i class="i"></i><span>Reportes</span>
-      </a>
+      <a href="#" class="item active" data-section="dashboard"><i class="i"></i><span>Dashboard</span></a>
+      <a href="#" class="item" data-section="ingresos"><i class="i"></i><span>Ingresos</span></a>
+      <a href="#" class="item" data-section="gastos"><i class="i"></i><span>Gastos</span></a>
+      <a href="#" class="item" data-section="reportes"><i class="i"></i><span>Reportes</span></a>
     </nav>
 
-    <footer class="side-foot">
-      <small>© San Agustín 2025</small>
-    </footer>
+    <footer class="side-foot"><small>© San Agustín 2025</small></footer>
   </aside>
+
+  <!-- Backdrop para drawer móvil -->
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
 
   <!-- Main -->
   <main class="main">
     <header class="topbar">
       <button id="btn-toggle" class="burger" aria-label="Menú"><span></span></button>
       <h1>Panel de Finanzas</h1>
+      <div class="top-actions">
+        <button id="btn-theme" class="btn ghost" type="button" title="Tema">Tema</button>
+      </div>
       <div class="top-user">FA</div>
     </header>
 
     <section class="content">
 
-      <!-- ================= Dashboard ================= -->
-      <div id="sec-dashboard" class="view is-visible">
+      <!-- DASHBOARD -->
+      <div id="sec-dashboard" class="view is-visible animate-in">
 
         <div class="kpis">
           <article class="kpi">
             <div class="kpi-head">Ingresos del mes</div>
-            <div class="kpi-val" id="kpi-ingresos">$0</div>
+            <div class="kpi-val odometer" id="kpi-ingresos" data-value="0">$0</div>
             <div class="kpi-foot" id="kpi-periodo">Periodo —</div>
           </article>
           <article class="kpi">
             <div class="kpi-head">Pendientes</div>
-            <div class="kpi-val" id="kpi-pend">0</div>
+            <div class="kpi-val odometer" id="kpi-pend" data-value="0">0</div>
             <div class="kpi-foot">Por aprobar</div>
           </article>
           <article class="kpi">
             <div class="kpi-head">Aprobados</div>
-            <div class="kpi-val" id="kpi-apr">0</div>
+            <div class="kpi-val odometer" id="kpi-apr" data-value="0">0</div>
             <div class="kpi-foot">Validados</div>
           </article>
           <article class="kpi">
             <div class="kpi-head">Rechazados</div>
-            <div class="kpi-val" id="kpi-rej">0</div>
+            <div class="kpi-val odometer" id="kpi-rej" data-value="0">0</div>
             <div class="kpi-foot">Observados</div>
           </article>
         </div>
 
         <div class="card">
-          <div class="card-head">
+          <div class="card-head sticky">
             <h3>Pagos registrados</h3>
             <div class="filters-grid">
               <select id="f-status" title="Estado">
@@ -100,9 +97,9 @@
                 <option value="Efectivo">Efectivo</option>
               </select>
               <select id="f-month" title="Periodo"><option value="">Periodo</option></select>
-              <input id="f-q" type="search" placeholder="Buscar alumno, curso o RUT">
+              <input id="f-q" type="search" placeholder="Buscar alumno, curso o RUT" autocomplete="off">
               <div class="filters-actions">
-                <button id="btn-export" class="btn"><i class="i"></i> Exportar CSV</button>
+                <button id="btn-export" class="btn" type="button"><i class="i"></i> Exportar CSV</button>
               </div>
             </div>
           </div>
@@ -129,7 +126,7 @@
               <span>Acciones</span>
             </div>
             <div id="tbody"></div>
-            <div id="empty" class="empty" hidden>No hay registros</div>
+            <div id="empty" class="empty fade" hidden>No hay registros</div>
             <div id="skeleton" class="skeleton" hidden></div>
           </div>
 
@@ -151,15 +148,15 @@
         </div>
       </div>
 
-      <!-- ================= Ingresos ================= -->
-      <div id="sec-ingresos" class="view">
+      <!-- INGRESOS -->
+      <div id="sec-ingresos" class="view animate-in">
         <div class="card">
           <div class="card-head">
             <h3>Ingresos (muestra)</h3>
-            <div class="filters-grid" style="grid-template-columns:160px 1fr auto">
+            <div class="filters-grid short">
               <select id="ing-month"><option value="">Todos los meses</option></select>
               <input id="ing-q" type="search" placeholder="Buscar alumno, curso o RUT">
-              <button id="ing-export" class="btn"><i class="i"></i> Exportar CSV</button>
+              <button id="ing-export" class="btn" type="button"><i class="i"></i> Exportar CSV</button>
             </div>
           </div>
           <div class="table">
@@ -172,15 +169,15 @@
         </div>
       </div>
 
-      <!-- ================= Gastos ================= -->
-      <div id="sec-gastos" class="view">
+      <!-- GASTOS -->
+      <div id="sec-gastos" class="view animate-in">
         <div class="card">
           <div class="card-head">
             <h3>Gastos (muestra)</h3>
-            <div class="filters-grid" style="grid-template-columns:200px 1fr auto">
+            <div class="filters-grid mid">
               <select id="gas-cc"><option value="">Todos los Centros de Costo</option></select>
               <input id="gas-q" type="search" placeholder="Buscar proveedor o glosa">
-              <button id="gas-export" class="btn"><i class="i"></i> Exportar CSV</button>
+              <button id="gas-export" class="btn" type="button"><i class="i"></i> Exportar CSV</button>
             </div>
           </div>
           <div class="table">
@@ -193,21 +190,20 @@
         </div>
       </div>
 
-      <!-- ================= Reportes ================= -->
-      <div id="sec-reportes" class="view">
+      <!-- REPORTES -->
+      <div id="sec-reportes" class="view animate-in">
         <div class="kpis">
-          <article class="kpi"><div class="kpi-head">Ingresos (muestra)</div><div class="kpi-val" id="rep-ing">$0</div><div class="kpi-foot">Mes actual</div></article>
-          <article class="kpi"><div class="kpi-head">Gastos (muestra)</div><div class="kpi-val" id="rep-gas">$0</div><div class="kpi-foot">Mes actual</div></article>
-          <article class="kpi"><div class="kpi-head">Resultado</div><div class="kpi-val" id="rep-res">$0</div><div class="kpi-foot">Ingresos – Gastos</div></article>
-          <article class="kpi"><div class="kpi-head">Transacciones</div><div class="kpi-val" id="rep-tx">0</div><div class="kpi-foot">Total</div></article>
+          <article class="kpi"><div class="kpi-head">Ingresos (muestra)</div><div class="kpi-val odometer" id="rep-ing" data-value="0">$0</div><div class="kpi-foot">Mes actual</div></article>
+          <article class="kpi"><div class="kpi-head">Gastos (muestra)</div><div class="kpi-val odometer" id="rep-gas" data-value="0">$0</div><div class="kpi-foot">Mes actual</div></article>
+          <article class="kpi"><div class="kpi-head">Resultado</div><div class="kpi-val odometer" id="rep-res" data-value="0">$0</div><div class="kpi-foot">Ingresos – Gastos</div></article>
+          <article class="kpi"><div class="kpi-head">Transacciones</div><div class="kpi-val odometer" id="rep-tx" data-value="0">0</div><div class="kpi-foot">Total</div></article>
         </div>
 
         <div class="card">
           <div class="card-head">
-            <h3>Exportación rápida</h3>
-            <span class="pill">CSV</span>
+            <h3>Exportación rápida</h3><span class="pill">CSV</span>
           </div>
-          <div class="filters-grid" style="grid-template-columns:160px 160px auto">
+          <div class="filters-grid mid">
             <select id="rep-month"><option value="">Todos los meses</option></select>
             <select id="rep-type">
               <option value="all">Ingresos + Gastos</option>
@@ -215,7 +211,7 @@
               <option value="gas">Solo gastos</option>
             </select>
             <div class="filters-actions">
-              <button id="rep-export" class="btn"><i class="i"></i> Descargar</button>
+              <button id="rep-export" class="btn" type="button"><i class="i"></i> Descargar</button>
             </div>
           </div>
         </div>
@@ -224,9 +220,9 @@
     </section>
   </main>
 
-  <!-- Row template para Dashboard -->
+  <!-- Row template -->
   <template id="row-tpl">
-    <div class="trow">
+    <div class="trow fade">
       <span>
         <label class="cb"><input type="checkbox" class="cb-row"></label>
         <span data-k="created_at"></span>
@@ -245,9 +241,7 @@
     </div>
   </template>
 
-  <!-- Toast -->
   <div id="toast" class="toast"></div>
-
   <script src="{% static 'finance/finanzas.js' %}"></script>
 </body>
 </html>
