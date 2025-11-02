@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserMa
 # ==========================
 #  User Manager (usa RUT)
 # ==========================
-from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
+
 
 class CustomUserManager(DjangoUserManager):
     use_in_migrations = True
@@ -15,9 +15,6 @@ class CustomUserManager(DjangoUserManager):
         if not rut:
             raise ValueError("El RUT es obligatorio")
         email = self.normalize_email(email)
-
-        # ❌ NO seteamos 'username' porque NO existe en tu modelo
-        # extra_fields.setdefault("username", str(rut))
 
         user = self.model(rut=str(rut).strip(), email=email, **extra_fields)
         user.set_password(password)
@@ -170,7 +167,7 @@ class Subject(models.Model):
 
 
 class SubjectSchedule(models.Model):
-    # Días de la semana: 0=Lunes ... 4=Viernes
+   
     MON, TUE, WED, THU, FRI = range(5)
     DOW_CHOICES = [
         (MON, "Lunes"),
@@ -181,7 +178,7 @@ class SubjectSchedule(models.Model):
     ]
 
     subject = models.ForeignKey(
-        "core.Subject",  # o Subject si está en el mismo archivo
+        "core.Subject",  
         on_delete=models.CASCADE,
         related_name="schedules",
     )

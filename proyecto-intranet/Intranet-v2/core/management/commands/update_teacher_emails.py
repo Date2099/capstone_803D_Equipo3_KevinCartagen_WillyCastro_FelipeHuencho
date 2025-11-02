@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand
-from studentView.models import User
+from core.models import User
 
 class Command(BaseCommand):
     help = "Actualiza los correos electrónicos de los profesores desde el archivo CSV."
