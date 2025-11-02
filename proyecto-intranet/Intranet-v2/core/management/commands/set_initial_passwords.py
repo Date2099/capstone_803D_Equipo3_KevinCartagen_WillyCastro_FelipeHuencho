@@ -3,7 +3,7 @@ import re
 import csv
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from studentView.models import User
+from core.models import User
 
 def strip_accents(s: str) -> str:
     if not s:

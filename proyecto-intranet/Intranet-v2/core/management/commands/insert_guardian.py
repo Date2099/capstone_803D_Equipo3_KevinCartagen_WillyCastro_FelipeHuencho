@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand
-from studentView.models import User, GuardianRelation
+from core.models import User, GuardianRelation
 
 class Command(BaseCommand):
     help = 'Importa apoderados desde un archivo CSV y los asocia con sus alumnos.'
