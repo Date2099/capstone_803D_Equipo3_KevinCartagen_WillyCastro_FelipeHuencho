@@ -1471,3 +1471,483 @@ tbody tr:last-child .cal-day { border-bottom: 0; }
  /*   --shadow-sm: 0 6px 18px rgba(2, 6, 23, .25); */
  /*   --shadow-md: 0 12px 30px rgba(2, 6, 23, .32); */
  /* } */
+
+/* =============================================================================
+   SECCIÓN 3: Reset Básico y Estilos Globales
+   =============================================================================
+   Normalización y reglas base aplicables a toda la app.
+*/
+ /* *, *::before, *::after { */
+ /*   box-sizing: border-box; */  /* Simplifica cálculos de tamaño (incluye padding y border) */
+ /*   margin: 0; */
+ /*   padding: 0; */
+ /* } */
+
+ /* html { */
+ /*   -webkit-text-size-adjust: 100%; */ /* Evita zoom de texto en iOS */
+ /*   scroll-behavior: smooth; */        /* Scroll suave para anclas */
+ /* } */
+
+ /* body { */
+ /*   height: 100%; */
+ /*   font-family: var(--font); */      /* Fuente principal */
+ /*   font-size: 0.9375rem; */          /* 15px base */
+ /*   line-height: 1.5; */
+ /*   background: linear-gradient(180deg, var(--bg), var(--bg-gradient-end)); */
+ /*   color: var(--ink); */
+ /*   -webkit-font-smoothing: antialiased; */
+ /*   -moz-osx-font-smoothing: grayscale; */
+ /* } */
+
+ /* img, picture, video, canvas, svg { */
+ /*   display: block; */
+ /*   max-width: 100%; */               /* Hace los medios responsivos */
+ /* } */
+
+ /* input, button, textarea, select { */
+ /*   font: inherit; */
+ /*   border: none; */
+ /*   outline: none; */
+ /* } */
+
+ /* h1, h2, h3, h4, h5, h6 { */
+ /*   text-wrap: balance; */
+ /*   font-weight: 800; */
+ /* } */
+
+ /* p { */
+ /*   text-wrap: pretty; */
+ /* } */
+
+ /* a { text-decoration: none; color: inherit; } */
+ /* ul, ol { list-style: none; } */
+
+ /* @media (prefers-reduced-motion: reduce) { */
+ /*   html { scroll-behavior: auto; } */
+ /*   * { */
+ /*     animation-duration: .01ms !important; */
+ /*     animation-iteration-count: 1 !important; */
+ /*     transition-duration: .01ms !important; */
+ /*   } */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 4: Layout General
+   =============================================================================
+   Estructura principal: .layout (sidebar + main), .main (topbar + content + footer)
+*/
+ /* .layout { */
+ /*   display: flex; */               /* Sidebar a la izquierda, contenido a la derecha */
+ /*   min-height: 100vh; */
+ /* } */
+
+ /* .main { */
+ /*   flex: 1; */
+ /*   display: flex; */
+ /*   flex-direction: column; */      /* Topbar encima, content en medio, footer abajo */
+ /*   min-width: 0; */               /* Previene overflow horizontal en flex children */
+ /* } */
+
+ /* .content { */
+ /*   padding: 1.25rem; */           /* Espaciado interior */
+ /*   flex: 1; */                    /* Toma espacio restante */
+ /* } */
+
+ /* .footer { */
+ /*   padding: 1rem; */
+ /*   text-align: center; */
+ /*   color: var(--muted); */
+ /*   font-size: .9rem; */
+ /*   border-top: 1px solid var(--border); */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 5: Sidebar (Barra Lateral)
+   =============================================================================
+   Reglas para sidebar: brand, profile, menu y footer. Foco en accesibilidad y
+   comportamiento móvil (ocultable).
+*/
+ /* .sidebar { */
+ /*   width: var(--sidebar-w); */
+ /*   flex-shrink: 0; */
+ /*   height: 100vh; */
+ /*   position: sticky; */
+ /*   top: 0; */
+ /*   background: linear-gradient(180deg, var(--primary), #172d56); */
+ /*   color: #fff; */
+ /*   display: flex; */
+ /*   flex-direction: column; */
+ /*   box-shadow: var(--shadow-md); */
+ /*   transform: translateZ(0); */   /* Mejora rendimiento de transformaciones */
+ /*   transition: transform var(--transition-lg) ease; */
+ /*   z-index: 50; */
+ /* } */
+
+ /* .brand { */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: .75rem; */
+ /*   padding: 1rem; */
+ /*   border-bottom: 1px solid rgba(255, 255, 255, .08); */
+ /*   font-weight: 800; */
+ /*   font-size: 1.1rem; */
+ /* } */
+ /* .brand i { color: var(--accent); } */ /* Ícono con color de acento */
+
+ /* .profile { */
+ /*   display: flex; */
+ /*   gap: .85rem; */
+ /*   align-items: center; */
+ /*   padding: 1rem; */
+ /*   border-bottom: 1px solid rgba(255, 255, 255, .06); */
+ /* } */
+
+ /* .avatar { */
+ /*   width: 52px; */
+ /*   height: 52px; */
+ /*   border-radius: var(--radius-lg); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   background: linear-gradient(135deg, var(--accent), var(--accent-2)); */
+ /*   color: #2a2312; */
+ /*   font-weight: 900; */
+ /*   flex-shrink: 0; */
+ /* } */
+
+ /* .profile-info { min-width: 0; } */
+
+ /* .profile-name { */
+ /*   font-weight: 800; */
+ /*   white-space: nowrap; */
+ /*   overflow: hidden; */
+ /*   text-overflow: ellipsis; */
+ /* } */
+
+ /* .role { */
+ /*   font-size: .85rem; */
+ /*   color: rgba(255, 255, 255, .88); */
+ /*   white-space: nowrap; */
+ /*   overflow: hidden; */
+ /*   text-overflow: ellipsis; */
+ /* } */
+
+ /* .menu { */
+ /*   padding: .6rem 0; */
+ /*   display: flex; */
+ /*   flex-direction: column; */
+ /*   gap: 0.375rem; */ /* 6px */
+ /*   margin-top: .4rem; */
+ /*   overflow: auto; */ /* Permite scroll interno si hay muchos items */
+ /* } */
+
+ /* .menu a { */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: .85rem; */
+ /*   padding: .75rem 1rem; */
+ /*   margin: 0 .6rem; */
+ /*   border-radius: var(--radius-md); */
+ /*   color: rgba(255, 255, 255, .95); */
+ /*   text-decoration: none; */
+ /*   font-weight: 600; */
+ /*   transition: all var(--transition-md); */
+ /*   position: relative; */
+ /*   isolation: isolate; */
+ /* } */
+
+ /* .menu a i { */
+ /*   width: 40px; */
+ /*   height: 40px; */
+ /*   border-radius: var(--radius-input); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   flex-shrink: 0; */
+ /* } */
+
+ /* .menu a:hover { */
+ /*   transform: translateX(6px); */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   box-shadow: var(--shadow-sm); */
+ /* } */
+
+ /* .menu a.active { */
+ /*   background: #fff; */
+ /*   color: var(--primary); */
+ /*   font-weight: 800; */
+ /*   box-shadow: 0 10px 30px rgba(13, 37, 82, .06); */
+ /* } */
+
+ /* .menu a.active i { */
+ /*   background: linear-gradient(135deg, var(--primary), var(--accent)); */
+ /*   color: #fff; */
+ /* } */
+
+ /* .side-footer { margin-top: auto; padding: 1rem; } */
+
+ /* .btn-ghost { */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   border: 1px solid rgba(255, 255, 255, .16); */
+ /*   color: #fff; */
+ /*   width: 100%; */
+ /*   text-align: center; */
+ /*   gap: 0.5rem; */
+ /*   display: inline-flex; */
+ /*   justify-content: center; */
+ /*   align-items: center; */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 6: Topbar (Barra Superior)
+   =============================================================================
+   Topbar con efecto "frosted glass" y controles (toggle, título, perfil).
+*/
+ /* .topbar { */
+ /*   height: 64px; */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: 1rem; */
+ /*   padding: 0 1rem; */
+ /*   border-bottom: 1px solid var(--border); */
+ /*   background: color-mix(in srgb, var(--panel) 88%, transparent); */
+ /*   backdrop-filter: saturate(140%) blur(6px); */
+ /*   position: sticky; */
+ /*   top: 0; */
+ /*   z-index: 10; */
+ /* } */
+
+ /* .toggle { */
+ /*   background: transparent; */
+ /*   border: 0; */
+ /*   color: var(--ink); */
+ /*   font-size: 1.1rem; */
+ /*   padding: .5rem; */
+ /*   border-radius: var(--radius-input); */
+ /*   cursor: pointer; */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /* } */
+
+ /* .topbar-title { */
+ /*   font-weight: 800; */
+ /*   font-size: 1.25rem; */
+ /*   margin: 0; */
+ /* } */
+
+ /* .spacer { flex: 1; } */
+
+ /* .user-mini { display: flex; align-items: center; gap: .6rem; } */
+
+ /* .avatar-mini { */
+ /*   width: 36px; */
+ /*   height: 36px; */
+ /*   border-radius: var(--radius-input); */
+ /*   background: linear-gradient(135deg, var(--primary), var(--accent)); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   color: #fff; */
+ /*   font-weight: 800; */
+ /* } */
+
+ /* .user-mini-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; } */
+
+/* =============================================================================
+   SECCIÓN 7: Componentes - Cards, Formularios, Botones
+   =============================================================================
+   Definición de tarjetas, botones principales/ secundarios y campos de formulario.
+*/
+ /* .card { */
+ /*   background: var(--panel); */
+ /*   border-radius: var(--radius-md); */
+ /*   padding: 1rem; */
+ /*   box-shadow: var(--shadow-md); */
+ /*   border: 1px solid var(--border); */
+ /* } */
+
+ /* .card h3 { margin: 0 0 .75rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; } */
+
+ /* .btn { */
+ /*   background: linear-gradient(90deg, var(--primary), var(--accent)); */
+ /*   color: #fff; */
+ /*   border: 0; */
+ /*   padding: .55rem .9rem; */
+ /*   border-radius: var(--radius-md); */
+ /*   font-weight: 800; */
+ /*   cursor: pointer; */
+ /*   box-shadow: 0 10px 26px rgba(13, 37, 82, .12); */
+ /*   transition: all var(--transition-md); */
+ /* } */
+
+ /* .btn:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(13, 37, 82, .16); } */
+ /* .btn:active { transform: translateY(-1px); } */
+
+ /* .btn.btn-secondary { */
+ /*   background: var(--panel); */
+ /*   color: var(--primary); */
+ /*   border: 1px solid var(--border); */
+ /*   box-shadow: none; */
+ /* } */
+ /* :root[data-theme="dark"] .btn.btn-secondary { color: var(--ink); } */
+
+ /* input[type="text"], input[type="date"], input[type="number"], input[type="search"], input[type="email"], input[type="tel"], select, textarea { */
+ /*   background: var(--panel-2); */
+ /*   border: 1px solid var(--border); */
+ /*   padding: .6rem .75rem; */
+ /*   border-radius: var(--radius-input); */
+ /*   font-size: .95rem; */
+ /*   outline: none; */
+ /*   transition: all var(--transition-sm); */
+ /*   color: var(--ink-2); */
+ /*   width: 100%; */
+ /* } */
+ /* :root[data-theme="dark"] input, :root[data-theme="dark"] select, :root[data-theme="dark"] textarea { background: var(--bg); color: var(--ink); } */
+
+ /* input:focus, select:focus, textarea:focus { */
+ /*   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); */
+ /*   border-color: var(--accent); */
+ /* } */
+
+ /* .view-controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; } */
+ /* .view-controls .search-wrapper { flex: 1; position: relative; min-width: 200px; } */
+ /* .view-controls .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; } */
+ /* .view-controls input[type="search"] { width: 100%; padding-left: 36px; background: var(--panel); } */
+
+/* =============================================================================
+   SECCIÓN 8: Componentes Específicos (Tablas, KPI, Gráficos)
+   =============================================================================
+*/
+ /* .table-wrapper { overflow-x: auto; border-radius: var(--radius-input); border: 1px solid var(--border); } */
+
+ /* .data-table { width: 100%; border-collapse: collapse; min-width: 640px; } */
+ /* .data-table th, .data-table td { padding: .78rem .9rem; border-bottom: 1px solid var(--border); text-align: center; } */
+ /* .data-table thead th { background: var(--panel-2); color: var(--muted); font-weight: 800; font-size: .78rem; letter-spacing: .6px; text-transform: uppercase; } */
+ /* .data-table tbody tr { transition: background var(--transition-sm); } */
+ /* .data-table tbody tr:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 6%, transparent), color-mix(in srgb, var(--accent) 6%, transparent)); } */
+ /* .data-table th:first-child, .data-table td:first-child { text-align: left; } */
+ /* .data-table td[id*="avg-"] { background: var(--panel-2); font-weight: 900; color: var(--primary); } */
+ /* :root[data-theme="dark"] .data-table td[id*="avg-"] { color: var(--accent-2); } */
+
+ /* .grade-input { width: 64px !important; text-align: center; padding: .4rem; font-weight: 700; -moz-appearance: textfield; } */
+ /* .grade-input::-webkit-outer-spin-button, .grade-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } */
+
+ /* .course-accordion { border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 1rem; background: var(--panel); overflow: hidden; } */
+ /* .course-accordion summary { padding: 1rem 1.2rem; font-weight: 900; font-size: 1.05rem; cursor: pointer; display: list-item; } */
+ /* .course-accordion[open] summary { border-bottom: 1px solid var(--border); } */
+ /* .course-accordion .course-content { padding: 0; } */
+
+ /* .empty-state { padding: 1.5rem; text-align: center; color: var(--muted); } */
+
+ /* .chart-wrap { width: 100%; height: 320px; border-radius: var(--radius-md); overflow: hidden; padding: 10px; border: 1px solid var(--border); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--primary) 6%, transparent)); } */
+ /* .chart-wrap canvas { width: 100% !important; height: 100% !important; display: block; } */
+
+ /* .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; } */
+
+ /* .kpi { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border-radius: var(--radius-kpi); color: #fff; position: relative; overflow: hidden; border: none; box-shadow: var(--shadow-sm); } */
+ /* .kpi::after { content: ""; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; background: radial-gradient(closest-side, rgba(255,255,255,.18), transparent); filter: blur(6px); opacity: 0.8; } */
+ /* .kpi.students { background: linear-gradient(90deg, var(--primary), #1e3a6d); } */
+ /* .kpi.classes { background: linear-gradient(90deg, #b88a3a, var(--accent)); } */
+ /* .kpi .num { font-size: 1.8rem; font-weight: 900; line-height: 1; } */
+
+ /* .mini-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; padding: .75rem 0; margin-bottom: 1rem; border-bottom: 1px solid var(--border); } */
+ /* .mini-kpi .label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } */
+ /* .mini-kpi .value { font-size: 1.5rem; font-weight: 800; line-height: 1; } */
+
+ /* .task-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; } */
+ /* .task-list li { padding-bottom: .8rem; border-bottom: 1px solid var(--border); } */
+ /* .task-list li:last-child { border-bottom: none; padding-bottom: 0; } */
+ /* .task-list li strong { color: var(--primary); } */
+ /* .task-list li div { font-size: .85rem; color: var(--muted); } */
+
+ /* .profile-field { padding: .5rem 0; } */
+ /* .profile-field strong { display: block; font-size: .8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; } */
+ /* .profile-form { display: flex; flex-direction: column; gap: 0.75rem; } */
+ /* .profile-form label { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .25rem; display: block; } */
+
+/* =============================================================================
+   SECCIÓN 9: Calendario
+   =============================================================================
+   Reglas para renderizar un calendario tipo table con días, hoy, eventos y estilos.
+*/
+ /* .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 .5rem; } */
+ /* .calendar-header h3 { margin: 0; font-size: 1.25rem; text-transform: capitalize; border-bottom: none; padding-bottom: 0; } */
+ /* .calendar-header .btn { padding: .4rem .7rem; box-shadow: none; border-radius: var(--radius-input); } */
+
+ /* #calendar { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; } */
+ /* #calendar th { background: var(--panel-2); color: var(--muted); font-weight: 700; font-size: 0.8rem; padding: 0.75rem 0.5rem; text-align: center; text-transform: uppercase; border-bottom: 1px solid var(--border); } */
+
+ /* .cal-day { height: 110px; padding: 6px; vertical-align: top; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); transition: background var(--transition-sm); } */
+ /* .cal-day:last-child { border-right: 0; } */
+ /* tbody tr:last-child .cal-day { border-bottom: 0; } */
+ /* .cal-day:hover { background: var(--panel-2); } */
+
+ /* .cal-day.is-other-month { background: color-mix(in srgb, var(--panel-2) 40%, var(--panel)); color: var(--muted); opacity: 0.6; } */
+ /* :root[data-theme="dark"] .cal-day.is-other-month { background: color-mix(in srgb, var(--bg) 50%, var(--panel)); } */
+
+ /* .cal-day .day-number { font-size: 0.85rem; font-weight: 700; text-align: right; margin-bottom: 4px; } */
+
+ /* .cal-day.is-today { background: color-mix(in srgb, var(--accent-2) 20%, var(--panel)); } */
+ /* .cal-day.is-today .day-number { background-color: var(--accent); color: #fff; border-radius: var(--radius-round); width: 24px; height: 24px; display: grid; place-items: center; float: right; line-height: 1; font-weight: 800; } */
+
+ /* .events-list { margin-top: 2px; display: flex; flex-direction: column; gap: 4px; max-height: 70px; overflow: hidden; } */
+
+ /* .ev-item { background: var(--primary); color: #fff; padding: 3px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 6px rgba(15, 41, 76, .2); } */
+
+/* =============================================================================
+   SECCIÓN 10: Modal
+   =============================================================================
+   Capas y animaciones para modales (overlay + modal-content + header/body/footer).
+*/
+ /* .modal-overlay { position: fixed; inset: 0; background: rgba(11, 18, 32, 0.6); backdrop-filter: blur(4px); display: grid; place-items: center; z-index: 100; opacity: 0; animation: modal-fade-in .2s forwards; } */
+
+ /* .modal-content { background: var(--panel); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 1rem; width: 90%; max-width: 500px; border-top: 4px solid var(--accent); transform: translateY(20px); animation: modal-pop-in .2s .1s forwards; } */
+ /* :root[data-theme="dark"] .modal-content { border-top-color: var(--primary); } */
+
+ /* .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: .75rem; margin-bottom: 1rem; } */
+ /* .modal-header h3 { margin: 0; font-size: 1.1rem; } */
+ /* .modal-close { background: var(--panel-2); border: 0; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; color: var(--muted); cursor: pointer; display: grid; place-items: center; } */
+
+ /* .modal-body { } */
+ /* .modal-body label { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .25rem; display: block; } */
+
+ /* .modal-footer { display: flex; justify-content: flex-end; gap: .5rem; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; } */
+
+ /* @keyframes modal-fade-in { to { opacity: 1; } } */
+ /* @keyframes modal-pop-in { to { transform: translateY(0); opacity: 1; } } */
+
+/* =============================================================================
+   SECCIÓN 11: Utilidades / Skeletons
+   =============================================================================
+*/
+ /* .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; } */
+
+ /* .sk { height: 160px; background: linear-gradient(90deg, var(--panel-2), #e9edf7, var(--panel-2)); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: var(--radius-md); border: 1px solid var(--border); } */
+ /* :root[data-theme="dark"] .sk { background: linear-gradient(90deg, var(--panel-2), var(--panel), var(--panel-2)); background-size: 200% 100%; } */
+ /* @keyframes sk { to { background-position: 200% 0; } } */
+
+/* =============================================================================
+   SECCIÓN 12: Responsive (Media Queries)
+   =============================================================================
+   Ajustes específicos para tablet y móvil (breakpoints: 900px y 700px).
+*/
+ /* @media (max-width: 900px) { */
+ /*   .sidebar { width: 220px; } */
+ /*   .chart-wrap { height: 260px; } */
+ /*   .data-table { min-width: 520px; } */
+ /* } */
+
+ /* @media (max-width: 700px) { */
+ /*   .sidebar { position: fixed; left: 0; top: 0; height: 100vh; transform: translateX(-100%); transition: transform var(--transition-lg) ease; } */
+ /*   .sidebar.open { transform: translateX(0); box-shadow: 0 0 60px rgba(2, 6, 23, .4); } */
+ /*   .layout { overflow-x: hidden; } */
+ /*   .menu a { margin: 0 .45rem; } */
+ /*   .chart-wrap { height: 220px; } */
+ /*   .grid { grid-template-columns: 1fr; } */
+ /*   .cal-day { height: auto; min-height: 80px; } */
+ /*   .ev-item { font-size: 0.75rem; padding: 2px 5px; } */
+ /*   .calendar-header h3 { font-size: 1.1rem; } */
+ /* } */
+
+/* =============================================================================
+   FIN DEL ARCHIVO: teacher_style.css (TOTALMENTE COMENTADO)
+   =============================================================================
+   Este documento está pensado para servir como respaldo/documentación técnica.
