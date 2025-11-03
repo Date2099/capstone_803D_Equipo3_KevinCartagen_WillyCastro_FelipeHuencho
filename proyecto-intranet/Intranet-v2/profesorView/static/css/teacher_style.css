@@ -1387,3 +1387,87 @@ tbody tr:last-child .cal-day { border-bottom: 0; }
 }
 
 /* --- FIN DEL ARCHIVO CSS --- */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS PRINCIPAL: Panel de Profesor                   |
+|               ARCHIVO: teacher_style.css                                     |
+|               AUTOR: Kev182-pixel (con refactorización de Asistente)         |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   Este archivo contiene la versión DOCUMENTADA y COMPLETAMENTE COMENTADA    |
+|   del CSS del panel de profesores.                                           |
+|                                                                              |
+|   NOTA: TODO el contenido está envuelto en comentarios (/* ... * /) para     |
+|   que el archivo pueda subirse como respaldo/documentación sin afectar la   |
+|   aplicación. Si necesita la versión funcional, solicítela y la prepararé.  |
+|                                                                              |
+================================================================================
+*/
+
+/* =============================================================================
+   SECCIÓN 1: :root (Variables Globales) - MODO CLARO (Por defecto)
+   =============================================================================
+   A continuación se definen las custom properties (variables CSS). Estas
+   variables centralizan paleta de colores, tipografía, sombras, radios y
+   dimensiones del layout. Cambiando aquí se ajusta el tema entero.
+*/
+ /* :root { */
+ /*   --bg: #f6f8fb; */                     /* Fondo principal: color base de la app */
+ /*   --bg-gradient-end: #fafbfe; */        /* Final del degradado de fondo */
+ /*   --panel: #ffffff; */                  /* Fondo de tarjetas y paneles */
+ /*   --panel-2: #f2f5fa; */                /* Fondo secundario (rows, hover ligero) */
+ /*   --primary: #0F294C; */                /* Azul institucional principal */
+ /*   --primary-2: #13345f; */              /* Variación más oscura del primario */
+ /*   --accent: #CDA758; */                 /* Acento dorado para botones/highlights */
+ /*   --accent-2: #E9D29B; */               /* Acento dorado más suave */
+ /*   --muted: #667085; */                  /* Texto secundario / descripciones */
+ /*   --ink: #0b1220; */                    /* Texto principal (oscuro) */
+ /*   --ink-2: #111827; */                  /* Texto secundario oscuro */
+ /*   --border: rgba(15, 23, 42, .08); */   /* Color de bordes sutiles */
+ /*
+    Radii (consistencia en bordes redondeados):
+ */
+ /*   --radius-sm: 8px; */
+ /*   --radius-input: 10px; */
+ /*   --radius-md: 12px; */
+ /*   --radius-lg: 16px; */
+ /*   --radius-kpi: 14px; */
+ /*   --radius-round: 50%; */
+ /*
+    Layout / dimensiones:
+ */
+ /*   --sidebar-w: 260px; */               /* Ancho de la sidebar en desktop */
+ /*
+    Sombras y transiciones:
+ */
+ /*   --shadow-sm: 0 6px 18px rgba(10, 14, 30, .06); */
+ /*   --shadow-md: 0 12px 30px rgba(10, 14, 30, .08); */
+ /*   --transition-sm: .12s; */
+ /*   --transition-md: .18s; */
+ /*   --transition-lg: .22s; */
+ /*
+    Tipografía:
+ */
+ /*   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 2: :root[data-theme="dark"] (Modo Oscuro)
+   =============================================================================
+   Si el <html> recibe el atributo data-theme="dark", estas variables sobrescriben
+   las anteriores para ofrecer una paleta adecuada a modo oscuro.
+*/
+ /* :root[data-theme="dark"] { */
+ /*   --bg: #0b1220; */
+ /*   --bg-gradient-end: #0b1220; */
+ /*   --panel: #0e1629; */
+ /*   --panel-2: #0f1b34; */
+ /*   --ink: #e5e7eb; */
+ /*   --ink-2: #f3f4f6; */
+ /*   --muted: #9aa3b2; */
+ /*   --border: rgba(255, 255, 255, .08); */
+ /*   --shadow-sm: 0 6px 18px rgba(2, 6, 23, .25); */
+ /*   --shadow-md: 0 12px 30px rgba(2, 6, 23, .32); */
+ /* } */
