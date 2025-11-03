@@ -25,6 +25,14 @@
 |   6.  Clases de Utilidad - Skeletons, helpers.                               |
 |   7.  Responsive (Media Queries) - Ajustes para tablets y móviles.           |
 |                                                                              |
+|   FILOSOFÍA DE DISEÑO:                                                       |
+|   -   Variables para todo: Facilita el mantenimiento y el temado.            |
+|   -   Flexbox y Grid: Para un layout moderno y robusto.                      |
+|   -   Móvil Primero (parcial): Los media queries ajustan para pantallas      |
+|       más pequeñas, asegurando la usabilidad.                                |
+|   -   BEM (modificado): Se usan clases claras como .card, .btn, .kpi,        |
+|       y modificadores como .btn-secondary.                                  |
+|                                                                              |
 ================================================================================
 */
 
@@ -1002,6 +1010,7 @@ textarea:focus {
   flex-direction: column;
   gap: 0.75rem;
 }
+/* Estilos para las etiquetas <label> en el formulario de perfil */
 .profile-form label {
   font-size: .85rem;
   font-weight: 600;
