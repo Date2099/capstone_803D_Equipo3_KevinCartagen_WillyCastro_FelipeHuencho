@@ -5,43 +5,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>INTRANET | Panel Alumno</title>
+<title>Panel Alumno</title>
 
-
+<!-- Fuentes e íconos -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-=======
-  <title>Portal de Alumnos</title>
-
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
-<link rel="stylesheet" href="{% static 'student_css/studentStyle.css' %}">
-
-
-=======
-  <!-- Favicon para que el tab se vea decente -->
-  <link rel="icon" href="{% static 'img\logo_V2-removebg-preview.png' %}" />
-
-
+<!-- Estilos principales -->
+<link rel="stylesheet" href="{% static 'student_css/studentstyle.css' %}">
 </head>
 
 <body>
 <div class="layout">
-  <aside class="sidebar closed" id="sidebar">
-    <div class="brand">
-        <img src="assets/INSIGNIA_HIPONA-removebg-preview-e1679963461233.png" alt="Insignia Colegio" class="brand-logo">
-        <span>Intranet</span>
-    </div>
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
     <div class="profile">
-      <div class="avatar">FH</div>
+      <div class="avatar">
+        {{ request.user.first_name|default:"U"|slice:":1" }}{{ request.user.last_name|default:"S"|slice:":1" }}
+      </div>
       <div class="profile-info">
-        <div>Felipe Huencho</div>
-        <div class="role">Alumno</div>
+        <div>{{ request.user.first_name }}</div>
+        <div class="role">
+          {% if request.user.role == "student" %} Alumno
+          {% elif request.user.role == "teacher" %} Profesor
+          {% elif request.user.role == "finance_admin" %} Finanzas
+          {% elif request.user.role == "admin" %} Administrador
+          {% else %} Usuario {% endif %}
+        </div>
       </div>
     </div>
+
     <nav class="menu">
       <a href="#" data-section="dashboard" class="active"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
       <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i> <span>Mis Clases</span></a>
@@ -49,30 +42,68 @@
       <a href="#" data-section="calendario"><i class="fa-solid fa-calendar"></i> <span>Calendario</span></a>
       <a href="#" data-section="perfil"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
       <a href="#" data-section="pagos"><i class="fa-solid fa-wallet"></i> <span>Portal de Pagos</span></a>
+      <a href="{% url 'inicioSesion:logout' %}" class="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar sesión</span></a>
     </nav>
   </aside>
 
+  <!-- ===== MAIN ===== -->
   <section class="main">
     <header class="topbar">
       <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
       <div class="topbar-title" id="topbar-title">Dashboard</div>
       <div class="spacer"></div>
       <div class="user-mini">
-        <span>Felipe Huencho</span>
-        <div class="avatar-mini">FH</div>
-        <i class="fa-solid fa-angle-down"></i>
+        <span>{{ request.user.first_name }}</span>
+        <div class="avatar-mini">{{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}</div>
       </div>
     </header>
-    <main class="content">
-      <div class="card" id="main-card">
+
+    <!-- CONTENIDO DINÁMICO -->
+    <main class="content" id="content-area">
+      <div class="card">
+        <h2 class="card-title">Bienvenido, {{ request.user.first_name }} {{ request.user.last_name }} - {{ curso }}</h2>
+        <p>Este es tu panel personal de estudiante.</p>
+
+        <div class="stat-cards-container">
+          <div class="stat-card" style="--card-color: var(--color-primary);">
+            <i class="fa-solid fa-book card-icon"></i>
+            <div class="card-info">
+              <div class="card-num">6</div>
+              <div class="card-label">Tus asignaturas</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--card-color: var(--color-secondary);">
+            <i class="fa-solid fa-list-check card-icon"></i>
+            <div class="card-info">
+              <div class="card-num">4.8</div>
+              <div class="card-label">Promedio general</div>
+            </div>
+          </div>
         </div>
+      </div>
     </main>
+
     <footer class="footer">
       Copyright © Colegio San Agustín de Hipona 2025
     </footer>
   </section>
 </div>
 
-<script src="{% static 'js/studentApp.js' %}"></script>
+<div id="overlay"></div>
+
+<script>
+  // Pasar variables Django a JS (opcional)
+  const alumno = {
+    nombre: "{{ request.user.first_name }} {{ request.user.last_name }}",
+    curso: "{{ curso }}"
+  };
+</script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
+<script type="module" src="{% static 'student_js/ui_student.js' %}"></script>
+
+
+
+
+
 </body>
 </html>

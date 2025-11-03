@@ -3,7 +3,7 @@
 
 /* Colores basados en la web del colegio */
 :root {
-  --color-primary: #4A2B6D;      /* Azul/Violeta oscuro del menú y logo */
+  --color-primary: #2a2979;      /* Azul/Violeta oscuro del menú y logo */
   --color-secondary: #cba858;   /* Dorado del logo y botón "Informativo" */
   --color-text-dark: #333;      /* Texto principal oscuro */
   --color-text-light: #ffffff;   /* Texto claro para el panel izquierdo */
@@ -63,7 +63,7 @@ body::before {
 /* Panel Izquierdo (Imagen del Colegio) */
 .left-panel {
   flex: 1;
-  background-image: linear-gradient(rgba(74, 43, 109, 0.65), rgba(74, 43, 109, 0.65)), url('DJI_0535.jpg');
+  background-image: linear-gradient(rgba(36, 19, 110, 0.65), rgba(24, 26, 124, 0.65)), url('DJI_0535.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -384,5 +384,92 @@ input.checkbox-field {
     width: 70px;
     height: auto;
     margin: 0 auto 20px;
+  }
+}
+
+.form-error-box {
+  background-color: rgba(255, 0, 0, 0.08);
+  border: 1px solid #e74c3c;
+  color: #c0392b;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+/* ====================== */
+/* MENSAJES FLOTANTES AJUSTADOS */
+/* ====================== */
+.message-container {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-left:100px;
+  z-index: 999;
+  text-align: center;
+  width: 100%;
+  max-width: 350px;
+  pointer-events: none;
+}
+
+.alert {
+  background-color: #ffe6e6;
+  margin-left: 40px; /* Ajusta según veas necesario */
+  border: 1px solid #e57373;
+  color: #b71c1c;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  display: inline-block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards, fadeOut 0.5s ease forwards 3.5s;
+  font-size: 0.95rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+    visibility: hidden;
+  }
+}
+
+/* ✅ Colores alternativos por tipo */
+.alert.success {
+  background-color: #e8f5e9;
+  border-color: #81c784;
+  color: #2e7d32;
+}
+
+.alert.warning {
+  background-color: #fff8e1;
+  border-color: #fbc02d;
+  color: #8a6d00;
+}
+
+/* 📱 Ajuste para pantallas móviles */
+@media (max-width: 768px) {
+  .message-container {
+    top: -5px;
+    max-width: 280px;
+  }
+
+  .alert {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 8px;
   }
 }

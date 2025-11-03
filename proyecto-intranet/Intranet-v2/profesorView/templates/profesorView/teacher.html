@@ -1,63 +1,89 @@
 {% load static %}
-
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>INTRANET | Panel Profesor</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INTRANET | Panel Profesor</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="{% static 'css/teacher_style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'css/teacher_style.css' %}">
 </head>
 
 <body>
+
 <div class="layout">
-  <aside class="sidebar closed" id="sidebar">
-    <div class="brand"><i class="fa-solid fa-chalkboard-user"></i> Profesor</div>
+  
+  <aside class="sidebar" id="sidebar">
+    
+    <div class="brand">
+      <i class="fa-solid fa-chalkboard-user"></i>
+      <span>Profesor</span>
+    </div>
 
     <div class="profile">
       <div class="avatar">JP</div>
-      <div style="min-width:0">
-        <div style="font-weight:800">Juan Pérez</div>
-        <div class="role" style="font-size:.85rem;opacity:.9">Matemáticas</div>
+      <div class="profile-info">
+        <div class="profile-name">Juan Pérez</div>
+        <div class="role">Matemáticas</div>
       </div>
     </div>
 
-    <nav class="menu">
-      <a class="active" href="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-      <a href="estudiantes"><i class="fa-solid fa-user-graduate"></i> Estudiantes</a>
-      <a href="tareas"><i class="fa-solid fa-file-pen"></i> Tareas / Notas</a>
-      <a href="anuncios"><i class="fa-solid fa-bullhorn"></i> Anuncios</a>
-      <a href="calendario"><i class="fa-solid fa-calendar"></i> Calendario</a>
-      <a href="perfil"><i class="fa-solid fa-user-gear"></i> Perfil</a>
+    <nav class="menu" id="menu">
+      <a class="active" href="dashboard"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+      <a href="estudiantes"><i class="fa-solid fa-user-graduate"></i> <span>Estudiantes</span></a>
+      <a href="tareas"><i class="fa-solid fa-file-pen"></i> <span>Tareas / Notas</span></a>
+      <a href="anuncios"><i class="fa-solid fa-bullhorn"></i> <span>Anuncios</span></a>
+      <a href="calendario"><i class="fa-solid fa-calendar"></i> <span>Calendario</span></a>
+      <a href="perfil"><i class="fa-solid fa-user-gear"></i> <span>Perfil</span></a>
     </nav>
+    
+    <footer class="side-footer">
+      <a href="/logout" class="btn btn-ghost" style="width: 100%;">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </footer>
   </aside>
 
-  <section class="main">
+  <main class="main">
+    
     <header class="topbar">
-      <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
-      <div class="topbar-title">Panel Profesor</div>
+      
+      <button 
+        class="toggle" 
+        id="toggle" 
+        aria-label="Abrir o cerrar menú lateral"
+        aria-controls="sidebar"
+        aria-expanded="false"
+      >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      
+      <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
+      
       <div class="spacer"></div>
+      
       <div class="user-mini">
         <div class="avatar-mini" title="Profesor">JP</div>
-        <span style="font-weight:700;margin-left:.5rem">Juan Pérez</span>
+        <span class="user-mini-name">Juan Pérez</span>
       </div>
     </header>
 
-    <main class="content">
-      </main>
+    <div class="content" id="content-area">
+      </div>
 
     <footer class="footer">
-      Copyright © Colegio San Agustin de Hipona 2025
+      <p>Copyright © Colegio San Agustin de Hipona 2025</p>
     </footer>
-  </section>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <script src="{% static 'js/teacher_jss.js' %}"></script>
 
 </body>

@@ -9,7 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,15 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k(3d7^mo(3*e1q=#un65t2c3@3_6@9llowc!m44j!^ddh3%2*a'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
+DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = []
 
 
-  # Redirige a la página de registro después de iniciar sesión
 
 
 # Application definition
@@ -40,13 +38,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'core',
     'inicioSesion',
     'studentView',
     'adminView',
     'profesorView',
-    "finance",
+    
 
 ]
+AUTH_USER_MODEL = 'core.User'
+
+LOGIN_URL = "inicioSesion:login" 
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'inicioSesion.middleware.LoginRequiredMiddleware',    
 ]
 
 ROOT_URLCONF = 'intranet.urls'
@@ -81,13 +86,17 @@ WSGI_APPLICATION = 'intranet.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Base de datos
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'intranet_escolar2',
+        'USER': 'postgres',
+        'PASSWORD': '31demayo2004',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
 
 
 # Password validation
@@ -134,5 +143,15 @@ LOGIN_REDIRECT_URL = '/inicioSesion/registro/'  # el nombre de la url a donde qu
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# ===============================
+# CONFIGURACIÓN DE CORREO (GMAIL)
+# ===============================
 
-
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+EMAIL_TIMEOUT = 15

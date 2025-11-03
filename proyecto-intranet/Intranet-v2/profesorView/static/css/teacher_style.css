@@ -1,552 +1,1953 @@
-/* ...existing code... */
-/* Diseño moderno para el módulo Profesores */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS PRINCIPAL: Panel de Profesor                   |
+|               ARCHIVO: teacher_style.css                                     |
+|               AUTOR: Kev182-pixel (con refactorización de Asistente)         |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   DESCRIPCIÓN:                                                               |
+|   Esta hoja de estilos contiene toda la definición visual para la            |
+|   Single Page Application (SPA) del panel de profesores.                     |
+|   Utiliza variables CSS (custom properties) para un temado fácil             |
+|   (modo claro/oscuro) y un diseño responsivo (mobile-first).                 |
+|                                                                              |
+|   ESTRUCTURA DEL ARCHIVO:                                                    |
+|   1.  :root (Variables Globales) - Define la paleta de colores,              |
+|       tipografía, sombras, y layout.                                         |
+|   2.  :root[data-theme="dark"] (Modo Oscuro) - Sobrescribe las variables     |
+|       para el tema oscuro.                                                   |
+|   3.  Reset Básico - Normaliza los estilos del navegador.                    |
+|   4.  Layout General - Estilos para .layout, .main, .content.                |
+|   5.  Componentes Específicos - Estilos para Sidebar, Topbar, Cards,         |
+|       Botones, Formularios, Tablas, KPIs, Gráficos, Calendario, Modales.     |
+|   6.  Clases de Utilidad - Skeletons, helpers.                               |
+|   7.  Responsive (Media Queries) - Ajustes para tablets y móviles.           |
+|                                                                              |
+|   FILOSOFÍA DE DISEÑO:                                                       |
+|   -   Variables para todo: Facilita el mantenimiento y el temado.            |
+|   -   Flexbox y Grid: Para un layout moderno y robusto.                      |
+|   -   Móvil Primero (parcial): Los media queries ajustan para pantallas      |
+|       más pequeñas, asegurando la usabilidad.                                |
+|   -   BEM (modificado): Se usan clases claras como .card, .btn, .kpi,        |
+|       y modificadores como .btn-secondary.                                  |
+|                                                                              |
+================================================================================
+*/
 
-:root{
-  --bg:#f5f7fb;
-  --panel:#ffffff;
-  --primary:#3759a8;
-  --accent:#6d28d9;
-  --muted:#6b7280;
-  --border:rgba(15,23,42,0.06);
-  --radius:12px;
-  --sidebar-w:260px;
-  --shadow-sm:0 6px 18px rgba(10,14,30,0.06);
-  --shadow-md:0 12px 30px rgba(10,14,30,0.08);
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+
+/*
+================================================================================
+|   SECCIÓN 1: :root (Variables Globales) - MODO CLARO (Por defecto)           |
+================================================================================
+|
+|   Aquí definimos todas las variables CSS (custom properties) que
+|   controlarán la apariencia de la aplicación.
+|   Usar variables nos permite cambiar un color o un espaciado
+|   en un solo lugar y que se actualice en todo el sitio.
+|
+*/
+:root {
+  /* Paleta de Colores Principal
+    Estos son los colores base para el tema claro.
+  */
+  --bg: #f6f8fb;                  /* Color de fondo principal (casi blanco) */
+  --bg-gradient-end: #fafbfe;     /* Final del degradado de fondo */
+  --panel: #ffffff;               /* Color de fondo para tarjetas y paneles (blanco puro) */
+  --panel-2: #f2f5fa;              /* Un fondo secundario, ligeramente más oscuro (para hover o tablas) */
+  --primary: #0F294C;             /* Color primario (Azul Marino/Navy) - usado en la sidebar y botones */
+  --primary-2: #13345f;            /* Una variación más oscura del primario */
+  --accent: #CDA758;              /* Color de acento (Dorado/Gold) - usado para botones, íconos, gráficos */
+  --accent-2: #E9D29B;             /* Un dorado más suave (Soft Gold) - usado para highlights */
+  --muted: #667085;                /* Color para texto secundario, grisáceo */
+  --ink: #0b1220;                  /* Color de texto principal (casi negro) */
+  --ink-2: #111827;                /* Un color de texto ligeramente más claro */
+  --border: rgba(15, 23, 42, .08); /* Color de borde sutil, basado en el primario con opacidad */
+
+  /* Radii (Radios de Borde)
+    Estandarizamos los radios de borde para una UI consistente.
+  */
+  --radius-sm: 8px;      /* Radio pequeño (para items internos) */
+  --radius-input: 10px;  /* Radio para inputs y botones */
+  --radius-md: 12px;     /* Radio medio (para tarjetas) */
+  --radius-lg: 16px;     /* Radio grande (para avatares) */
+  --radius-kpi: 14px;    /* Radio específico para las tarjetas KPI */
+  --radius-round: 50%;   /* Círculo perfecto */
+
+  /* Layout (Diseño)
+    Variables que definen la estructura de la página.
+  */
+  --sidebar-w: 260px;    /* Ancho de la barra lateral en desktop */
+
+  /* Sombras (Shadows)
+    Sombras consistentes para dar profundidad a la UI.
+  */
+  --shadow-sm: 0 6px 18px rgba(10, 14, 30, .06);   /* Sombra pequeña */
+  --shadow-md: 0 12px 30px rgba(10, 14, 30, .08);  /* Sombra mediana (para tarjetas) */
+  
+  /* Transiciones
+    Tiempos de animación estándar para una UI fluida.
+  */
+  --transition-sm: .12s;  /* Transición rápida (ej: hover de input) */
+  --transition-md: .18s;  /* Transición media (ej: hover de botón) */
+  --transition-lg: .22s;  /* Transición lenta (ej: sidebar en móvil) */
+  
+  /* Tipografía (Fuente)
+    Definimos la pila de fuentes principal.
+  */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* Reset */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:var(--font-sans);font-size:15px;background:linear-gradient(180deg,var(--bg),#f8fafc);color:#0b1220}
 
-/* Layout */
-.layout{display:flex;min-height:100vh}
-.sidebar{
-  width:var(--sidebar-w);
-  background:linear-gradient(180deg,#2f2b4a,#3b2b6a);
-  color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding-bottom:1rem;
-  box-shadow:var(--shadow-md);
-}
-.brand{display:flex;align-items:center;gap:.85rem;padding:1.15rem 1rem;font-weight:700;font-size:1.05rem;border-bottom:1px solid rgba(255,255,255,0.04)}
-.brand i{font-size:1.2rem;color:var(--accent)}
-.profile{display:flex;gap:0.85rem;align-items:center;padding:1rem;border-bottom:1px solid rgba(255,255,255,0.03)}
-.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#f59e0b);font-weight:800;color:#fff}
-.profile .role{font-size:.82rem;color:rgba(255,255,255,0.85)}
+/*
+================================================================================
+|   SECCIÓN 2: :root[data-theme="dark"] (Modo Oscuro)                          |
+================================================================================
+|
+|   Aquí sobrescribimos las variables definidas en :root
+|   cuando el <html> tiene el atributo [data-theme="dark"].
+|   Esto nos permite cambiar todo el tema de la página
+|   con una sola línea de JavaScript (cambiando el atributo).
+|
+*/
+:root[data-theme="dark"] {
+  /* Sobrescritura de Paleta de Colores
+    Invertimos los colores para el tema oscuro.
+  */
+  --bg: #0b1220;                   /* Fondo principal (azul muy oscuro) */
+  --bg-gradient-end: #0b1220;      /* Mismo color (sin degradado) */
+  --panel: #0e1629;                /* Fondo de tarjetas (ligeramente más claro que el fondo) */
+  --panel-2: #0f1b34;              /* Fondo secundario (para hovers) */
+  --ink: #e5e7eb;                  /* Color de texto principal (casi blanco) */
+  --ink-2: #f3f4f6;                /* Color de texto secundario (blanco) */
+  --muted: #9aa3b2;                /* Color de texto silenciado (gris claro) */
+  --border: rgba(255, 255, 255, .08); /* Borde claro y sutil */
 
-/* Menu */
-.menu{padding:0.6rem 0;display:flex;flex-direction:column;gap:6px;margin-top:.4rem;overflow:auto}
-.menu a{
-  position:relative;
-  display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;margin:0 .6rem;border-radius:12px;color:rgba(255,255,255,0.95);text-decoration:none;font-weight:600;transition:all 180ms ease;
-  background:transparent;
-}
-.menu a i{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,0.03);font-size:1rem}
-.menu a:hover{transform:translateX(6px);background:rgba(255,255,255,0.04);box-shadow:var(--shadow-sm)}
-.menu a.active{background:#fff;color:var(--primary);font-weight:800;box-shadow:0 10px 30px rgba(13,37,82,0.06)}
-.menu a.active i{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
-
-/* Main */
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{height:64px;display:flex;align-items:center;padding:0 1rem;gap:1rem;background:transparent;border-bottom:1px solid rgba(11,17,32,0.02)}
-.toggle{background:transparent;border:0;color:#374151;font-size:1.05rem;padding:.45rem;border-radius:10px;cursor:pointer}
-.topbar strong{font-size:1.05rem;color:#0b1220}
-.topbar .spacer{flex:1}
-.user-mini{display:flex;align-items:center;gap:.6rem}
-.user-mini img{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent))}
-
-/* Content */
-.content{padding:1.25rem}
-.card{background:var(--panel);border-radius:12px;padding:1rem;box-shadow:var(--shadow-md);border:1px solid var(--border)}
-.chart-card{display:flex;flex-direction:column;gap:.6rem;padding:1rem;border-radius:14px;overflow:hidden}
-.chart-card #chart{width:100% !important;height:300px !important;display:block;border-radius:8px}
-
-/* Grid KPIs */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
-.kpi{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:12px;color:#fff;box-shadow:0 8px 26px rgba(13,37,82,0.04)}
-.kpi.students{background:linear-gradient(90deg,#4f46e5,#7c3aed)}
-.kpi.classes{background:linear-gradient(90deg,#0ea5a4,#06b6d4)}
-.kpi.tasks{background:linear-gradient(90deg,#f97316,#fb923c)}
-.kpi .num{font-size:1.6rem;font-weight:800}
-.kpi .label{opacity:.95;font-weight:600}
-
-/* Footer */
-.footer{padding:1rem;text-align:center;color:var(--muted);font-size:.9rem}
-
-/* Responsive */
-@media (max-width:900px){
-  .sidebar{width:220px}
-  .chart-card #chart{height:260px !important}
-}
-@media (max-width:700px){
-  .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);transition:transform .22s ease;z-index:50}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .layout{overflow-x:hidden}
-  .menu a{margin:0 .5rem}
-  .chart-card #chart{height:260px !important}
-}
-/* ...existing code... */
-/* ...existing code... */
-
-/* Estilos adicionales para UI funcional y profesional */
-
-/* Botones */
-.btn{
-  background: linear-gradient(90deg,var(--primary),var(--accent));
-  color:#fff;border:0;padding:.55rem .85rem;border-radius:10px;font-weight:700;cursor:pointer;
-  box-shadow: 0 8px 26px rgba(13,37,82,0.06);transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;
-}
-.btn:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(13,37,82,0.08); }
-.btn:active{ transform:translateY(-1px); }
-.btn.btn-secondary{
-  background:transparent;color:var(--primary);border:1px solid rgba(55,89,168,0.12);box-shadow:none;font-weight:700;
+  /* Sobrescritura de Sombras
+    Las sombras en modo oscuro deben ser más pronunciadas.
+  */
+  --shadow-sm: 0 6px 18px rgba(2, 6, 23, .25);
+  --shadow-md: 0 12px 30px rgba(2, 6, 23, .32);
 }
 
-/* Formularios, selects e inputs */
-input[type="text"], input[type="date"], input[type="number"], select, .grade-input {
-  background:#fff;border:1px solid var(--border);padding:.45rem .5rem;border-radius:8px;font-size:.95rem;
-  outline:none;transition:box-shadow .12s ease,border-color .12s ease;
-}
-input:focus, select:focus, .grade-input:focus{ box-shadow:0 6px 20px rgba(55,89,168,0.06); border-color: rgba(55,89,168,0.18); }
 
-/* Forzar look de grade inputs (overrides inline widths gracefully) */
-.grade-input{ width:64px !important; text-align:center; padding:.35rem; border-radius:8px; }
+/*
+================================================================================
+|   SECCIÓN 3: Reset Básico y Estilos Globales                                 |
+================================================================================
+|
+|   Normalizamos los estilos por defecto del navegador para
+|   asegurar consistencia entre Chrome, Firefox, Safari, etc.
+|
+*/
 
-/* Tabla de datos */
-.table-wrapper{ overflow-x:auto; border-radius:8px; }
-.data-table{ width:100%; border-collapse:collapse; background:transparent; min-width:640px; }
-.data-table th, .data-table td{ padding:.72rem .9rem; vertical-align:middle; border-bottom:1px solid var(--border); }
-.data-table thead th{ background:linear-gradient(180deg,#fbfcff,#fff); color:var(--muted); font-weight:800; font-size:.8rem; letter-spacing:.6px; text-transform:uppercase; }
-.data-table tbody tr:hover{ background:linear-gradient(90deg, rgba(55,89,168,0.02), rgba(74,43,109,0.01)); }
-.data-table td input.grade-input{ border:1px solid rgba(15,23,42,0.06); }
-
-/* Card title */
-.card h3, .card .card-title{ margin:0 0 .6rem 0; font-size:1.05rem; color:#0b1220; }
-
-/* Chart wrapper */
-.chart-wrap{ width:100%; height:320px; border-radius:10px; overflow:hidden; background:linear-gradient(180deg, rgba(99,102,241,0.02), rgba(59,130,246,0.01)); padding:10px; border:1px solid rgba(15,23,42,0.04); }
-.chart-wrap canvas{ width:100% !important; height:100% !important; display:block; }
-
-/* KPIs refinement */
-.kpi{ align-items:center; display:flex; gap:1rem; padding:1rem; }
-.kpi i{ font-size:1.6rem; opacity:.95; margin-right:6px; }
-.kpi .num{ font-size:1.5rem; font-weight:800; }
-.kpi .label{ font-size:.92rem; opacity:.95; }
-
-/* Calendar */
-#calendar{ width:100%; table-layout:fixed; border-collapse:collapse; }
-#calendar thead th{ text-align:left; padding:.6rem; font-weight:800; color:var(--muted); background:transparent; }
-#calendar tbody td{ min-height:84px; vertical-align:top; padding:.6rem; border-top:1px solid var(--border); }
-.cal-day div:first-child{ font-weight:700; color:var(--muted); }
-.cal-day .ev-item{ margin-top:6px; padding:6px 8px; border-radius:8px; font-size:.85rem; background:rgba(59,130,246,0.08); color:#0b1220; }
-
-/* Small helpers */
-.view-grades, .action-small { padding:.4rem .55rem; border-radius:8px; border:1px solid rgba(11,17,32,0.04); background:#fff; cursor:pointer; }
-.view-grades:hover, .action-small:hover{ box-shadow:0 8px 20px rgba(11,17,32,0.04); transform:translateY(-2px); }
-
-/* Responsive tweaks */
-@media (max-width:900px){
-  .chart-wrap{ height:260px }
-  .data-table{ min-width:520px }
-}
-@media (max-width:700px){
-  .chart-wrap{ height:220px }
-  .menu a{ padding:.55rem .8rem; margin:0 .45rem }
-  .grid{ grid-template-columns:1fr; gap:.6rem }
+/**
+ * El "box-sizing: border-box" es fundamental.
+ * Le dice al navegador que incluya el 'padding' y el 'border'
+ * dentro del ancho (width) y alto (height) total del elemento,
+ * en lugar de sumarlos por fuera.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* ...existing code... */
-/* Diseño moderno para el módulo Profesores (completo) */
-
-:root{
-  --bg:#f5f7fb;
-  --panel:#ffffff;
-  --primary:#3759a8;
-  --accent:#6d28d9;
-  --muted:#6b7280;
-  --border:rgba(15,23,42,0.06);
-  --radius:12px;
-  --sidebar-w:260px;
-  --shadow-sm:0 6px 18px rgba(10,14,30,0.06);
-  --shadow-md:0 12px 30px rgba(10,14,30,0.08);
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+/**
+ * Configura el comportamiento de scroll (desplazamiento)
+ * para que sea suave al hacer clic en anclas (#).
+ */
+html {
+  -webkit-text-size-adjust: 100%; /* Previene el zoom de texto en iOS */
+  scroll-behavior: smooth;
 }
 
-/* Reset */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:var(--font-sans);font-size:15px;background:linear-gradient(180deg,var(--bg),#f8fafc);color:#0b1220}
-
-/* Layout */
-.layout{display:flex;min-height:100vh}
-.sidebar{
-  width:var(--sidebar-w);
-  background:linear-gradient(180deg,#2f2b4a,#3b2b6a);
-  color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding-bottom:1rem;
-  box-shadow:var(--shadow-md);
-}
-.brand{display:flex;align-items:center;gap:.85rem;padding:1.15rem 1rem;font-weight:700;font-size:1.05rem;border-bottom:1px solid rgba(255,255,255,0.04)}
-.brand i{font-size:1.2rem;color:var(--accent)}
-.profile{display:flex;gap:0.85rem;align-items:center;padding:1rem;border-bottom:1px solid rgba(255,255,255,0.03)}
-.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#f59e0b);font-weight:800;color:#fff}
-.profile .role{font-size:.82rem;color:rgba(255,255,255,0.85)}
-
-/* Menu */
-.menu{padding:0.6rem 0;display:flex;flex-direction:column;gap:6px;margin-top:.4rem;overflow:auto}
-.menu a{
-  position:relative;
-  display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;margin:0 .6rem;border-radius:12px;color:rgba(255,255,255,0.95);text-decoration:none;font-weight:600;transition:all 180ms ease;
-  background:transparent;
-}
-.menu a i{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,0.03);font-size:1rem}
-.menu a:hover{transform:translateX(6px);background:rgba(255,255,255,0.04);box-shadow:var(--shadow-sm)}
-.menu a.active{background:#fff;color:var(--primary);font-weight:800;box-shadow:0 10px 30px rgba(13,37,82,0.06)}
-.menu a.active i{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
-
-/* Main */
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{height:64px;display:flex;align-items:center;padding:0 1rem;gap:1rem;background:transparent;border-bottom:1px solid rgba(11,17,32,0.02)}
-.toggle{background:transparent;border:0;color:#374151;font-size:1.05rem;padding:.45rem;border-radius:10px;cursor:pointer}
-.topbar-title{font-weight:700}
-.topbar .spacer{flex:1}
-.user-mini{display:flex;align-items:center;gap:.6rem}
-.avatar-mini{width:36px;height:36px;border-radius:50%;font-size:.95rem;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;color:#fff}
-
-/* Content */
-.content{padding:1.25rem}
-.card{background:var(--panel);border-radius:12px;padding:1rem;box-shadow:var(--shadow-md);border:1px solid var(--border)}
-.chart-card{display:flex;flex-direction:column;gap:.6rem;padding:1rem;border-radius:14px;overflow:hidden}
-.chart-card #chart{width:100% !important;height:300px !important;display:block;border-radius:8px}
-
-/* Grid KPIs */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
-.kpi{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:12px;color:#fff;box-shadow:0 8px 26px rgba(13,37,82,0.04)}
-.kpi.students{background:linear-gradient(90deg,#4f46e5,#7c3aed)}
-.kpi.classes{background:linear-gradient(90deg,#0ea5a4,#06b6d4)}
-.kpi.tasks{background:linear-gradient(90deg,#f97316,#fb923c)}
-.kpi .num{font-size:1.6rem;font-weight:800}
-.kpi .label{opacity:.95;font-weight:600}
-
-/* Botones */
-.btn{
-  background: linear-gradient(90deg,var(--primary),var(--accent));
-  color:#fff;border:0;padding:.55rem .85rem;border-radius:10px;font-weight:700;cursor:pointer;
-  box-shadow: 0 8px 26px rgba(13,37,82,0.06);transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;
-}
-.btn:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(13,37,82,0.08); }
-.btn:active{ transform:translateY(-1px); }
-.btn.btn-secondary{
-  background:transparent;color:var(--primary);border:1px solid rgba(55,89,168,0.12);box-shadow:none;font-weight:700;
-}
-
-/* Formularios, selects e inputs */
-input[type="text"], input[type="date"], input[type="number"], select, .grade-input, textarea {
-  background:#fff;border:1px solid var(--border);padding:.45rem .5rem;border-radius:8px;font-size:.95rem;
-  outline:none;transition:box-shadow .12s ease,border-color .12s ease;
-}
-input:focus, select:focus, .grade-input:focus, textarea:focus{ box-shadow:0 6px 20px rgba(55,89,168,0.06); border-color: rgba(55,89,168,0.18); }
-
-/* Forzar look de grade inputs */
-.grade-input{ width:64px !important; text-align:center; padding:.35rem; border-radius:8px; }
-
-/* Tabla de datos */
-.table-wrapper{ overflow-x:auto; border-radius:8px; }
-.data-table{ width:100%; border-collapse:collapse; background:transparent; min-width:640px; }
-.data-table th, .data-table td{ padding:.72rem .9rem; vertical-align:middle; border-bottom:1px solid var(--border); }
-.data-table thead th{ background:linear-gradient(180deg,#fbfcff,#fff); color:var(--muted); font-weight:800; font-size:.8rem; letter-spacing:.6px; text-transform:uppercase; }
-.data-table tbody tr:hover{ background:linear-gradient(90deg, rgba(55,89,168,0.02), rgba(74,43,109,0.01)); }
-.data-table td input.grade-input{ border:1px solid rgba(15,23,42,0.06); }
-
-/* Card title */
-.card h3, .card .card-title{ margin:0 0 .6rem 0; font-size:1.05rem; color:#0b1220; }
-
-/* Chart wrapper */
-.chart-wrap{ width:100%; height:320px; border-radius:10px; overflow:hidden; background:linear-gradient(180deg, rgba(99,102,241,0.02), rgba(59,130,246,0.01)); padding:10px; border:1px solid rgba(15,23,42,0.04); }
-.chart-wrap canvas{ width:100% !important; height:100% !important; display:block; }
-
-/* KPIs refinement */
-.kpi i{ font-size:1.6rem; opacity:.95; margin-right:6px; }
-.kpi .num{ font-size:1.5rem; font-weight:800; }
-.kpi .label{ font-size:.92rem; opacity:.95; }
-
-/* Calendar */
-#calendar{ width:100%; table-layout:fixed; border-collapse:collapse; }
-#calendar thead th{ text-align:left; padding:.6rem; font-weight:800; color:var(--muted); background:transparent; }
-#calendar tbody td{ min-height:84px; vertical-align:top; padding:.6rem; border-top:1px solid var(--border); }
-.cal-day div:first-child{ font-weight:700; color:var(--muted); }
-.cal-day .ev-item{ margin-top:6px; padding:6px 8px; border-radius:8px; font-size:.85rem; background:rgba(59,130,246,0.08); color:#0b1220; }
-
-/* Small helpers */
-.view-grades, .action-small { padding:.4rem .55rem; border-radius:8px; border:1px solid rgba(11,17,32,0.04); background:#fff; cursor:pointer; }
-.view-grades:hover, .action-small:hover{ box-shadow:0 8px 20px rgba(11,17,32,0.04); transform:translateY(-2px); }
-
-/* Perfil */
-.profile-card{ padding:1rem; border-radius:12px; display:block; box-shadow:var(--shadow-md); }
-.profile-avatar-big{
-  width:92px;height:92px;border-radius:16px;display:grid;place-items:center;
-  font-size:2rem;color:#fff;font-weight:900;margin-right:.6rem;
-  background:linear-gradient(135deg,var(--accent),#f59e0b);
-}
-.profile-field{ margin-top:6px; color:#374151; }
-.profile-field strong{ display:block; font-size:.9rem; color:#0b1220; margin-bottom:4px; }
-.profile-card input, .profile-card textarea{ width:100%; box-sizing:border-box; }
-
-/* Responsive */
-@media (max-width:900px){
-  .sidebar{width:220px}
-  .chart-card #chart{height:260px !important}
-  .chart-wrap{ height:260px }
-  .data-table{ min-width:520px }
-}
-@media (max-width:700px){
-  .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);transition:transform .22s ease;z-index:50}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .layout{overflow-x:hidden}
-  .menu a{margin:0 .5rem}
-  .chart-card #chart{height:260px !important}
-  .chart-wrap{ height:220px }
-  .menu a{ padding:.55rem .8rem; margin:0 .45rem }
-  .grid{ grid-template-columns:1fr; gap:.6rem }
-}
-
-/* ... (tu código CSS existente) ... */
-
-/* --- Estilos para Pop-over de Comentarios --- */
-.comment-popover {
-  position: absolute;
-  z-index: 10;
-  width: 280px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--radius);
-  padding: 0.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.comment-popover::before {
-  /* Pequeña flecha que apunta a la celda */
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -6px;
-  transform: translateY(-50%) rotate(45deg);
-  width: 12px;
-  height: 12px;
-  background: var(--panel);
-  border-left: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.comment-popover textarea {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem;
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  resize: vertical; /* Permite cambiar el alto */
-}
-
-.comment-popover-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.comment-popover-actions .btn {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-}
-/* ... (tu código CSS existente) ... */
-
-/* --- Estilos para la Ventana Modal --- */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+/**
+ * Estilos base para todo el <body>.
+ * - Aseguramos que ocupe el 100% de la altura.
+ * - Aplicamos la fuente, color y fondo definidos en :root.
+ * - El fondo es un sutil degradado.
+ */
+body {
   height: 100%;
-  background: rgba(11, 18, 32, 0.6);
+  font-family: var(--font);
+  font-size: 0.9375rem; /* 15px (15 / 16 = 0.9375) */
+  line-height: 1.5;     /* Interlineado estándar */
+  background: linear-gradient(180deg, var(--bg), var(--bg-gradient-end));
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased; /* Renderizado de fuente más suave en WebKit */
+  -moz-osx-font-smoothing: grayscale; /* Renderizado de fuente más suave en Firefox */
+}
+
+/**
+ * Estilos base para imágenes y multimedia.
+ * - 'display: block' elimina el espacio extra debajo de las imágenes.
+ * - 'max-width: 100%' asegura que las imágenes nunca se
+ * desborden de su contenedor (las hace responsivas).
+ */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/**
+ * Asegura que los elementos de formulario hereden la fuente
+ * del <body>, en lugar de usar la fuente por defecto del navegador.
+ */
+input, button, textarea, select {
+  font: inherit;
+  border: none;
+  outline: none;
+}
+
+/**
+ * Estilos base para encabezados (h1, h2, etc.).
+ * - 'text-wrap: balance' intenta balancear las líneas de texto
+ * para una mejor legibilidad (disponible en navegadores modernos).
+ * - Asumimos un peso de 800 (Extra Bold) como estándar.
+ */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+  font-weight: 800;
+}
+
+/**
+ * 'text-wrap: pretty' mejora la legibilidad de los párrafos
+ * evitando huérfanos (palabras solas al final).
+ */
+p {
+  text-wrap: pretty;
+}
+
+/**
+ * Reseteo base para enlaces (<a>) y listas (ul, ol).
+ */
+a { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; }
+
+/**
+ * Accesibilidad: Reduce las animaciones para usuarios
+ * que lo han solicitado en su sistema operativo.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto; /* Desactiva el scroll suave */
+  }
+  * {
+    /* Desactiva casi todas las animaciones y transiciones */
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 4: Layout General                                                  |
+================================================================================
+|
+|   Define la estructura principal de la aplicación.
+|
+*/
+
+/**
+ * Contenedor principal de la aplicación.
+ * - 'display: flex' coloca la sidebar y el main uno al lado del otro.
+ * - 'min-height: 100vh' asegura que ocupe al menos toda la altura
+ * de la ventana.
+ */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/**
+ * Contenedor del contenido principal (Topbar + Content + Footer).
+ * - 'flex: 1' hace que ocupe todo el espacio sobrante
+ * (al lado de la sidebar).
+ * - 'min-width: 0' es un truco de flexbox para prevenir
+ * que el contenido se desborde en pantallas pequeñas.
+ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Apila Topbar, Content y Footer verticalmente */
+  min-width: 0;
+}
+
+/**
+ * El área de contenido donde se inyectan las vistas.
+ * - 'padding: 1.25rem' le da un respiro al contenido.
+ * - 'flex: 1' (añadido) hace que esta área crezca para
+ * empujar el footer hacia abajo.
+ */
+.content {
+  padding: 1.25rem;
+  flex: 1; /* <-- Asegura que el footer se mantenga abajo */
+}
+
+/**
+ * Pie de página al final del .main.
+ */
+.footer {
+  padding: 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+  border-top: 1px solid var(--border); /* Añade una separación sutil */
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 5: Componente - Sidebar (Barra Lateral)                            |
+================================================================================
+*/
+
+/**
+ * La barra lateral de navegación.
+ * - 'width: var(--sidebar-w)' usa nuestra variable de ancho.
+ * - 'flex-shrink: 0' evita que se encoja cuando la pantalla es pequeña.
+ * - 'position: sticky' y 'top: 0' la mantiene fija en su lugar
+ * mientras se hace scroll en el contenido principal.
+ * - 'background: linear-gradient(...)' le da el color primario.
+ * - 'transform: translateZ(0)' es un truco para forzar la
+ * aceleración por hardware, mejorando la fluidez.
+ */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, var(--primary), #172d56);
+  color: #fff;
+  display: flex;
+  flex-direction: column; /* Apila Brand, Profile, Menu, Footer verticalmente */
+  box-shadow: var(--shadow-md);
+  transform: translateZ(0);
+  transition: transform var(--transition-lg) ease; /* Para la animación móvil */
+  z-index: 50; /* Asegura que esté por encima del contenido en móvil */
+}
+
+/**
+ * El logo o marca en la parte superior de la sidebar.
+ */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem; /* Espacio entre el ícono y el texto */
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .08); /* Borde sutil */
+  font-weight: 800;
+  font-size: 1.1rem; /* Más grande para que destaque */
+}
+.brand i {
+  color: var(--accent); /* Usa el color dorado para el ícono */
+}
+
+/**
+ * Contenedor del perfil del usuario en la sidebar.
+ */
+.profile {
+  display: flex;
+  gap: .85rem;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+/**
+ * El avatar circular/redondeado.
+ * - 'border-radius: var(--radius-lg)' usa nuestra variable.
+ * - 'display: grid' y 'place-items: center' es una forma moderna
+ * de centrar perfectamente las iniciales (JP) dentro.
+ * - 'background: linear-gradient(...)' usa los colores de acento.
+ */
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
   display: grid;
   place-items: center;
-  z-index: 100;
-  backdrop-filter: blur(4px);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #2a2312; /* Color de texto oscuro para que contraste con el dorado */
+  font-weight: 900;
+  flex-shrink: 0; /* Evita que el avatar se encoja */
 }
 
-.modal-content {
-  background: var(--bg);
-  padding: 1.5rem 2rem;
-  border-radius: var(--radius);
-  width: 90%;
-  max-width: 500px;
-  box-shadow: var(--shadow-md);
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
+/**
+ * Contenedor para el nombre y el rol, para que el texto
+ * se ajuste correctamente (text-overflow).
+ */
+.profile-info {
+  min-width: 0;
 }
 
-.modal-header {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.8rem;
-  margin-bottom: 1rem;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.modal-body {
-  overflow-y: auto; /* Permite scroll si la lista de alumnos es larga */
-  padding-right: 1rem; /* Espacio para la barra de scroll */
-  margin-right: -1rem;
-}
-
-.modal-student-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 1rem;
-}
-
-.modal-student-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-.modal-footer {
-  border-top: 1px solid var(--border);
-  padding-top: 1rem;
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-/* ... (tu código CSS existente) ... */
-
-/* --- Estilos para la Nueva Vista de Notas por Asignatura --- */
-.course-accordion {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 1rem;
-  background: var(--panel);
-}
-
-.course-accordion summary {
-  padding: 1rem 1.2rem;
+/**
+ * Nombre del profesor en el perfil.
+ */
+.profile-name {
   font-weight: 800;
-  font-size: 1.1rem;
-  cursor: pointer;
-  outline: none;
+  white-space: nowrap; /* Evita que el nombre se parta en dos líneas */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade "..." si el nombre es muy largo */
+}
+
+/**
+ * Rol del profesor (ej: "Matemáticas").
+ */
+.role {
+  font-size: .85rem;
+  color: rgba(255, 255, 255, .88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/**
+ * Contenedor de la lista de enlaces de navegación.
+ * - 'overflow: auto' permite hacer scroll si hay demasiados
+ * enlaces y no caben en la pantalla.
+ */
+.menu {
+  padding: .6rem 0;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.375rem; /* 6px */
+  margin-top: .4rem;
+  overflow: auto;
+}
+
+/**
+ * Estilos para cada enlace <a> del menú.
+ */
+.menu a {
+  display: flex;
   align-items: center;
+  gap: .85rem;
+  padding: .75rem 1rem;
+  margin: 0 .6rem;
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, .95);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all var(--transition-md); /* Anima todos los cambios */
+  position: relative;
+  isolation: isolate; /* Necesario para el efecto de hover con ::after */
 }
 
-.course-accordion summary:hover {
-  background: rgba(15,23,42,0.02);
+/**
+ * Estilo para el ícono <i> dentro del enlace del menú.
+ */
+.menu a i {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-input);
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, .08);
+  flex-shrink: 0; /* Evita que el ícono se encoja */
 }
 
-.course-accordion[open] summary {
-  border-bottom: 1px solid var(--border);
+/**
+ * Efecto de hover para los enlaces del menú.
+ * - 'transform: translateX(6px)' mueve el enlace a la derecha.
+ * - 'box-shadow' le da un efecto de "elevación".
+ */
+.menu a:hover {
+  transform: translateX(6px);
+  background: rgba(255, 255, 255, .08);
+  box-shadow: var(--shadow-sm);
 }
 
-.course-accordion .course-content {
+/**
+ * Estado activo (página actual) para el enlace del menú.
+ * - Cambia el fondo a blanco y el texto al color primario.
+ * - Le da una sombra más pronunciada.
+ */
+.menu a.active {
+  background: #fff;
+  color: var(--primary);
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgba(13, 37, 82, .06);
+}
+
+/**
+ * Estilo del ícono <i> cuando el enlace está activo.
+ * - Le da un fondo degradado.
+ */
+.menu a.active i {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+/**
+ * Pie de página de la sidebar (para el botón de logout).
+ * - 'margin-top: auto' empuja este elemento hasta el fondo
+ * de la sidebar (gracias al flex-direction: column).
+ */
+.side-footer {
+  margin-top: auto;
   padding: 1rem;
 }
 
-.view-controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+/**
+ * Estilo para el botón "fantasma" (ghost button) de logout.
+ */
+.btn-ghost {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  gap: 0.5rem; /* Espacio entre el ícono y el texto */
+  display: inline-flex; /* Para alinear ícono y texto */
+  justify-content: center;
   align-items: center;
 }
 
-.view-controls .search-wrapper {
-  flex-grow: 1;
-  position: relative;
+
+/*
+================================================================================
+|   SECCIÓN 6: Componente - Topbar (Barra Superior)                            |
+================================================================================
+*/
+
+/**
+ * La barra superior que contiene el título y el mini-perfil.
+ * - 'position: sticky' y 'top: 0' la mantiene fija en la parte
+ * superior del área de .main.
+ * - 'backdrop-filter: blur(6px)' crea un efecto de "vidrio esmerilado"
+ * que difumina el contenido que pasa por debajo (moderno).
+ * - 'background: color-mix(...)' crea un fondo semitransparente.
+ */
+.topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 10; /* Se asegura de que esté sobre el contenido */
 }
 
+/**
+ * El botón de "hamburguesa" para abrir/cerrar la sidebar en móvil.
+ */
+.toggle {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+  padding: .5rem;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  display: grid; /* Añadido para centrar el ícono */
+  place-items: center; /* Añadido para centrar el ícono */
+}
+
+/**
+ * El título <h1> en la topbar.
+ */
+.topbar-title {
+  font-weight: 800;
+  font-size: 1.25rem; /* Más grande que el texto normal */
+  margin: 0; /* Resetea el margen del h1 */
+}
+
+/**
+ * Un div vacío que usa 'flex: 1' para empujar
+ * el mini-perfil hacia la derecha.
+ */
+.spacer {
+  flex: 1;
+}
+
+/**
+ * Contenedor del mini-perfil en la topbar (avatar + nombre).
+ */
+.user-mini {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+/**
+ * El avatar pequeño en la topbar.
+ */
+.avatar-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-input);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/**
+ * El nombre del usuario en la topbar.
+ */
+.user-mini-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 7: Componentes - Cards, Formularios, Botones                       |
+================================================================================
+*/
+
+/**
+ * Estilo base para todas las "tarjetas" o paneles de contenido.
+ * Define el fondo, borde, radio y sombra.
+ */
+.card {
+  background: var(--panel);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.card h3 {
+  margin: 0 0 .75rem; /* Espacio debajo del título de la tarjeta */
+  border-bottom: 1px solid var(--border); /* Línea de separación */
+  padding-bottom: .75rem;
+}
+
+/**
+ * Estilo base para botones principales (con degradado).
+ */
+.btn {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  color: #fff;
+  border: 0;
+  padding: .55rem .9rem;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(13, 37, 82, .12);
+  transition: all var(--transition-md);
+}
+
+/**
+ * Efecto de "elevación" al pasar el mouse sobre el botón.
+ */
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px rgba(13, 37, 82, .16);
+}
+.btn:active {
+  transform: translateY(-1px); /* Efecto de "presionado" */
+}
+
+/**
+ * Botón secundario (blanco con borde).
+ */
+.btn.btn-secondary {
+  background: var(--panel); /* Usa el fondo del panel (blanco/oscuro) */
+  color: var(--primary);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+:root[data-theme="dark"] .btn.btn-secondary {
+  color: var(--ink); /* En modo oscuro, el texto es claro */
+}
+
+/**
+ * Estilos base para todos los campos de formulario.
+ * Esto unifica la apariencia de inputs, selects y textareas.
+ */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="search"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+  background: var(--panel-2); /* Un fondo ligeramente gris */
+  border: 1px solid var(--border);
+  padding: .6rem .75rem;
+  border-radius: var(--radius-input);
+  font-size: .95rem;
+  outline: none;
+  transition: all var(--transition-sm);
+  color: var(--ink-2);
+  width: 100%; /* Ocupan todo el ancho por defecto */
+}
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  background: var(--bg); /* En modo oscuro, usa el fondo principal */
+  color: var(--ink);
+}
+
+/**
+ * Efecto de foco para los formularios.
+ * Añade una sombra y un borde más nítido.
+ */
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: var(--accent);
+}
+
+/**
+ * Controles de vista (como la barra de búsqueda sobre una tabla).
+ */
+.view-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap; /* Permite que se apilen en móvil */
+}
+.view-controls .search-wrapper {
+  flex: 1; /* Hace que la búsqueda ocupe el espacio */
+  position: relative;
+  min-width: 200px; /* Ancho mínimo */
+}
 .view-controls .search-wrapper i {
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
+  pointer-events: none; /* Evita que el ícono bloquee el clic */
 }
-
 .view-controls input[type="search"] {
   width: 100%;
-  padding-left: 36px;
-}
-/* ... (tu código CSS existente) ... */
-
-/* --- Mejoras Visuales para Tabla de Notas --- */
-
-/* 1. Centrar todas las cabeceras, excepto la de "Alumno" */
-.data-table th {
-  text-align: center;
-  vertical-align: middle;
-}
-.data-table th:first-child {
-  text-align: left;
+  padding-left: 36px; /* Espacio para el ícono de lupa */
+  background: var(--panel); /* Fondo blanco (o panel) para que destaque */
 }
 
-/* 2. Centrar el contenido de todas las celdas, excepto la del nombre del alumno */
+
+/*
+================================================================================
+|   SECCIÓN 8: Componentes Específicos (Tablas, KPI, Gráficos)                 |
+================================================================================
+*/
+
+/**
+ * Contenedor para la tabla.
+ * 'overflow-x: auto' añade scroll horizontal si la tabla
+ * es más ancha que la pantalla (esencial en móvil).
+ */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+}
+
+/**
+ * La tabla de datos principal.
+ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px; /* Ancho mínimo para forzar el scroll en pantallas pequeñas */
+}
+
+/**
+ * Celdas de encabezado (th) y celdas de datos (td).
+ */
+.data-table th,
 .data-table td {
-  text-align: center;
-  vertical-align: middle;
+  padding: .78rem .9rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center; /* Centra el texto por defecto */
 }
+
+/**
+ * Encabezado de la tabla (thead).
+ */
+.data-table thead th {
+  background: var(--panel-2);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: .78rem;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+/**
+ * Filas del cuerpo de la tabla (tbody).
+ * Añade una transición suave para el efecto de hover.
+ */
+.data-table tbody tr {
+  transition: background var(--transition-sm);
+}
+
+/**
+ * Efecto de hover para las filas.
+ * Un degradado sutil que usa los colores primario y de acento.
+ */
+.data-table tbody tr:hover {
+  background: linear-gradient(90deg, 
+    color-mix(in srgb, var(--primary) 6%, transparent), 
+    color-mix(in srgb, var(--accent) 6%, transparent)
+  );
+}
+
+/**
+ * Alinea a la izquierda la primera columna (nombres).
+ */
+.data-table th:first-child,
 .data-table td:first-child {
   text-align: left;
 }
 
-/* 3. Estilo principal para los campos de notas: los hace más notorios y limpios */
-.grade-input {
-  background-color: transparent;
-  border: 1px solid transparent; /* Sin borde por defecto */
-  border-radius: 8px;
-  font-weight: 700; /* Resalta el número de la nota */
-  font-size: 1rem;   /* Un poco más grande */
-  text-align: center;
-  width: 65px;       /* Ancho consistente */
-  padding: 6px;
-  transition: all 0.2s ease-in-out;
+/**
+ * Estilo para la celda de promedio (fondo destacado).
+ */
+.data-table td[id*="avg-"] {
+  background: var(--panel-2);
+  font-weight: 900;
+  color: var(--primary);
+}
+:root[data-theme="dark"] .data-table td[id*="avg-"] {
+  color: var(--accent-2);
 }
 
-/* 4. Oculta las flechas de control en los campos numéricos para un look más limpio */
+/**
+ * Input específico para las notas.
+ * Pequeño, centrado y con tipografía bold.
+ */
+.grade-input {
+  width: 64px !important; /* Ancho fijo */
+  text-align: center;
+  padding: .4rem;
+  font-weight: 700;
+  /* Oculta las flechas de "subir/bajar" en inputs de tipo número */
+  -moz-appearance: textfield;
+}
 .grade-input::-webkit-outer-spin-button,
 .grade-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-.grade-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield; /* Firefox */
-}
 
-/* 5. Al pasar el mouse o hacer clic, se revela que el campo es editable */
-.grade-input:hover {
-  background-color: #f7f7ff; /* Un fondo muy sutil */
+/**
+ * Acordeón para los cursos en la vista de Tareas.
+ */
+.course-accordion {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  background: var(--panel);
+  overflow: hidden; /* Para que el radio se aplique correctamente */
 }
-.grade-input:focus {
-  background-color: #ffffff;
-  border: 1px solid var(--primary); /* Borde notorio al editar */
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(55, 89, 168, 0.1);
-}
-
-/* 6. Estilo especial para la columna de promedios para diferenciarla */
-.data-table td[id*="avg-"] {
-  background-color: #f8fafc;
+.course-accordion summary {
+  padding: 1rem 1.2rem;
+  font-weight: 900;
   font-size: 1.05rem;
+  cursor: pointer;
+  display: list-item; /* Permite el marcador (flecha) por defecto */
 }
+.course-accordion[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+.course-accordion .course-content {
+  padding: 0; /* Quitamos el padding para que la tabla ocupe todo */
+}
+/* Estilo para cuando no hay datos en una tabla */
+.empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/**
+ * Contenedor para los gráficos de Chart.js.
+ * Asegura que el canvas se ajuste correctamente.
+ */
+.chart-wrap {
+  width: 100%;
+  height: 320px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, 
+    color-mix(in srgb, var(--accent) 10%, transparent), 
+    color-mix(in srgb, var(--primary) 6%, transparent)
+  );
+}
+.chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/**
+ * Grilla principal (usada en Dashboard).
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/**
+ * Tarjetas de KPI (Indicadores Clave de Rendimiento).
+ */
+.kpi {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem; /* Más padding que una tarjeta normal */
+  border-radius: var(--radius-kpi);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border: none; /* Sobrescribe el borde de .card si se usa */
+  box-shadow: var(--shadow-sm);
+}
+/* Efecto de brillo sutil en la esquina */
+.kpi::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .18), transparent);
+  filter: blur(6px);
+  opacity: 0.8;
+}
+.kpi.students {
+  background: linear-gradient(90deg, var(--primary), #1e3a6d);
+}
+.kpi.classes {
+  background: linear-gradient(90deg, #b88a3a, var(--accent));
+}
+.kpi .num {
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/**
+ * KPIs pequeños (usados dentro del gráfico del Dashboard).
+ */
+.mini-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: .75rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.mini-kpi .label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-kpi .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/**
+ * Lista de tareas demo en el Dashboard.
+ */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.task-list li {
+  padding-bottom: .8rem;
+  border-bottom: 1px solid var(--border);
+}
+.task-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.task-list li strong { color: var(--primary); }
+.task-list li div { font-size: .85rem; color: var(--muted); }
+
+/**
+ * Estilos para la vista de Perfil.
+ */
+.profile-field {
+  padding: .5rem 0;
+}
+.profile-field strong {
+  display: block;
+  font-size: .8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* Estilos para las etiquetas <label> en el formulario de perfil */
+.profile-form label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: .25rem;
+  display: block;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 9: Componente - Calendario (Nuevo)                                 |
+================================================================================
+*/
+
+/**
+ * Encabezado del calendario (con botones "prev" y "next").
+ */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 .5rem;
+}
+.calendar-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  text-transform: capitalize;
+  border-bottom: none; /* Sobrescribe el h3 de .card */
+  padding-bottom: 0;
+}
+.calendar-header .btn {
+  padding: .4rem .7rem; /* Botones más pequeños */
+  box-shadow: none;
+  border-radius: var(--radius-input);
+}
+
+/**
+ * Estilos para la tabla <table> del calendario.
+ */
+#calendar {
+  width: 100%;
+  border-collapse: separate; /* Permite 'border-spacing' */
+  border-spacing: 0;
+  table-layout: fixed; /* Celdas de ancho uniforme */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/**
+ * Encabezados del calendario (Lun, Mar, Mié...).
+ */
+#calendar th {
+  background: var(--panel-2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+/**
+ * Estilo para cada celda <td> de día en el calendario.
+ */
+.cal-day {
+  height: 110px;
+  padding: 6px;
+  vertical-align: top; /* Alinea el número del día arriba */
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  transition: background var(--transition-sm);
+}
+.cal-day:last-child { border-right: 0; }
+tbody tr:last-child .cal-day { border-bottom: 0; }
+.cal-day:hover { background: var(--panel-2); }
+
+/**
+ * Días que no pertenecen al mes actual.
+ * Se ven "apagados".
+ */
+.cal-day.is-other-month {
+  background: color-mix(in srgb, var(--panel-2) 40%, var(--panel));
+  color: var(--muted);
+  opacity: 0.6;
+}
+:root[data-theme="dark"] .cal-day.is-other-month {
+  background: color-mix(in srgb, var(--bg) 50%, var(--panel));
+}
+
+/**
+ * El número del día (1, 2, 3...).
+ */
+.cal-day .day-number {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+  margin-bottom: 4px;
+}
+
+/**
+ * Estilo especial para el día de HOY.
+ */
+.cal-day.is-today {
+  background: color-mix(in srgb, var(--accent-2) 20%, var(--panel));
+}
+.cal-day.is-today .day-number {
+  background-color: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-round);
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  float: right;
+  line-height: 1;
+  font-weight: 800;
+}
+
+/**
+ * Contenedor de la lista de eventos dentro de un día.
+ */
+.events-list {
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 70px; /* Límite de altura */
+  overflow: hidden;
+}
+
+/**
+ * Cada item de evento (evaluación).
+ */
+.ev-item {
+  background: var(--primary);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap; /* Evita que el texto se parta */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade "..." si es muy largo */
+  box-shadow: 0 2px 6px rgba(15, 41, 76, .2);
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 10: Componente - Modal (Nuevo)                                     |
+================================================================================
+|
+|   Estilos para las ventanas modales (ej: "Agregar Evaluación").
+|   El modal se crea dinámicamente con JavaScript.
+|
+*/
+
+/**
+ * El fondo oscuro semitransparente que cubre la página.
+ */
+.modal-overlay {
+  position: fixed;
+  inset: 0; /* (top: 0, right: 0, bottom: 0, left: 0) */
+  background: rgba(11, 18, 32, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center; /* Centra el contenido vertical y horizontalmente */
+  z-index: 100;
+  opacity: 0; /* Inicia invisible */
+  animation: modal-fade-in .2s forwards; /* Animación de entrada */
+}
+
+/**
+ * El contenedor blanco (o panel) del modal.
+ */
+.modal-content {
+  background: var(--panel);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 1rem;
+  width: 90%;
+  max-width: 500px;
+  border-top: 4px solid var(--accent); /* Un detalle de color */
+  transform: translateY(20px); /* Inicia ligeramente abajo */
+  animation: modal-pop-in .2s .1s forwards; /* Animación de entrada (con retraso) */
+}
+:root[data-theme="dark"] .modal-content {
+  border-top-color: var(--primary);
+}
+
+/**
+ * Encabezado del modal (Título y botón de cerrar).
+ */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .75rem;
+  margin-bottom: 1rem;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  border-bottom: none; /* Sobrescribe el h3 de .card */
+  padding-bottom: 0;
+}
+.modal-close {
+  background: var(--panel-2);
+  border: 0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/**
+ * Cuerpo del modal (donde van los formularios).
+ */
+.modal-body {
+  /* Estilos específicos (como 'gap') se aplican en línea desde JS */
+}
+
+/**
+ * Estilo para las etiquetas <label> dentro del modal.
+ */
+.modal-body label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: .25rem;
+  display: block;
+}
+
+/**
+ * Pie del modal (donde van los botones de "Guardar" y "Cancelar").
+ */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end; /* Alinea botones a la derecha */
+  gap: .5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+}
+
+/**
+ * Animaciones de entrada del modal.
+ */
+@keyframes modal-fade-in { to { opacity: 1; } }
+@keyframes modal-pop-in { to { transform: translateY(0); opacity: 1; } }
+
+
+/*
+================================================================================
+|   SECCIÓN 11: Clases de Utilidad (Skeletons, etc.)                           |
+================================================================================
+*/
+
+/**
+ * Grilla para los esqueletos de carga (placeholders).
+ */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/**
+ * El esqueleto de carga.
+ * Usa un fondo degradado y una animación para
+ * crear el efecto de "barrido" (shimmer).
+ */
+.sk {
+  height: 160px;
+  background: linear-gradient(90deg, var(--panel-2), #e9edf7, var(--panel-2));
+  background-size: 200% 100%;
+  animation: sk 1.2s infinite;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+:root[data-theme="dark"] .sk {
+  background: linear-gradient(90deg, var(--panel-2), var(--panel), var(--panel-2));
+  background-size: 200% 100%;
+}
+@keyframes sk { to { background-position: 200% 0; } }
+
+
+/*
+================================================================================
+|   SECCIÓN 12: Responsive (Media Queries)                                     |
+================================================================================
+*/
+
+/**
+ * Para tablets (pantallas de 900px o menos).
+ * - Achicamos la sidebar.
+ * - Hacemos el gráfico más pequeño.
+ */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+  }
+  .chart-wrap {
+    height: 260px;
+  }
+  .data-table {
+    min-width: 520px;
+  }
+}
+
+/**
+ * Para móviles (pantallas de 700px o menos).
+ * - Ocultamos la sidebar fuera de la pantalla.
+ * - La sidebar se vuelve 'fixed' (flotante).
+ * - La clase '.open' (añadida por JS) la hace visible.
+ * - Los KPIs y gráficos se apilan verticalmente.
+ */
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed; /* Cambia a 'fixed' en móvil */
+    left: 0;
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%); /* La oculta fuera de la pantalla */
+    transition: transform var(--transition-lg) ease;
+  }
+  .sidebar.open {
+    transform: translateX(0); /* La clase .open la trae a la vista */
+    box-shadow: 0 0 60px rgba(2, 6, 23, .4);
+  }
+  
+  /* Evita el scroll horizontal en el layout */
+  .layout {
+    overflow-x: hidden;
+  }
+  
+  /* Ajustes para el menú en sidebar más pequeña */
+  .menu a {
+    margin: 0 .45rem;
+  }
+  
+  /* Gráfico más pequeño */
+  .chart-wrap {
+    height: 220px;
+  }
+  
+  /* Apila las columnas de la grilla (KPIs y Dashboard) */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ajustes del calendario para móvil */
+  .cal-day {
+    height: auto;
+    min-height: 80px;
+  }
+  .ev-item {
+    font-size: 0.75rem;
+    padding: 2px 5px;
+  }
+  .calendar-header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* --- FIN DEL ARCHIVO CSS --- */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS PRINCIPAL: Panel de Profesor                   |
+|               ARCHIVO: teacher_style.css                                     |
+|               AUTOR: Kev182-pixel (con refactorización de Asistente)         |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   Este archivo contiene la versión DOCUMENTADA y COMPLETAMENTE COMENTADA    |
+|   del CSS del panel de profesores.                                           |
+|                                                                              |
+|   NOTA: TODO el contenido está envuelto en comentarios (/* ... * /) para     |
+|   que el archivo pueda subirse como respaldo/documentación sin afectar la   |
+|   aplicación. Si necesita la versión funcional, solicítela y la prepararé.  |
+|                                                                              |
+================================================================================
+*/
+
+/* =============================================================================
+   SECCIÓN 1: :root (Variables Globales) - MODO CLARO (Por defecto)
+   =============================================================================
+   A continuación se definen las custom properties (variables CSS). Estas
+   variables centralizan paleta de colores, tipografía, sombras, radios y
+   dimensiones del layout. Cambiando aquí se ajusta el tema entero.
+*/
+ /* :root { */
+ /*   --bg: #f6f8fb; */                     /* Fondo principal: color base de la app */
+ /*   --bg-gradient-end: #fafbfe; */        /* Final del degradado de fondo */
+ /*   --panel: #ffffff; */                  /* Fondo de tarjetas y paneles */
+ /*   --panel-2: #f2f5fa; */                /* Fondo secundario (rows, hover ligero) */
+ /*   --primary: #0F294C; */                /* Azul institucional principal */
+ /*   --primary-2: #13345f; */              /* Variación más oscura del primario */
+ /*   --accent: #CDA758; */                 /* Acento dorado para botones/highlights */
+ /*   --accent-2: #E9D29B; */               /* Acento dorado más suave */
+ /*   --muted: #667085; */                  /* Texto secundario / descripciones */
+ /*   --ink: #0b1220; */                    /* Texto principal (oscuro) */
+ /*   --ink-2: #111827; */                  /* Texto secundario oscuro */
+ /*   --border: rgba(15, 23, 42, .08); */   /* Color de bordes sutiles */
+ /*
+    Radii (consistencia en bordes redondeados):
+ */
+ /*   --radius-sm: 8px; */
+ /*   --radius-input: 10px; */
+ /*   --radius-md: 12px; */
+ /*   --radius-lg: 16px; */
+ /*   --radius-kpi: 14px; */
+ /*   --radius-round: 50%; */
+ /*
+    Layout / dimensiones:
+ */
+ /*   --sidebar-w: 260px; */               /* Ancho de la sidebar en desktop */
+ /*
+    Sombras y transiciones:
+ */
+ /*   --shadow-sm: 0 6px 18px rgba(10, 14, 30, .06); */
+ /*   --shadow-md: 0 12px 30px rgba(10, 14, 30, .08); */
+ /*   --transition-sm: .12s; */
+ /*   --transition-md: .18s; */
+ /*   --transition-lg: .22s; */
+ /*
+    Tipografía:
+ */
+ /*   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 2: :root[data-theme="dark"] (Modo Oscuro)
+   =============================================================================
+   Si el <html> recibe el atributo data-theme="dark", estas variables sobrescriben
+   las anteriores para ofrecer una paleta adecuada a modo oscuro.
+*/
+ /* :root[data-theme="dark"] { */
+ /*   --bg: #0b1220; */
+ /*   --bg-gradient-end: #0b1220; */
+ /*   --panel: #0e1629; */
+ /*   --panel-2: #0f1b34; */
+ /*   --ink: #e5e7eb; */
+ /*   --ink-2: #f3f4f6; */
+ /*   --muted: #9aa3b2; */
+ /*   --border: rgba(255, 255, 255, .08); */
+ /*   --shadow-sm: 0 6px 18px rgba(2, 6, 23, .25); */
+ /*   --shadow-md: 0 12px 30px rgba(2, 6, 23, .32); */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 3: Reset Básico y Estilos Globales
+   =============================================================================
+   Normalización y reglas base aplicables a toda la app.
+*/
+ /* *, *::before, *::after { */
+ /*   box-sizing: border-box; */  /* Simplifica cálculos de tamaño (incluye padding y border) */
+ /*   margin: 0; */
+ /*   padding: 0; */
+ /* } */
+
+ /* html { */
+ /*   -webkit-text-size-adjust: 100%; */ /* Evita zoom de texto en iOS */
+ /*   scroll-behavior: smooth; */        /* Scroll suave para anclas */
+ /* } */
+
+ /* body { */
+ /*   height: 100%; */
+ /*   font-family: var(--font); */      /* Fuente principal */
+ /*   font-size: 0.9375rem; */          /* 15px base */
+ /*   line-height: 1.5; */
+ /*   background: linear-gradient(180deg, var(--bg), var(--bg-gradient-end)); */
+ /*   color: var(--ink); */
+ /*   -webkit-font-smoothing: antialiased; */
+ /*   -moz-osx-font-smoothing: grayscale; */
+ /* } */
+
+ /* img, picture, video, canvas, svg { */
+ /*   display: block; */
+ /*   max-width: 100%; */               /* Hace los medios responsivos */
+ /* } */
+
+ /* input, button, textarea, select { */
+ /*   font: inherit; */
+ /*   border: none; */
+ /*   outline: none; */
+ /* } */
+
+ /* h1, h2, h3, h4, h5, h6 { */
+ /*   text-wrap: balance; */
+ /*   font-weight: 800; */
+ /* } */
+
+ /* p { */
+ /*   text-wrap: pretty; */
+ /* } */
+
+ /* a { text-decoration: none; color: inherit; } */
+ /* ul, ol { list-style: none; } */
+
+ /* @media (prefers-reduced-motion: reduce) { */
+ /*   html { scroll-behavior: auto; } */
+ /*   * { */
+ /*     animation-duration: .01ms !important; */
+ /*     animation-iteration-count: 1 !important; */
+ /*     transition-duration: .01ms !important; */
+ /*   } */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 4: Layout General
+   =============================================================================
+   Estructura principal: .layout (sidebar + main), .main (topbar + content + footer)
+*/
+ /* .layout { */
+ /*   display: flex; */               /* Sidebar a la izquierda, contenido a la derecha */
+ /*   min-height: 100vh; */
+ /* } */
+
+ /* .main { */
+ /*   flex: 1; */
+ /*   display: flex; */
+ /*   flex-direction: column; */      /* Topbar encima, content en medio, footer abajo */
+ /*   min-width: 0; */               /* Previene overflow horizontal en flex children */
+ /* } */
+
+ /* .content { */
+ /*   padding: 1.25rem; */           /* Espaciado interior */
+ /*   flex: 1; */                    /* Toma espacio restante */
+ /* } */
+
+ /* .footer { */
+ /*   padding: 1rem; */
+ /*   text-align: center; */
+ /*   color: var(--muted); */
+ /*   font-size: .9rem; */
+ /*   border-top: 1px solid var(--border); */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 5: Sidebar (Barra Lateral)
+   =============================================================================
+   Reglas para sidebar: brand, profile, menu y footer. Foco en accesibilidad y
+   comportamiento móvil (ocultable).
+*/
+ /* .sidebar { */
+ /*   width: var(--sidebar-w); */
+ /*   flex-shrink: 0; */
+ /*   height: 100vh; */
+ /*   position: sticky; */
+ /*   top: 0; */
+ /*   background: linear-gradient(180deg, var(--primary), #172d56); */
+ /*   color: #fff; */
+ /*   display: flex; */
+ /*   flex-direction: column; */
+ /*   box-shadow: var(--shadow-md); */
+ /*   transform: translateZ(0); */   /* Mejora rendimiento de transformaciones */
+ /*   transition: transform var(--transition-lg) ease; */
+ /*   z-index: 50; */
+ /* } */
+
+ /* .brand { */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: .75rem; */
+ /*   padding: 1rem; */
+ /*   border-bottom: 1px solid rgba(255, 255, 255, .08); */
+ /*   font-weight: 800; */
+ /*   font-size: 1.1rem; */
+ /* } */
+ /* .brand i { color: var(--accent); } */ /* Ícono con color de acento */
+
+ /* .profile { */
+ /*   display: flex; */
+ /*   gap: .85rem; */
+ /*   align-items: center; */
+ /*   padding: 1rem; */
+ /*   border-bottom: 1px solid rgba(255, 255, 255, .06); */
+ /* } */
+
+ /* .avatar { */
+ /*   width: 52px; */
+ /*   height: 52px; */
+ /*   border-radius: var(--radius-lg); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   background: linear-gradient(135deg, var(--accent), var(--accent-2)); */
+ /*   color: #2a2312; */
+ /*   font-weight: 900; */
+ /*   flex-shrink: 0; */
+ /* } */
+
+ /* .profile-info { min-width: 0; } */
+
+ /* .profile-name { */
+ /*   font-weight: 800; */
+ /*   white-space: nowrap; */
+ /*   overflow: hidden; */
+ /*   text-overflow: ellipsis; */
+ /* } */
+
+ /* .role { */
+ /*   font-size: .85rem; */
+ /*   color: rgba(255, 255, 255, .88); */
+ /*   white-space: nowrap; */
+ /*   overflow: hidden; */
+ /*   text-overflow: ellipsis; */
+ /* } */
+
+ /* .menu { */
+ /*   padding: .6rem 0; */
+ /*   display: flex; */
+ /*   flex-direction: column; */
+ /*   gap: 0.375rem; */ /* 6px */
+ /*   margin-top: .4rem; */
+ /*   overflow: auto; */ /* Permite scroll interno si hay muchos items */
+ /* } */
+
+ /* .menu a { */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: .85rem; */
+ /*   padding: .75rem 1rem; */
+ /*   margin: 0 .6rem; */
+ /*   border-radius: var(--radius-md); */
+ /*   color: rgba(255, 255, 255, .95); */
+ /*   text-decoration: none; */
+ /*   font-weight: 600; */
+ /*   transition: all var(--transition-md); */
+ /*   position: relative; */
+ /*   isolation: isolate; */
+ /* } */
+
+ /* .menu a i { */
+ /*   width: 40px; */
+ /*   height: 40px; */
+ /*   border-radius: var(--radius-input); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   flex-shrink: 0; */
+ /* } */
+
+ /* .menu a:hover { */
+ /*   transform: translateX(6px); */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   box-shadow: var(--shadow-sm); */
+ /* } */
+
+ /* .menu a.active { */
+ /*   background: #fff; */
+ /*   color: var(--primary); */
+ /*   font-weight: 800; */
+ /*   box-shadow: 0 10px 30px rgba(13, 37, 82, .06); */
+ /* } */
+
+ /* .menu a.active i { */
+ /*   background: linear-gradient(135deg, var(--primary), var(--accent)); */
+ /*   color: #fff; */
+ /* } */
+
+ /* .side-footer { margin-top: auto; padding: 1rem; } */
+
+ /* .btn-ghost { */
+ /*   background: rgba(255, 255, 255, .08); */
+ /*   border: 1px solid rgba(255, 255, 255, .16); */
+ /*   color: #fff; */
+ /*   width: 100%; */
+ /*   text-align: center; */
+ /*   gap: 0.5rem; */
+ /*   display: inline-flex; */
+ /*   justify-content: center; */
+ /*   align-items: center; */
+ /* } */
+
+/* =============================================================================
+   SECCIÓN 6: Topbar (Barra Superior)
+   =============================================================================
+   Topbar con efecto "frosted glass" y controles (toggle, título, perfil).
+*/
+ /* .topbar { */
+ /*   height: 64px; */
+ /*   display: flex; */
+ /*   align-items: center; */
+ /*   gap: 1rem; */
+ /*   padding: 0 1rem; */
+ /*   border-bottom: 1px solid var(--border); */
+ /*   background: color-mix(in srgb, var(--panel) 88%, transparent); */
+ /*   backdrop-filter: saturate(140%) blur(6px); */
+ /*   position: sticky; */
+ /*   top: 0; */
+ /*   z-index: 10; */
+ /* } */
+
+ /* .toggle { */
+ /*   background: transparent; */
+ /*   border: 0; */
+ /*   color: var(--ink); */
+ /*   font-size: 1.1rem; */
+ /*   padding: .5rem; */
+ /*   border-radius: var(--radius-input); */
+ /*   cursor: pointer; */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /* } */
+
+ /* .topbar-title { */
+ /*   font-weight: 800; */
+ /*   font-size: 1.25rem; */
+ /*   margin: 0; */
+ /* } */
+
+ /* .spacer { flex: 1; } */
+
+ /* .user-mini { display: flex; align-items: center; gap: .6rem; } */
+
+ /* .avatar-mini { */
+ /*   width: 36px; */
+ /*   height: 36px; */
+ /*   border-radius: var(--radius-input); */
+ /*   background: linear-gradient(135deg, var(--primary), var(--accent)); */
+ /*   display: grid; */
+ /*   place-items: center; */
+ /*   color: #fff; */
+ /*   font-weight: 800; */
+ /* } */
+
+ /* .user-mini-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; } */
+
+/* =============================================================================
+   SECCIÓN 7: Componentes - Cards, Formularios, Botones
+   =============================================================================
+   Definición de tarjetas, botones principales/ secundarios y campos de formulario.
+*/
+ /* .card { */
+ /*   background: var(--panel); */
+ /*   border-radius: var(--radius-md); */
+ /*   padding: 1rem; */
+ /*   box-shadow: var(--shadow-md); */
+ /*   border: 1px solid var(--border); */
+ /* } */
+
+ /* .card h3 { margin: 0 0 .75rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; } */
+
+ /* .btn { */
+ /*   background: linear-gradient(90deg, var(--primary), var(--accent)); */
+ /*   color: #fff; */
+ /*   border: 0; */
+ /*   padding: .55rem .9rem; */
+ /*   border-radius: var(--radius-md); */
+ /*   font-weight: 800; */
+ /*   cursor: pointer; */
+ /*   box-shadow: 0 10px 26px rgba(13, 37, 82, .12); */
+ /*   transition: all var(--transition-md); */
+ /* } */
+
+ /* .btn:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(13, 37, 82, .16); } */
+ /* .btn:active { transform: translateY(-1px); } */
+
+ /* .btn.btn-secondary { */
+ /*   background: var(--panel); */
+ /*   color: var(--primary); */
+ /*   border: 1px solid var(--border); */
+ /*   box-shadow: none; */
+ /* } */
+ /* :root[data-theme="dark"] .btn.btn-secondary { color: var(--ink); } */
+
+ /* input[type="text"], input[type="date"], input[type="number"], input[type="search"], input[type="email"], input[type="tel"], select, textarea { */
+ /*   background: var(--panel-2); */
+ /*   border: 1px solid var(--border); */
+ /*   padding: .6rem .75rem; */
+ /*   border-radius: var(--radius-input); */
+ /*   font-size: .95rem; */
+ /*   outline: none; */
+ /*   transition: all var(--transition-sm); */
+ /*   color: var(--ink-2); */
+ /*   width: 100%; */
+ /* } */
+ /* :root[data-theme="dark"] input, :root[data-theme="dark"] select, :root[data-theme="dark"] textarea { background: var(--bg); color: var(--ink); } */
+
+ /* input:focus, select:focus, textarea:focus { */
+ /*   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); */
+ /*   border-color: var(--accent); */
+ /* } */
+
+ /* .view-controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; } */
+ /* .view-controls .search-wrapper { flex: 1; position: relative; min-width: 200px; } */
+ /* .view-controls .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; } */
+ /* .view-controls input[type="search"] { width: 100%; padding-left: 36px; background: var(--panel); } */
+
+/* =============================================================================
+   SECCIÓN 8: Componentes Específicos (Tablas, KPI, Gráficos)
+   =============================================================================
+*/
+ /* .table-wrapper { overflow-x: auto; border-radius: var(--radius-input); border: 1px solid var(--border); } */
+
+ /* .data-table { width: 100%; border-collapse: collapse; min-width: 640px; } */
+ /* .data-table th, .data-table td { padding: .78rem .9rem; border-bottom: 1px solid var(--border); text-align: center; } */
+ /* .data-table thead th { background: var(--panel-2); color: var(--muted); font-weight: 800; font-size: .78rem; letter-spacing: .6px; text-transform: uppercase; } */
+ /* .data-table tbody tr { transition: background var(--transition-sm); } */
+ /* .data-table tbody tr:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 6%, transparent), color-mix(in srgb, var(--accent) 6%, transparent)); } */
+ /* .data-table th:first-child, .data-table td:first-child { text-align: left; } */
+ /* .data-table td[id*="avg-"] { background: var(--panel-2); font-weight: 900; color: var(--primary); } */
+ /* :root[data-theme="dark"] .data-table td[id*="avg-"] { color: var(--accent-2); } */
+
+ /* .grade-input { width: 64px !important; text-align: center; padding: .4rem; font-weight: 700; -moz-appearance: textfield; } */
+ /* .grade-input::-webkit-outer-spin-button, .grade-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } */
+
+ /* .course-accordion { border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 1rem; background: var(--panel); overflow: hidden; } */
+ /* .course-accordion summary { padding: 1rem 1.2rem; font-weight: 900; font-size: 1.05rem; cursor: pointer; display: list-item; } */
+ /* .course-accordion[open] summary { border-bottom: 1px solid var(--border); } */
+ /* .course-accordion .course-content { padding: 0; } */
+
+ /* .empty-state { padding: 1.5rem; text-align: center; color: var(--muted); } */
+
+ /* .chart-wrap { width: 100%; height: 320px; border-radius: var(--radius-md); overflow: hidden; padding: 10px; border: 1px solid var(--border); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--primary) 6%, transparent)); } */
+ /* .chart-wrap canvas { width: 100% !important; height: 100% !important; display: block; } */
+
+ /* .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; } */
+
+ /* .kpi { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border-radius: var(--radius-kpi); color: #fff; position: relative; overflow: hidden; border: none; box-shadow: var(--shadow-sm); } */
+ /* .kpi::after { content: ""; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; background: radial-gradient(closest-side, rgba(255,255,255,.18), transparent); filter: blur(6px); opacity: 0.8; } */
+ /* .kpi.students { background: linear-gradient(90deg, var(--primary), #1e3a6d); } */
+ /* .kpi.classes { background: linear-gradient(90deg, #b88a3a, var(--accent)); } */
+ /* .kpi .num { font-size: 1.8rem; font-weight: 900; line-height: 1; } */
+
+ /* .mini-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; padding: .75rem 0; margin-bottom: 1rem; border-bottom: 1px solid var(--border); } */
+ /* .mini-kpi .label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } */
+ /* .mini-kpi .value { font-size: 1.5rem; font-weight: 800; line-height: 1; } */
+
+ /* .task-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; } */
+ /* .task-list li { padding-bottom: .8rem; border-bottom: 1px solid var(--border); } */
+ /* .task-list li:last-child { border-bottom: none; padding-bottom: 0; } */
+ /* .task-list li strong { color: var(--primary); } */
+ /* .task-list li div { font-size: .85rem; color: var(--muted); } */
+
+ /* .profile-field { padding: .5rem 0; } */
+ /* .profile-field strong { display: block; font-size: .8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; } */
+ /* .profile-form { display: flex; flex-direction: column; gap: 0.75rem; } */
+ /* .profile-form label { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .25rem; display: block; } */
+
+/* =============================================================================
+   SECCIÓN 9: Calendario
+   =============================================================================
+   Reglas para renderizar un calendario tipo table con días, hoy, eventos y estilos.
+*/
+ /* .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 .5rem; } */
+ /* .calendar-header h3 { margin: 0; font-size: 1.25rem; text-transform: capitalize; border-bottom: none; padding-bottom: 0; } */
+ /* .calendar-header .btn { padding: .4rem .7rem; box-shadow: none; border-radius: var(--radius-input); } */
+
+ /* #calendar { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; } */
+ /* #calendar th { background: var(--panel-2); color: var(--muted); font-weight: 700; font-size: 0.8rem; padding: 0.75rem 0.5rem; text-align: center; text-transform: uppercase; border-bottom: 1px solid var(--border); } */
+
+ /* .cal-day { height: 110px; padding: 6px; vertical-align: top; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); transition: background var(--transition-sm); } */
+ /* .cal-day:last-child { border-right: 0; } */
+ /* tbody tr:last-child .cal-day { border-bottom: 0; } */
+ /* .cal-day:hover { background: var(--panel-2); } */
+
+ /* .cal-day.is-other-month { background: color-mix(in srgb, var(--panel-2) 40%, var(--panel)); color: var(--muted); opacity: 0.6; } */
+ /* :root[data-theme="dark"] .cal-day.is-other-month { background: color-mix(in srgb, var(--bg) 50%, var(--panel)); } */
+
+ /* .cal-day .day-number { font-size: 0.85rem; font-weight: 700; text-align: right; margin-bottom: 4px; } */
+
+ /* .cal-day.is-today { background: color-mix(in srgb, var(--accent-2) 20%, var(--panel)); } */
+ /* .cal-day.is-today .day-number { background-color: var(--accent); color: #fff; border-radius: var(--radius-round); width: 24px; height: 24px; display: grid; place-items: center; float: right; line-height: 1; font-weight: 800; } */
+
+ /* .events-list { margin-top: 2px; display: flex; flex-direction: column; gap: 4px; max-height: 70px; overflow: hidden; } */
+
+ /* .ev-item { background: var(--primary); color: #fff; padding: 3px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 6px rgba(15, 41, 76, .2); } */
+
+/* =============================================================================
+   SECCIÓN 10: Modal
+   =============================================================================
+   Capas y animaciones para modales (overlay + modal-content + header/body/footer).
+*/
+ /* .modal-overlay { position: fixed; inset: 0; background: rgba(11, 18, 32, 0.6); backdrop-filter: blur(4px); display: grid; place-items: center; z-index: 100; opacity: 0; animation: modal-fade-in .2s forwards; } */
+
+ /* .modal-content { background: var(--panel); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 1rem; width: 90%; max-width: 500px; border-top: 4px solid var(--accent); transform: translateY(20px); animation: modal-pop-in .2s .1s forwards; } */
+ /* :root[data-theme="dark"] .modal-content { border-top-color: var(--primary); } */
+
+ /* .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: .75rem; margin-bottom: 1rem; } */
+ /* .modal-header h3 { margin: 0; font-size: 1.1rem; } */
+ /* .modal-close { background: var(--panel-2); border: 0; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; color: var(--muted); cursor: pointer; display: grid; place-items: center; } */
+
+ /* .modal-body { } */
+ /* .modal-body label { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .25rem; display: block; } */
+
+ /* .modal-footer { display: flex; justify-content: flex-end; gap: .5rem; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; } */
+
+ /* @keyframes modal-fade-in { to { opacity: 1; } } */
+ /* @keyframes modal-pop-in { to { transform: translateY(0); opacity: 1; } } */
+
+/* =============================================================================
+   SECCIÓN 11: Utilidades / Skeletons
+   =============================================================================
+*/
+ /* .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; } */
+
+ /* .sk { height: 160px; background: linear-gradient(90deg, var(--panel-2), #e9edf7, var(--panel-2)); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: var(--radius-md); border: 1px solid var(--border); } */
+ /* :root[data-theme="dark"] .sk { background: linear-gradient(90deg, var(--panel-2), var(--panel), var(--panel-2)); background-size: 200% 100%; } */
+ /* @keyframes sk { to { background-position: 200% 0; } } */
+
+/* =============================================================================
+   SECCIÓN 12: Responsive (Media Queries)
+   =============================================================================
+   Ajustes específicos para tablet y móvil (breakpoints: 900px y 700px).
+*/
+ /* @media (max-width: 900px) { */
+ /*   .sidebar { width: 220px; } */
+ /*   .chart-wrap { height: 260px; } */
+ /*   .data-table { min-width: 520px; } */
+ /* } */
+
+ /* @media (max-width: 700px) { */
+ /*   .sidebar { position: fixed; left: 0; top: 0; height: 100vh; transform: translateX(-100%); transition: transform var(--transition-lg) ease; } */
+ /*   .sidebar.open { transform: translateX(0); box-shadow: 0 0 60px rgba(2, 6, 23, .4); } */
+ /*   .layout { overflow-x: hidden; } */
+ /*   .menu a { margin: 0 .45rem; } */
+ /*   .chart-wrap { height: 220px; } */
+ /*   .grid { grid-template-columns: 1fr; } */
+ /*   .cal-day { height: auto; min-height: 80px; } */
+ /*   .ev-item { font-size: 0.75rem; padding: 2px 5px; } */
+ /*   .calendar-header h3 { font-size: 1.1rem; } */
+ /* } */
+
+/* =============================================================================
+   FIN DEL ARCHIVO: teacher_style.css (TOTALMENTE COMENTADO)
+   =============================================================================
+   Este documento está pensado para servir como respaldo/documentación técnica.

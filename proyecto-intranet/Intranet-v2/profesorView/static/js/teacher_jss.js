@@ -1,459 +1,1005 @@
-// App funcional para módulo Profesores (Vista de Notas por Asignatura con Búsqueda y Filtros)
+/*
+================================================================================
+|                                                                              |
+|                    SISTEMA DE GESTIÓN DE PROFESORES (SPA)                    |
+|                    ARCHIVO: teacher_jss.js                                   |
+|                    AUTOR: Kev182-pixel (Refactorizado a Clase por Asistente) |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   DESCRIPCIÓN:                                                               |
+|   Este script maneja toda la lógica de la Single Page Application (SPA)      |
+|   para el panel de profesores. Se ha refactorizado a un patrón de            |
+|   Clase (ES6 Class) para una máxima encapsulación, organización y            |
+|   mantenibilidad.                                                            |
+|                                                                              |
+|   ARQUITECTURA DE LA CLASE `TeacherApp`:                                     |
+|   -   Campos Privados (#): Almacenan el estado y refs del DOM.               |
+|   -   constructor(): Punto de entrada. Llama a #cacheDom, #loadState,        |
+|       y #bindEvents.                                                         |
+|   -   #cacheDom(): Busca y almacena elementos del DOM una sola vez.          |
+|   -   #bindEvents(): Conecta todos los listeners de eventos (estáticos y     |
+|       delegados) a sus métodos manejadores.                                  |
+|   -   Métodos de Estado (#loadState, #saveState): Manejan localStorage.      |
+|   -   Métodos de Lógica (#getEvaluationMetrics): Funciones puras para        |
+|       cálculos.                                                              |
+|   -   Métodos de Vistas (#renderContent, #renderDashboard): Generan HTML     |
+|       y lo inyectan en el DOM.                                               |
+|   -   Métodos Manejadores (#onNavClick, #onContentClick): La lógica          |
+|       que se ejecuta cuando ocurre un evento.                                |
+|                                                                              |
+|   FIX DE ERRORES ANTERIORES:                                                 |
+|   -   Bug 404: Solucionado al envolver todo en 'DOMContentLoaded' y          |
+|       asegurar que `e.preventDefault()` se ejecute correctamente.            |
+|   -   ReferenceError (defaultState): Solucionado al definir los datos       |
+|       por defecto antes de que `loadState` los necesite.                     |
+|   -   ReferenceError (eval): Solucionado renombrando la variable a `evalId`  |
+|       durante la desestructuración.                                          |
+|                                                                              |
+================================================================================
+*/
 
-// SIDEBAR RESPONSIVO
-const toggleBtn = document.getElementById('toggle');
-const sidebar = document.getElementById('sidebar');
-const mq = window.matchMedia('(max-width:700px)');
 
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (mq.matches) sidebar.classList.toggle('open');
-    else sidebar.classList.toggle('closed');
-  });
-}
-document.addEventListener('click', (e) => {
-  if (!mq.matches) return;
-  const inside = e.target.closest('#sidebar') || e.target.closest('#toggle');
-  if (!inside && sidebar.classList.contains('open')) sidebar.classList.remove('open');
-});
-function updateSidebar() {
-  if (mq.matches) {
-    sidebar.classList.add('closed');
-    sidebar.classList.remove('open');
-  } else {
-    sidebar.classList.remove('closed');
-    sidebar.classList.remove('open');
-  }
-}
-updateSidebar();
-mq.addEventListener('change', updateSidebar);
+/**
+ * =============================================================================
+ * | EVENTO DOMContentLoaded                                                    |
+ * =============================================================================
+ *
+ * Envolvemos toda la aplicación en este listener.
+ *
+ * ¿POR QUÉ?
+ * Garantiza que el script no se ejecute hasta que el DOM (todo el HTML)
+ * esté completamente cargado y listo. Esto previene errores de tipo
+ * "Cannot read properties of null" (ej: al intentar buscar un botón
+ * que aún no existe).
+ */
+document.addEventListener('DOMContentLoaded', () => {
 
-// --- APP STATE & UTILITIES ---
-const STORAGE_KEY = 'profesores_state_v4_courses'; // Nueva clave para la nueva estructura
-const contentEl = document.querySelector('.content');
-let chart = null;
-let gradeViewFilters = { searchTerm: '', sortByAvg: false }; // Estado para los filtros
+  /**
+   * ===========================================================================
+   * | CLASE PRINCIPAL: TeacherApp                                              |
+   * ===========================================================================
+   *
+   * Esta clase encapsula toda la funcionalidad de la aplicación.
+   * Usamos campos privados (#) para proteger el estado interno.
+   *
+   */
+  class TeacherApp {
 
-function genId(prefix = 'ev-') { return prefix + Math.random().toString(36).slice(2,9); }
-function todayISO(offsetDays = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0,10);
-}
+    /*
+    ============================================================================
+    | SECCIÓN 1: CAMPOS PRIVADOS DE LA CLASE                                   |
+    ============================================================================
+    |
+    | Almacenan el estado interno y las referencias.
+    |
+    */
 
-const defaultState = {
-  teacher: { id: 'T-1234', name: 'Juan Pérez', email: 'juan.perez@colegio.cl', subject: 'Ciencias', phone: '+56912345678', bio: 'Profesor titular de Ciencias Naturales y Física. Apasionado por la experimentación y el aprendizaje práctico.', avatarColor: '#6d28d9' },
-  students: [
-    { id: 'S-001', name: 'Ana Contreras' }, { id: 'S-002', name: 'Benjamín Soto' },
-    { id: 'S-003', name: 'Carlos Díaz' }, { id: 'S-004', name: 'Daniela Espinoza' }
-  ],
-  courses: [
-    { id: 'C-01', name: 'Matemáticas 4to B', studentIds: ['S-001', 'S-002', 'S-003'] },
-    { id: 'C-02', name: 'Física 4to B', studentIds: ['S-001', 'S-004'] }
-  ],
-  evaluations: [
-    { id: 'ev-m1', name: 'Prueba 1', date: todayISO(-10), courseId: 'C-01' },
-    { id: 'ev-m2', name: 'Tarea 1', date: todayISO(-5), courseId: 'C-01' },
-    { id: 'ev-f1', name: 'Laboratorio 1', date: todayISO(-8), courseId: 'C-02' },
-    { id: 'ev-f2', name: 'Prueba de Química', date: todayISO(-2), courseId: 'C-02' }
-  ],
-  grades: {
-    'S-001': { 'ev-m1': 6.5, 'ev-m2': 7.0, 'ev-f1': 6.8, 'ev-f2': 7.0 },
-    'S-002': { 'ev-m1': 5.4, 'ev-m2': 6.0 },
-    'S-003': { 'ev-m1': 4.1 },
-    'S-004': { 'ev-f1': 7.0, 'ev-f2': 6.2 }
-  },
-  announcements: [
-      {id: genId('an-'), title: 'Reunión de Apoderados', content: 'Se les recuerda que la reunión de apoderados será el próximo viernes a las 18:00 hrs en la sala de conferencias.', date: todayISO(-2) }
-  ]
-};
+    /**
+     * Clave para el `localStorage`.
+     * @type {string}
+     */
+    #STORAGE_KEY = 'profesores_state_v4_courses';
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) { saveState(defaultState); return JSON.parse(JSON.stringify(defaultState)); }
-    const savedState = JSON.parse(raw);
-    return { ...defaultState, ...savedState, teacher: { ...defaultState.teacher, ...(savedState.teacher || {}) } };
-  } catch (e) { console.error('Error al cargar estado', e); return JSON.parse(JSON.stringify(defaultState)); }
-}
-function saveState(s = state) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+    /**
+     * Objeto para cachear los elementos del DOM.
+     * @type {Object}
+     */
+    #DOM = {};
 
-let state = loadState();
+    /**
+     * Almacena el estado completo de la aplicación (datos).
+     * @type {Object}
+     */
+    #state = {};
 
-function updateProfileUI() {
-  const name = state.teacher.name || 'Profesor';
-  const initials = name.split(' ').map(n => n[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
-  document.querySelectorAll('.avatar, .avatar-mini').forEach(el => { el.textContent = initials; if(el.classList.contains('avatar')) el.style.background = `linear-gradient(135deg, ${state.teacher.avatarColor}, #f59e0b)`; });
-  document.querySelector('.user-mini span').textContent = name;
-  const profileNameEl = document.querySelector('.profile [style*="font-weight:800"]');
-  if(profileNameEl) profileNameEl.textContent = name;
-  const profileRoleEl = document.querySelector('.profile .role');
-  if(profileRoleEl) profileRoleEl.textContent = state.teacher.subject || 'Profesor';
-}
+    /**
+     * Referencia al objeto Chart.js activo.
+     * @type {Chart|null}
+     */
+    #chart = null;
 
-function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    /**
+     * Almacena la fecha actual para la vista de Calendario.
+     * @type {Date}
+     */
+    #currentMonthView = new Date();
 
-function renderContent(target) {
-  target = (target || 'dashboard').replace(/^\/+/, '');
-  if (target === 'tareas' || target === 'notas') {
-    gradeViewFilters = { searchTerm: '', sortByAvg: false };
-    renderGradeEntryView();
-  } else if (target === 'estudiantes') {
-    renderStudentsView();
-  } else if (target === 'calendario') {
-    renderCalendarView();
-  } else if (target === 'perfil') {
-    renderProfileView();
-  } else if (target === 'anuncios') {
-    renderAnnouncementsView();
-  } else {
-    renderDashboardView();
-  }
-}
 
-function renderDashboardView() {
-  contentEl.innerHTML = `
-    <div class="card chart-card">
-      <h3>Rendimiento General de Evaluaciones</h3>
-      <div class="chart-wrap" style="height:320px"><canvas id="chart"></canvas></div>
-      <div class="grid" id="kpi-grid"></div>
-      <div style="margin-top:12px;display:flex;gap:.5rem">
-        <button id="reset-data" class="btn btn-secondary">Reset datos (demo)</button>
-      </div>
-    </div>`;
-  document.getElementById('reset-data').addEventListener('click', ()=>{ if(confirm('¿Resetear datos a demo?')) { localStorage.removeItem(STORAGE_KEY); location.reload(); }});
-  renderChart();
-  renderKPIs();
-}
+    /**
+     * ==========================================================================
+     * | CONSTRUCTOR DE LA CLASE                                                |
+     * ==========================================================================
+     *
+     * El punto de entrada. Se llama automáticamente cuando creamos
+     * `new TeacherApp()`.
+     *
+     */
+    constructor() {
+      // 1. Buscar y almacenar todos los elementos del DOM.
+      this.#cacheDom();
 
-function renderStudentsView() {
-  const rows = state.students.map(s => {
-    const avg = computeOverallStudentAverage(s.id);
-    return `<tr>
-      <td>${s.id}</td>
-      <td>${s.name}</td>
-      <td style="font-weight:700">${isNaN(avg) ? '-' : avg.toFixed(2)}</td>
-    </tr>`;
-  }).join('');
-  contentEl.innerHTML = `<div class="card"><h3>Listado General de Alumnos</h3>
-    <div class="table-wrapper"><table class="data-table" style="width:100%">
-    <thead><tr><th>ID</th><th>Nombre</th><th>Promedio General</th></tr></thead>
-    <tbody>${rows}</tbody>
-    </table></div></div>`;
-}
-
-function renderGradeEntryView() {
-  contentEl.innerHTML = `
-    <div class="card">
-      <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin:0;">Notas por Asignatura</h3>
-        <button id="show-add-eval-modal" class="btn"><i class="fa-solid fa-plus" style="margin-right: 6px;"></i>Agregar Evaluación</button>
-      </div>
-      <div class="view-controls">
-        <div class="search-wrapper">
-          <i class="fa-solid fa-search"></i>
-          <input type="search" id="student-search" placeholder="Buscar alumno por nombre..." value="${escapeHtml(gradeViewFilters.searchTerm)}">
-        </div>
-        <button id="sort-by-avg" class="btn btn-secondary ${gradeViewFilters.sortByAvg ? 'active' : ''}"><i class="fa-solid fa-arrow-down-9-1" style="margin-right: 6px;"></i>Ordenar por Promedio</button>
-      </div>
-      <div id="courses-container">${state.courses.map(course => renderCourseAccordion(course)).join('')}</div>
-    </div>`;
-
-  document.getElementById('show-add-eval-modal').addEventListener('click', renderAddEvaluationModal);
-  
-  document.getElementById('student-search').addEventListener('input', (e) => {
-    gradeViewFilters.searchTerm = e.target.value;
-    document.querySelectorAll('.course-accordion').forEach(details => {
-      const courseId = details.dataset.courseId;
-      const course = state.courses.find(c => c.id === courseId);
-      if(course) {
-          const content = details.querySelector('.course-content');
-          if (content) content.innerHTML = renderCourseGradeTable(course);
+      // 2. Verificación de seguridad. Si faltan elementos cruciales,
+      //    detenemos la app para evitar errores.
+      if (!this.#DOM.contentEl || !this.#DOM.sidebar || !this.#DOM.toggleBtn || !this.#DOM.menu) {
+        console.error('Error Crítico: Faltan elementos base del layout. La aplicación no puede iniciar.');
+        console.log('DOM Cacheado:', this.#DOM); // Muestra qué elementos faltan
+        return; // Detiene la ejecución
       }
-    });
-    addGradeInputListeners();
-  });
 
-  document.getElementById('sort-by-avg').addEventListener('click', (e) => {
-    gradeViewFilters.sortByAvg = !gradeViewFilters.sortByAvg;
-    renderGradeEntryView();
-  });
+      // 3. Cargar el estado desde localStorage (o usar por defecto).
+      this.#state = this.#loadState();
 
-  addGradeInputListeners();
-}
+      // 4. Conectar todos los listeners de eventos (clics, resize, etc.).
+      //    Usamos .bind(this) para asegurar que 'this' dentro del
+      //    manejador de eventos se refiera a la instancia de la clase.
+      this.#bindEvents();
 
-function renderCourseAccordion(course) {
-  return `
-    <details class="course-accordion" data-course-id="${course.id}" open>
-      <summary>${escapeHtml(course.name)}</summary>
-      <div class="course-content">${renderCourseGradeTable(course)}</div>
-    </details>`;
-}
+      // 5. Actualizar la UI estática (nombre, avatar) con los datos cargados.
+      this.#updateProfileUI();
 
-function renderCourseGradeTable(course) {
-  const courseEvals = state.evaluations.filter(ev => ev.courseId === course.id);
-  let courseStudents = course.studentIds.map(studentId => state.students.find(s => s.id === studentId)).filter(Boolean);
+      // 6. Renderizar la vista inicial (Dashboard).
+      this.#renderContent('dashboard');
 
-  if (gradeViewFilters.searchTerm) {
-    const term = gradeViewFilters.searchTerm.toLowerCase();
-    courseStudents = courseStudents.filter(s => s.name.toLowerCase().includes(term));
-  }
+      // 7. Mensaje de éxito en la consola.
+      console.log('Aplicación de Profesor (Clase) inicializada correctamente.');
+    }
 
-  if (gradeViewFilters.sortByAvg) {
-    courseStudents.sort((a, b) => (computeCourseAverage(b.id, course.id) || 0) - (computeCourseAverage(a.id, course.id) || 0));
-  }
-  
-  if (courseStudents.length === 0) return '<p style="padding: 1rem; text-align:center; color: var(--muted);">No se encontraron alumnos.</p>';
-  if (courseEvals.length === 0) return '<p style="padding: 1rem; text-align:center; color: var(--muted);">No hay evaluaciones para este curso.</p>';
 
-  const header = `<thead><tr><th>Alumno</th>${courseEvals.map(ev => `<th>${escapeHtml(ev.name)}</th>`).join('')}<th>Promedio</th></tr></thead>`;
-  const body = `<tbody>${courseStudents.map(student => {
-    const cells = courseEvals.map(ev => {
-      const grade = state.grades[student.id]?.[ev.id] ?? '';
-      return `<td><input class="grade-input" type="number" step="0.1" min="0" max="7" value="${grade}" data-student="${student.id}" data-eval="${ev.id}"></td>`;
-    }).join('');
-    const avg = computeCourseAverage(student.id, course.id);
-    return `<tr><td>${escapeHtml(student.name)}</td>${cells}<td id="avg-${student.id}-${course.id}" style="font-weight:700">${isNaN(avg) ? '-' : avg.toFixed(2)}</td></tr>`;
-  }).join('')}</tbody>`;
+    /*
+    ============================================================================
+    | SECCIÓN 2: MÉTODOS DE INICIALIZACIÓN (Cache y Bind)                      |
+    ============================================================================
+    */
 
-  return `<div class="table-wrapper"><table class="data-table">${header}${body}</table></div>`;
-}
+    /**
+     * Busca todos los elementos estáticos del DOM al inicio
+     * y los guarda en el objeto `#DOM`.
+     * Esto es una optimización de rendimiento, evita querySelector repetidos.
+     * @private
+     */
+    #cacheDom() {
+      // Usamos los IDs y Clases definidos en el HTML
+      this.#DOM.contentEl = document.getElementById('content-area');
+      this.#DOM.sidebar = document.getElementById('sidebar');
+      this.#DOM.toggleBtn = document.getElementById('toggle');
+      this.#DOM.mq = window.matchMedia('(max-width: 700px)');
+      this.#DOM.menu = document.getElementById('menu');
+      this.#DOM.menuLinks = document.querySelectorAll('.menu a');
+      this.#DOM.topbarTitle = document.getElementById('topbar-title');
+      
+      // Hooks para actualizar la UI del perfil
+      this.#DOM.userNameMini = document.querySelector('.user-mini-name');
+      this.#DOM.profileName = document.querySelector('.profile-name');
+      this.#DOM.profileRole = document.querySelector('.profile .role');
+    }
 
-function addGradeInputListeners() {
-  document.querySelectorAll('.grade-input').forEach(inp => {
-    inp.addEventListener('change', (e) => {
-      const studentId = e.target.dataset.student;
-      const evalId = e.target.dataset.eval;
-      const value = parseFloat(e.target.value);
+    /**
+     * Conecta los "Handlers" (lógica de eventos) a los elementos del DOM.
+     * Se ejecuta UNA SOLA VEZ en el constructor.
+     * @private
+     */
+    #bindEvents() {
+      // 1. Listeners Estáticos (para la navegación principal)
+      //    Usamos .bind(this) para que 'this' dentro del handler
+      //    (ej: #onNavClick) siga siendo la instancia de TeacherApp.
+      this.#DOM.menu.addEventListener('click', this.#onNavClick.bind(this));
+      this.#DOM.toggleBtn.addEventListener('click', this.#onToggleClick.bind(this));
+      document.body.addEventListener('click', this.#onBodyClick.bind(this));
+      this.#DOM.mq.addEventListener('change', this.#onResize.bind(this));
 
-      if (!state.grades[studentId]) state.grades[studentId] = {};
-      if (isNaN(value)) delete state.grades[studentId][evalId];
-      else state.grades[studentId][evalId] = Math.max(0, Math.min(7, value));
-      saveState();
+      // 2. Listeners Dinámicos (Delegación de Eventos)
+      //    Estos se adjuntan al contenedor `contentEl` y manejan
+      //    eventos de botones/inputs que se crean y destruyen
+      //    dinámicamente con cada vista.
+      this.#DOM.contentEl.addEventListener('click', this.#onContentClick.bind(this));
+      this.#DOM.contentEl.addEventListener('change', this.#onContentChange.bind(this));
+      this.#DOM.contentEl.addEventListener('input', this.#onContentInput.bind(this));
+    }
 
-      const courseId = state.evaluations.find(ev => ev.id === evalId)?.courseId;
-      if (courseId) {
-        const avg = computeCourseAverage(studentId, courseId);
-        const avgEl = document.querySelector(`#avg-${studentId}-${courseId}`);
-        if(avgEl) avgEl.textContent = isNaN(avg) ? '-' : avg.toFixed(2);
+
+    /*
+    ============================================================================
+    | SECCIÓN 3: UTILIDADES Y GESTIÓN DE ESTADO                                |
+    ============================================================================
+    */
+
+    /**
+     * Generador de IDs únicos.
+     * @param {string} [prefix='ev-'] - Un prefijo para el ID.
+     * @returns {string} Un ID pseudo-aleatorio.
+     * @private
+     * @static
+     */
+    static #genId(prefix = 'ev-') {
+      return prefix + Math.random().toString(36).slice(2, 11);
+    }
+
+    /**
+     * Devuelve la fecha de hoy (o con un desfase) en formato AAAA-MM-DD.
+     * @param {number} [offsetDays=0] - Días a sumar o restar de hoy.
+     * @returns {string} La fecha en formato ISO (YYYY-MM-DD).
+     * @private
+     * @static
+     */
+    static #todayISO(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().slice(0, 10);
+    }
+
+    /**
+     * Escapa HTML para prevenir ataques XSS (Cross-Site Scripting).
+     * @param {string} [s=''] - El string a escapar.
+     * @returns {string} El string seguro.
+     * @private
+     * @static
+     */
+    static #escapeHtml(s = '') {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /**
+     * Getter para los datos por defecto.
+     * Usar un getter previene que los datos por defecto sean
+     * modificados accidentalmente.
+     * @returns {object} El estado por defecto.
+     * @private
+     */
+    get #defaultState() {
+      // Usamos los métodos estáticos para generar los datos
+      return {
+        teacher: { id: 'T-1234', name: 'Juan Pérez', email: 'juan.perez@colegio.cl', subject: 'Matemáticas', phone: '+56912345678', bio: 'Profesor titular de Matemáticas. Apasionado por la experimentación y el aprendizaje práctico.', avatarColor: '#6d28d9' },
+        students: [
+          { id: 'S-001', name: 'Ana Contreras' }, { id: 'S-002', name: 'Benjamín Soto' },
+          { id: 'S-003', name: 'Carlos Díaz' }, { id: 'S-004', name: 'Daniela Espinoza' },
+          { id: 'S-005', name: 'Elena Morales' }, { id: 'S-006', name: 'Felipe Rojas' }
+        ],
+        courses: [
+          { id: 'C-01', name: 'Matemáticas 4to B', studentIds: ['S-001', 'S-002', 'S-003', 'S-005'] },
+          { id: 'C-02', name: 'Física 4to B', studentIds: ['S-001', 'S-004', 'S-006'] }
+        ],
+        evaluations: [
+          { id: 'ev-m1', name: 'Prueba 1', date: TeacherApp.#todayISO(-10), courseId: 'C-01' },
+          { id: 'ev-m2', name: 'Tarea 1', date: TeacherApp.#todayISO(-5), courseId: 'C-01' },
+          { id: 'ev-f1', name: 'Laboratorio 1', date: TeacherApp.#todayISO(-8), courseId: 'C-02' },
+          { id: 'ev-f2', name: 'Prueba de Química', date: TeacherApp.#todayISO(-2), courseId: 'C-02' }
+        ],
+        grades: {
+          'S-001': { 'ev-m1': 6.5, 'ev-m2': 7.0, 'ev-f1': 6.8, 'ev-f2': 7.0 },
+          'S-002': { 'ev-m1': 5.4, 'ev-m2': 6.0 },
+          'S-003': { 'ev-m1': 4.1 },
+          'S-004': { 'ev-f1': 7.0, 'ev-f2': 6.2 },
+          'S-005': { 'ev-m1': 6.8, 'ev-m2': 6.5 },
+          'S-006': { 'ev-f1': 5.5, 'ev-f2': 5.9 }
+        },
+        announcements: [
+          { id: TeacherApp.#genId('an-'), title: 'Reunión de Apoderados', content: 'Se les recuerda que la reunión de apoderados será el próximo viernes a las 18:00 hrs en la sala de conferencias.', date: TeacherApp.#todayISO(-2) }
+        ]
+      };
+    }
+
+    /**
+     * Carga el estado desde localStorage.
+     * @returns {object} El estado de la aplicación.
+     * @private
+     */
+    #loadState() {
+      try {
+        const raw = localStorage.getItem(this.#STORAGE_KEY);
+        const defaults = this.#defaultState; // Llama al getter
+        if (!raw) {
+          this.#saveState(defaults); // Guarda el estado por defecto
+          return JSON.parse(JSON.stringify(defaults));
+        }
+        const savedState = JSON.parse(raw);
+        // Fusiona el estado por defecto con el guardado
+        return { ...defaults, ...savedState, teacher: { ...defaults.teacher, ...(savedState.teacher || {}) } };
+      } catch (e) {
+        console.error('Error al cargar estado', e);
+        return JSON.parse(JSON.stringify(this.#defaultState));
       }
-    });
-  });
-}
+    }
 
-function renderAddEvaluationModal() {
-  const modalOverlay = document.createElement('div');
-  modalOverlay.className = 'modal-overlay';
-  const courseOptions = state.courses.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    /**
+     * Guarda el estado actual en localStorage.
+     * @param {object} [newState=this.#state] - El estado a guardar.
+     * @private
+     */
+    #saveState(newState = this.#state) {
+      this.#state = newState; // Actualiza el estado interno de la clase
+      localStorage.setItem(this.#STORAGE_KEY, JSON.stringify(this.#state));
+    }
 
-  modalOverlay.innerHTML = `<div class="modal-content" style="max-width: 400px;">
-      <div class="modal-header"><h3>Agregar Nueva Evaluación</h3></div>
-      <div class="modal-body" style="display:flex; flex-direction:column; gap:1rem;">
-        <div><label>Asignatura / Curso</label><select id="modal-course-id" style="width:100%;">${courseOptions}</select></div>
-        <div><label>Nombre de la Evaluación</label><input id="modal-eval-name" type="text" placeholder="Ej: Parcial 1" style="width:100%;"></div>
-        <div><label>Fecha</label><input id="modal-eval-date" type="date" value="${todayISO()}" style="width:100%;"></div>
-      </div>
-      <div class="modal-footer"><button id="modal-cancel" class="btn btn-secondary">Cancelar</button><button id="modal-save" class="btn">Crear Evaluación</button></div>
-    </div>`;
 
-  document.body.appendChild(modalOverlay);
-  const closeModal = () => modalOverlay.remove();
-  document.getElementById('modal-cancel').addEventListener('click', closeModal);
-  modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-  document.getElementById('modal-save').addEventListener('click', () => {
-    const courseId = document.getElementById('modal-course-id').value;
-    const evalName = document.getElementById('modal-eval-name').value.trim();
-    const evalDate = document.getElementById('modal-eval-date').value;
-    if (!courseId || !evalName || !evalDate) return alert('Todos los campos son obligatorios.');
-    state.evaluations.push({ id: genId(), name: evalName, date: evalDate, courseId });
-    saveState();
-    closeModal();
-    renderGradeEntryView();
-  });
-}
+    /*
+    ============================================================================
+    | SECCIÓN 4: MÓDULO DE LÓGICA DE CÁLCULO (#logic)                          |
+    ============================================================================
+    |
+    | Métodos privados para cálculos puros.
+    |
+    */
 
-function renderAnnouncementsView() {
-  const announcementsHtml = (state.announcements || []).slice().sort((a, b) => b.date.localeCompare(a.date)).map(an => `
-    <div class="card" style="margin-bottom: 1rem;">
-      <h4>${escapeHtml(an.title)} <span style="font-size: .8rem; color: var(--muted); font-weight: 500;">(${an.date})</span></h4>
-      <p style="color: #374151;">${escapeHtml(an.content)}</p>
-    </div>
-  `).join('');
+    /**
+     * Calcula el promedio de una evaluación específica.
+     * @param {string} evalId - El ID de la evaluación.
+     * @returns {number|NaN} El promedio, o NaN si no hay notas.
+     * @private
+     */
+    #getAverageForEval(evalId) {
+      const grades = Object.values(this.#state.grades)
+        .map(sGrades => sGrades[evalId])
+        .filter(g => g !== undefined && g !== null);
+      return grades.length ? grades.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / grades.length : NaN;
+    }
+    
+    /**
+     * Calcula los KPIs (Métricas Clave) para el Dashboard.
+     * @returns {object} Un objeto con {overall, best, worst, bestName, worstName}.
+     * @private
+     */
+    #getEvaluationMetrics() {
+      const evalData = this.#state.evaluations.map(ev => ({
+        name: ev.name,
+        avg: this.#getAverageForEval(ev.id)
+      })).filter(ev => !isNaN(ev.avg));
+      
+      if (evalData.length === 0) return { overall: 'N/A', best: 'N/A', worst: 'N/A', bestName: '-', worstName: '-' };
+      
+      const overall = evalData.reduce((acc, ev) => acc + ev.avg, 0) / evalData.length;
+      let best = evalData[0], worst = evalData[0];
+      evalData.forEach(ev => {
+        if (ev.avg > best.avg) best = ev;
+        if (ev.avg < worst.avg) worst = ev;
+      });
+      
+      return {
+        overall: overall.toFixed(2),
+        best: best.avg.toFixed(2),
+        worst: worst.avg.toFixed(2),
+        bestName: best.name,
+        worstName: worst.name
+      };
+    }
 
-  contentEl.innerHTML = `
-    <div class="card"><h3>Anuncios</h3>
-      <div style="margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius);">
-        <h4>Crear Nuevo Anuncio</h4>
-        <div style="display:flex; flex-direction:column; gap:.6rem; margin-top:10px;">
-          <input id="new-an-title" type="text" placeholder="Título del anuncio" />
-          <textarea id="new-an-content" rows="4" placeholder="Contenido..."></textarea>
-          <div style="text-align: right;"><button id="add-announcement" class="btn">Publicar</button></div>
+    /**
+     * Calcula el promedio de un estudiante en un curso específico.
+     * @param {string} studentId - ID del estudiante.
+     * @param {string} courseId - ID del curso.
+     * @returns {number|NaN} El promedio del curso.
+     * @private
+     */
+    #computeCourseAverage(studentId, courseId) {
+      const studentGrades = this.#state.grades[studentId] || {};
+      const courseEvalIds = this.#state.evaluations.filter(ev => ev.courseId === courseId).map(ev => ev.id);
+      const grades = courseEvalIds.map(evalId => studentGrades[evalId]).filter(g => g !== undefined && g !== null && g !== '');
+      if (!grades.length) return NaN;
+      return grades.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / grades.length;
+    }
+
+    /**
+     * Calcula el promedio general de un estudiante (en todos sus cursos).
+     * @param {string} studentId - ID del estudiante.
+     * @returns {number|NaN} El promedio general.
+     * @private
+     */
+    #computeOverallStudentAverage(studentId) {
+      const studentGrades = this.#state.grades[studentId] || {};
+      const grades = Object.values(studentGrades).filter(g => g !== undefined && g !== null && g !== '');
+      if (!grades.length) return NaN;
+      return grades.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / grades.length;
+    }
+
+    
+    /*
+    ============================================================================
+    | SECCIÓN 5: MÓDULO DE VISTAS (#views)                                     |
+    ============================================================================
+    |
+    | Métodos privados que generan HTML y lo inyectan en el DOM.
+    |
+    */
+
+    /**
+     * Función "Router" principal.
+     * @param {string} target - El nombre de la vista a renderizar (ej: 'dashboard').
+     * @private
+     */
+    #renderContent(target) {
+      target = (target || 'dashboard').replace(/^\/+/, '');
+      
+      // Mapeo de string a método de la clase
+      const viewMap = {
+        'dashboard': this.#renderDashboard,
+        'estudiantes': this.#renderStudents,
+        'tareas': this.#renderGrades,
+        'anuncios': this.#renderAnnouncements,
+        'calendario': this.#renderCalendarView,
+        'perfil': this.#renderProfile
+      };
+
+      const renderFn = viewMap[target] || viewMap['dashboard'];
+      
+      if (target === 'calendario') {
+        this.#currentMonthView = new Date();
+      }
+      
+      // Usamos .call(this) para asegurar que 'this' dentro de la
+      // función de renderizado siga siendo la instancia de la clase.
+      renderFn.call(this);
+    }
+
+    /**
+     * VISTA 1: DASHBOARD
+     * @private
+     */
+    #renderDashboard() {
+      const metrics = this.#getEvaluationMetrics();
+      this.#DOM.contentEl.innerHTML = `
+        <div class="grid">
+          <div class="kpi students"><i class="fa-solid fa-user-graduate fa-2x"></i><div><div class="num" id="kpi-students-count">--</div><div>Estudiantes Totales</div></div></div>
+          <div class="kpi classes"><i class="fa-solid fa-chalkboard fa-2x"></i><div><div class="num" id="kpi-courses-count">--</div><div>Clases Activas</div></div></div>
         </div>
-      </div>
-      <div style="margin-top: 1.5rem;"><h4>Anuncios Publicados</h4>${announcementsHtml || '<p>No hay anuncios publicados.</p>'}</div>
-    </div>`;
-
-  document.getElementById('add-announcement').addEventListener('click', () => {
-    const title = document.getElementById('new-an-title').value.trim();
-    const content = document.getElementById('new-an-content').value.trim();
-    if (!title || !content) return alert('El título y el contenido son obligatorios.');
-    if (!state.announcements) state.announcements = [];
-    state.announcements.unshift({ id: 'an-' + Date.now(), title, content, date: todayISO() });
-    saveState();
-    renderAnnouncementsView();
-  });
-}
-
-function renderCalendarView() {
-    contentEl.innerHTML = `
-    <div class="card">
-      <h3>Calendario de Evaluaciones</h3>
-      <div id="calendar-container"></div>
-    </div>`;
-    renderCalendar();
-}
-
-function renderProfileView() {
-  const t = state.teacher || {};
-  contentEl.innerHTML = `
-    <div class="card profile-card">
-      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-        <div class="profile-avatar-big">${(t.name||'').split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()}</div>
-        <div style="flex:1;min-width:240px">
-          <h3>Perfil del Profesor</h3>
-          <div class="profile-field"><strong>Nombre</strong><div>${escapeHtml(t.name||'')}</div></div>
-          <div class="profile-field"><strong>Asignatura Principal</strong><div>${escapeHtml(t.subject||'')}</div></div>
-          <div class="profile-field"><strong>Email</strong><div>${escapeHtml(t.email||'')}</div></div>
-          <div class="profile-field"><strong>Teléfono</strong><div>${escapeHtml(t.phone||'')}</div></div>
+        <div class="grid" style="grid-template-columns: 2fr 1fr; margin-top: 1.5rem; align-items: flex-start;">
+          <div class="card">
+            <h3>Rendimiento de Evaluaciones</h3>
+            <div class="mini-kpi-grid">
+              <div class="mini-kpi"><span class="label">Promedio General</span><span class="value" style="color: var(--primary);">${metrics.overall}</span></div>
+              <div class="mini-kpi"><span class="label" title="${TeacherApp.#escapeHtml(metrics.bestName)}">Mejor Eval. (${TeacherApp.#escapeHtml(metrics.bestName)})</span><span class="value" style="color: var(--accent);">${metrics.best}</span></div>
+              <div class="mini-kpi"><span class="label" title="${TeacherApp.#escapeHtml(metrics.worstName)}">Peor Eval. (${TeacherApp.#escapeHtml(metrics.worstName)})</span><span class="value" style="color: var(--muted);">${metrics.worst}</span></div>
+            </div>
+            <div class="chart-wrap" style="height: 260px;"><canvas id="dashboard-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <h3>Tareas Pendientes (Demo)</h3>
+            <ul class="task-list">
+              <li><strong>Calificar Ensayo</strong><div>Curso: 8vo Básico - Vence Hoy</div></li>
+              <li><strong>Preparar Guía N°5</strong><div>Curso: 7mo A - Vence Mañana</div></li>
+              <li><strong>Revisar Proyectos</strong><div>Curso: 8vo A - Vence en 3 días</div></li>
+            </ul>
+          </div>
         </div>
-      </div>
-      <div style="margin-top:12px">
-        <strong>Biografía</strong>
-        <div style="margin-top:6px;color:#374151">${escapeHtml(t.bio||'')}</div>
-      </div>
-      <div style="margin-top:14px;display:flex;gap:.5rem">
-        <button id="edit-profile" class="btn">Editar Perfil</button>
-      </div>
-    </div>`;
+        <div style="margin-top:1rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: right;"><button data-action="reset-data" class="btn btn-secondary">Resetear datos (demo)</button></div>`;
+      
+      try {
+        document.getElementById('kpi-students-count').textContent = this.#state.students.length;
+        document.getElementById('kpi-courses-count').textContent = this.#state.courses.length;
+      } catch (e) {}
+      
+      this.#renderDashboardChart();
+    }
 
-  document.getElementById('edit-profile').addEventListener('click', () => {
-    const formHtml = `
-      <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:10px">
-        <input id="prof-name" type="text" placeholder="Nombre" value="${(t.name||'')}" />
-        <input id="prof-subject" type="text" placeholder="Asignatura" value="${(t.subject||'')}" />
-        <input id="prof-email" type="text" placeholder="Email" value="${(t.email||'')}" />
-        <input id="prof-phone" type="text" placeholder="Teléfono" value="${(t.phone||'')}" />
-        <textarea id="prof-bio" rows="4" placeholder="Biografía">${(t.bio||'')}</textarea>
-        <div style="display:flex;gap:.5rem">
-          <button id="save-profile" class="btn">Guardar</button>
-          <button id="cancel-profile" class="btn btn-secondary">Cancelar</button>
-        </div>
-      </div>`;
-    const card = document.querySelector('.profile-card');
-    const temp = document.createElement('div');
-    temp.innerHTML = formHtml;
-    card.appendChild(temp);
-    document.getElementById('cancel-profile').addEventListener('click', () => renderProfileView());
-    document.getElementById('save-profile').addEventListener('click', () => {
-      state.teacher.name = document.getElementById('prof-name').value.trim();
-      state.teacher.subject = document.getElementById('prof-subject').value.trim();
-      state.teacher.email = document.getElementById('prof-email').value.trim();
-      state.teacher.phone = document.getElementById('prof-phone').value.trim();
-      state.teacher.bio = document.getElementById('prof-bio').value.trim();
-      saveState();
-      updateProfileUI();
-      renderProfileView();
-    });
-  });
-}
+    /** Dibuja el gráfico de barras del Dashboard. */
+    #renderDashboardChart() {
+      const canvas = document.getElementById('dashboard-chart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (this.#chart) this.#chart.destroy();
 
-function renderChart() {
-  const canvas = document.getElementById('chart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (chart) chart.destroy();
-  const labels = state.evaluations.map(ev => ev.name);
-  const averages = state.evaluations.map(ev => {
-    const grades = Object.values(state.grades).map(sGrades => sGrades[ev.id]).filter(g => g !== undefined);
-    return grades.length ? grades.reduce((a, b) => a + b, 0) / grades.length : NaN;
-  });
-  const grad = ctx.createLinearGradient(0,0,0, canvas.parentElement.clientHeight || 300);
-  grad.addColorStop(0, 'rgba(59,130,246,0.9)');
-  grad.addColorStop(1, 'rgba(99,102,241,0.12)');
-  chart = new Chart(ctx, { type:'line', data: { labels, datasets:[{ label:'Promedio', data: averages, backgroundColor: grad, borderColor: '#374ef0', tension: .3, fill: true, pointRadius:6, spanGaps: true }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} , tooltip:{ callbacks:{ label: c => `Promedio: ${Number(c.parsed.y).toFixed(2)}` } } }, scales: { y: { min:1, max:7, ticks:{stepSize:1} } } } });
-}
+      const labels = this.#state.evaluations.map(ev => ev.name);
+      const averages = this.#state.evaluations.map(ev => this.#getAverageForEval(ev.id));
 
-function renderKPIs() {
-  const grid = document.getElementById('kpi-grid');
-  if (!grid) return;
-  grid.innerHTML = `
-    <div class="card kpi students"><i class="fa-solid fa-user-graduate fa-2x"></i><div><div class="num">${state.students.length}</div><div class="label">Alumnos Totales</div></div></div>
-    <div class="card kpi classes"><i class="fa-solid fa-book fa-2x"></i><div><div class="num">${state.courses.length}</div><div class="label">Asignaturas</div></div></div>`;
-}
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#0F294C';
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#CDA758';
+      const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(0,0,0,0.1)';
 
-function renderCalendar() {
-  const container = document.getElementById('calendar-container');
-  if (!container) return;
-  const today = new Date();
-  const month = today.getMonth();
-  const year = today.getFullYear();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  
-  const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-  let html = '<table id="calendar"><thead><tr>' + weekdays.map(d => `<th>${d}</th>`).join('') + '</tr></thead><tbody>';
-  
-  let date = 1;
-  let startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+      this.#chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Promedio', data: averages,
+            backgroundColor: primaryColor, borderColor: primaryColor,
+            borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'var(--ink-2, #111827)', titleColor: 'var(--accent, #CDA758)',
+              bodyColor: '#ffffff', displayColors: false,
+              callbacks: { label: (context) => `Promedio: ${context.parsed.y.toFixed(2)}` }
+            }
+          },
+          scales: {
+            y: { min: 1, max: 7, ticks: { stepSize: 1, padding: 10, color: 'var(--muted)' }, grid: { drawBorder: false, color: borderColor } },
+            x: { ticks: { padding: 10, color: 'var(--muted)' }, grid: { display: false } }
+          }
+        }
+      });
+    }
 
-  for (let i = 0; i < 6; i++) {
-    html += '<tr>';
-    for (let j = 0; j < 7; j++) {
-      if (i === 0 && j < startDay || date > daysInMonth) {
-        html += '<td></td>';
+    /**
+     * VISTA 2: ESTUDIANTES
+     * @param {string} [searchTerm=''] - El texto para filtrar la lista.
+     * @private
+     */
+    #renderStudents(searchTerm = '') {
+      const term = searchTerm.toLowerCase();
+      const filteredStudents = this.#state.students.filter(s => s.name.toLowerCase().includes(term));
+      const rows = filteredStudents.map(s => {
+        const avg = this.#computeOverallStudentAverage(s.id);
+        return `<tr>
+          <td>${s.id}</td>
+          <td>${TeacherApp.#escapeHtml(s.name)}</td>
+          <td style="font-weight:700">${isNaN(avg) ? '-' : avg.toFixed(2)}</td>
+          <td>${TeacherApp.#escapeHtml(this.#state.courses.filter(c => c.studentIds.includes(s.id)).map(c => c.name).join(', '))}</td>
+        </tr>`;
+      }).join('');
+      this.#DOM.contentEl.innerHTML = `
+        <div class="card">
+          <h3>Listado General de Alumnos</h3>
+          <div class="view-controls"><div class="search-wrapper"><i class="fa-solid fa-search"></i><input type="search" id="student-search-input" placeholder="Buscar alumno por nombre..." value="${TeacherApp.#escapeHtml(searchTerm)}"></div></div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>Nombre</th><th>Promedio General</th><th>Cursos</th></tr></thead>
+              <tbody>${rows.length > 0 ? rows : `<tr><td colspan="4" class="empty-state">No se encontraron alumnos.</td></tr>`}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    /**
+     * VISTA 3: TAREAS / NOTAS
+     * @param {object} [filters] - Opciones de filtrado.
+     * @private
+     */
+    #renderGrades(filters = { searchTerm: '', sortByAvg: false }) {
+      this.#DOM.contentEl.innerHTML = `
+        <div class="card">
+          <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin:0;">Notas por Asignatura</h3>
+            <button data-action="show-add-eval-modal" class="btn"><i class="fa-solid fa-plus" style="margin-right: 6px;"></i>Agregar Evaluación</button>
+          </div>
+          <div class="view-controls">
+            <div class="search-wrapper"><i class="fa-solid fa-search"></i><input type="search" id="grade-search-input" placeholder="Buscar alumno por nombre..." value="${TeacherApp.#escapeHtml(filters.searchTerm)}"></div>
+            <button data-action="sort-by-avg" class="btn btn-secondary ${filters.sortByAvg ? 'active' : ''}"><i class="fa-solid fa-arrow-down-9-1" style="margin-right: 6px;"></i>Ordenar por Promedio</button>
+          </div>
+          <div id="courses-container" style="margin-top: 1rem;">${this.#state.courses.map(course => this.#renderCourseAccordion(course, filters)).join('')}</div>
+        </div>`;
+    }
+
+    /** Helper para la vista de Tareas (Acordeón). */
+    #renderCourseAccordion(course, filters) {
+      return `<details class="course-accordion" data-course-id="${course.id}" open><summary>${TeacherApp.#escapeHtml(course.name)}</summary><div class="course-content">${this.#renderCourseGradeTable(course, filters)}</div></details>`;
+    }
+
+    /** Helper para la vista de Tareas (Tabla de Notas). */
+    #renderCourseGradeTable(course, filters) {
+      const courseEvals = this.#state.evaluations.filter(ev => ev.courseId === course.id);
+      let courseStudents = this.#state.studentIds.map(studentId => this.#state.students.find(s => s.id === studentId)).filter(Boolean);
+      if (filters.searchTerm) {
+        const term = filters.searchTerm.toLowerCase();
+        courseStudents = courseStudents.filter(s => s.name.toLowerCase().includes(term));
+      }
+      if (filters.sortByAvg) {
+        courseStudents.sort((a, b) => (this.#computeCourseAverage(b.id, course.id) || 0) - (this.#computeCourseAverage(a.id, course.id) || 0));
+      }
+      if (courseStudents.length === 0) return '<p class="empty-state">No se encontraron alumnos.</p>';
+      if (courseEvals.length === 0) return '<p class="empty-state">No hay evaluaciones para este curso.</p>';
+      const header = `<thead><tr><th>Alumno</th>${courseEvals.map(ev => `<th>${TeacherApp.#escapeHtml(ev.name)}</th>`).join('')}<th>Promedio</th></tr></thead>`;
+      const body = `<tbody>${courseStudents.map(student => {
+        const cells = courseEvals.map(ev => {
+          const grade = this.#state.grades[student.id]?.[ev.id] ?? '';
+          return `<td><input class="grade-input" type="number" step="0.1" min="0" max="7" value="${grade}" data-student="${student.id}" data-eval="${ev.id}"></td>`;
+        }).join('');
+        const avg = this.#computeCourseAverage(student.id, course.id);
+        return `<tr><td>${TeacherApp.#escapeHtml(student.name)}</td>${cells}<td id="avg-${student.id}-${course.id}">${isNaN(avg) ? '-' : avg.toFixed(2)}</td></tr>`;
+      }).join('')}</tbody>`;
+      return `<div class="table-wrapper"><table class="data-table">${header}${body}</table></div>`;
+    }
+
+    /**
+     * VISTA 4: ANUNCIOS
+     * @private
+     */
+    #renderAnnouncements() {
+      const announcementsHtml = (this.#state.announcements || []).slice().sort((a, b) => b.date.localeCompare(a.date)).map(an => `
+        <div class="card" style="margin-bottom: 1rem;">
+          <h4>${TeacherApp.#escapeHtml(an.title)} <span class="text-muted" style="font-size: .8rem; font-weight: 500;">(${an.date})</span></h4>
+          <p style="color: var(--ink-2); margin-top: 0.5rem; white-space: pre-wrap;">${TeacherApp.#escapeHtml(an.content)}</p>
+        </div>`).join('');
+      this.#DOM.contentEl.innerHTML = `
+        <div class="card">
+          <h3>Anuncios</h3>
+          <div style="margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md);">
+            <h4>Crear Nuevo Anuncio</h4>
+            <div style="display:flex; flex-direction:column; gap:.6rem; margin-top:10px;">
+              <input id="new-an-title" type="text" placeholder="Título del anuncio" />
+              <textarea id="new-an-content" rows="4" placeholder="Contenido..."></textarea>
+              <div style="text-align: right;"><button data-action="add-announcement" class="btn">Publicar</button></div>
+            </div>
+          </div>
+          <div style="margin-top: 1.5rem;"><h4>Anuncios Publicados</h4>${announcementsHtml || '<p class="empty-state">No hay anuncios publicados.</p>'}</div>
+        </div>`;
+    }
+
+    /**
+     * VISTA 5: CALENDARIO
+     * @private
+     */
+    #renderCalendarView() {
+      this.#DOM.contentEl.innerHTML = `
+        <div class="card">
+          <div class="calendar-header">
+            <button data-action="cal-prev" class="btn btn-secondary"><i class="fa-solid fa-chevron-left"></i></button>
+            <h3 id="cal-month-year"></h3>
+            <button data-action="cal-next" class="btn btn-secondary"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div id="calendar-container" class="table-wrapper"></div>
+        </div>`;
+      this.#renderCalendar(this.#currentMonthView);
+    }
+
+    /** Helper para la vista de Calendario (Dibuja la tabla). */
+    #renderCalendar(dateToShow) {
+      const container = document.getElementById('calendar-container');
+      if (!container) return;
+      document.getElementById('cal-month-year').textContent = dateToShow.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
+      const today = new Date();
+      const month = dateToShow.getMonth();
+      const year = dateToShow.getFullYear();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDayOfMonth = new Date(year, month, 1);
+      let startDay = firstDayOfMonth.getDay();
+      startDay = (startDay === 0) ? 6 : startDay - 1;
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      let html = '<table id="calendar"><thead><tr>' + weekdays.map(d => `<th>${d}</th>`).join('') + '</tr></thead><tbody>';
+      let date = 1;
+      let nextMonthDate = 1;
+      for (let i = 0; i < 6; i++) {
+        html += '<tr>';
+        for (let j = 0; j < 7; j++) {
+          if (i === 0 && j < startDay) {
+            html += `<td class="cal-day is-other-month"><div class="day-number">${prevMonthDays - startDay + 1 + j}</div></td>`;
+          } else if (date > daysInMonth) {
+            html += `<td class="cal-day is-other-month"><div class="day-number">${nextMonthDate++}</div></td>`;
+          } else {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+            const isToday = date === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+            const evs = this.#state.evaluations.filter(ev => ev.date === dateStr);
+            html += `<td class="cal-day ${isToday ? 'is-today' : ''}"><div class="day-number">${date}</div><div class="events-list">${evs.map(ev => `<div class="ev-item" title="${TeacherApp.#escapeHtml(ev.name)}">${TeacherApp.#escapeHtml(ev.name)}</div>`).join('')}</div></td>`;
+            date++;
+          }
+        }
+        html += '</tr>';
+        if (date > daysInMonth) break;
+      }
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    /**
+     * VISTA 6: PERFIL
+     * @private
+     */
+    #renderProfile() {
+      const t = this.#state.teacher || {};
+      const initials = (t.name || '').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+      this.#DOM.contentEl.innerHTML = `
+        <div class="card profile-card" id="profile-card-container">
+          <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap; margin-bottom: 1.5rem;">
+            <div class="avatar" style="width: 80px; height: 80px; font-size: 2rem; border-radius: var(--radius-lg); background: ${t.avatarColor || '#6d28d9'};">${initials}</div>
+            <div style="flex:1;min-width:240px">
+              <h3 style="margin: 0 0 0.5rem 0;">${TeacherApp.#escapeHtml(t.name || '')}</h3>
+              <div style="color: var(--muted);">${TeacherApp.#escapeHtml(t.subject || '')}</div>
+            </div>
+            <button data-action="edit-profile" class="btn">Editar Perfil</button>
+          </div>
+          <div class="profile-field"><strong>Email</strong><div>${TeacherApp.#escapeHtml(t.email || '-')}</div></div>
+          <div class="profile-field"><strong>Teléfono</strong><div>${TeacherApp.#escapeHtml(t.phone || '-')}</div></div>
+          <div class="profile-field" style="margin-top: 1rem;"><strong>Biografía</strong><p style="margin-top: 6px; color:var(--ink-2); white-space: pre-wrap;">${TeacherApp.#escapeHtml(t.bio || '-')}</p></div>
+        </div>`;
+    }
+
+    /** Helper para la vista de Perfil (Formulario de Edición). */
+    #renderProfileEditForm() {
+      const t = this.#state.teacher || {};
+      const container = document.getElementById('profile-card-container');
+      if (!container) return;
+      container.innerHTML = `
+        <h3>Editar Perfil</h3>
+        <div class="profile-form">
+          <label>Nombre</label><input id="prof-name" type="text" placeholder="Nombre" value="${TeacherApp.#escapeHtml(t.name || '')}" />
+          <label>Asignatura</label><input id="prof-subject" type="text" placeholder="Asignatura" value="${TeacherApp.#escapeHtml(t.subject || '')}" />
+          <label>Email</label><input id="prof-email" type="email" placeholder="Email" value="${TeacherApp.#escapeHtml(t.email || '')}" />
+          <label>Teléfono</label><input id="prof-phone" type="tel" placeholder="Teléfono" value="${TeacherApp.#escapeHtml(t.phone || '')}" />
+          <label>Biografía</label><textarea id="prof-bio" rows="4" placeholder="Biografía">${TeacherApp.#escapeHtml(t.bio || '')}</textarea>
+          <div style="display:flex;gap:.5rem; justify-content: flex-end; margin-top: 1rem;">
+            <button data-action="cancel-profile" class="btn btn-secondary">Cancelar</button>
+            <button data-action="save-profile" class="btn">Guardar Cambios</button>
+          </div>
+        </div>`;
+    }
+
+    /**
+     * VISTA MODAL: AGREGAR EVALUACIÓN
+     * @private
+     */
+    #renderAddEvaluationModal() {
+      const modalOverlay = document.createElement('div');
+      modalOverlay.className = 'modal-overlay'; 
+      const courseOptions = this.#state.courses.map(c => `<option value="${c.id}">${TeacherApp.#escapeHtml(c.name)}</option>`).join('');
+      modalOverlay.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+          <div class="modal-header"><h3>Agregar Nueva Evaluación</h3><button class="modal-close" data-action="close-modal">&times;</button></div>
+          <div class="modal-body" style="display:flex; flex-direction:column; gap:1rem;">
+            <div><label for="modal-course-id">Asignatura / Curso</label><select id="modal-course-id">${courseOptions}</select></div>
+            <div><label for="modal-eval-name">Nombre de la Evaluación</label><input id="modal-eval-name" type="text" placeholder="Ej: Parcial 1"></div>
+            <div><label for="modal-eval-date">Fecha</label><input id="modal-eval-date" type="date" value="${TeacherApp.#todayISO()}"></div>
+          </div>
+          <div class="modal-footer"><button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button id="modal-save-eval" class="btn">Crear Evaluación</button></div>
+        </div>`;
+      document.body.appendChild(modalOverlay);
+      
+      // Listeners locales para el modal
+      const closeModal = () => modalOverlay.remove();
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay || e.target.closest('[data-action="close-modal"]')) {
+          closeModal();
+        }
+        if (e.target.id === 'modal-save-eval') {
+          const courseId = document.getElementById('modal-course-id').value;
+          const evalName = document.getElementById('modal-eval-name').value.trim();
+          const evalDate = document.getElementById('modal-eval-date').value;
+          if (!courseId || !evalName || !evalDate) return alert('Todos los campos son obligatorios.');
+          this.#state.evaluations.push({ id: TeacherApp.#genId(), name: evalName, date: evalDate, courseId });
+          this.#saveState();
+          closeModal();
+          this.#renderGrades(); // Recarga la vista de tareas
+        }
+      });
+    }
+
+    /**
+     * VISTA PARCIAL: ACTUALIZAR UI
+     * @private
+     */
+    #updateProfileUI() {
+      const name = this.#state.teacher.name || 'Profesor';
+      const initials = name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+      
+      document.querySelectorAll('.avatar, .avatar-mini').forEach(el => {
+        el.textContent = initials;
+        if (el.classList.contains('avatar')) {
+          el.style.background = `linear-gradient(135deg, ${this.#state.teacher.avatarColor || '#6d28d9'}, var(--accent-2))`;
+        }
+      });
+      
+      if (this.#DOM.userNameMini) this.#DOM.userNameMini.textContent = name;
+      if (this.#DOM.profileName) this.#DOM.profileName.textContent = name;
+      if (this.#DOM.profileRole) this.#DOM.profileRole.textContent = this.#state.teacher.subject || 'Profesor';
+    }
+
+
+    /*
+    ============================================================================
+    | SECCIÓN 6: MANEJADORES DE EVENTOS (#handlers)                            |
+    ============================================================================
+    |
+    | Métodos privados que se ejecutan cuando ocurre un evento.
+    |
+    */
+
+    /**
+     * Maneja los clics en la navegación principal (Sidebar).
+     * ¡ESTA FUNCIÓN ARREGLA EL BUG 404!
+     * @param {Event} e - El objeto de evento del clic.
+     * @private
+     */
+    #onNavClick(e) {
+      const link = e.target.closest('a');
+      if (!link) return;
+      
+      // Previene que el navegador recargue la página
+      e.preventDefault(); 
+      
+      this.#DOM.menuLinks.forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+      
+      const title = link.querySelector('span') ? link.querySelector('span').textContent : 'Dashboard';
+      if (this.#DOM.topbarTitle) this.#DOM.topbarTitle.textContent = title;
+
+      this.#renderContent(link.getAttribute('href'));
+      
+      if (this.#DOM.mq.matches && this.#DOM.sidebar.classList.contains('open')) {
+        this.#toggleSidebar(false);
+      }
+    }
+
+    /**
+     * Maneja los clics en el botón de hamburguesa (toggle).
+     * @param {Event} e - El objeto de evento del clic.
+     * @private
+     */
+    #onToggleClick(e) {
+      e.stopPropagation();
+      const isExpanded = this.#DOM.mq.matches ? this.#DOM.sidebar.classList.contains('open') : !this.#DOM.sidebar.classList.contains('closed');
+      this.#toggleSidebar(!isExpanded);
+    }
+
+    /**
+     * Abre o cierra la sidebar y actualiza ARIA.
+     * @param {boolean} [forceOpen] - Opcional. Forzar un estado.
+     * @private
+     */
+    #toggleSidebar(forceOpen) {
+      let open;
+      if (this.#DOM.mq.matches) {
+        open = forceOpen !== undefined ? forceOpen : !this.#DOM.sidebar.classList.contains('open');
+        this.#DOM.sidebar.classList.toggle('open', open);
       } else {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-        const evs = state.evaluations.filter(ev => ev.date === dateStr);
-        html += `<td class="cal-day"><div>${date}</div>${evs.map(ev => `<div class="ev-item">${escapeHtml(ev.name)}</div>`).join('')}</td>`;
-        date++;
+        open = forceOpen !== undefined ? forceOpen : this.#DOM.sidebar.classList.contains('closed');
+        this.#DOM.sidebar.classList.toggle('closed', !open);
+      }
+      this.#DOM.toggleBtn.setAttribute('aria-expanded', open);
+    }
+
+    /**
+     * Maneja clics en el <body> (para cerrar el menú móvil).
+     * @param {Event} e - El objeto de evento del clic.
+     * @private
+     */
+    #onBodyClick(e) {
+      if (!this.#DOM.mq.matches) return;
+      const inside = e.target.closest('#sidebar') || e.target.closest('#toggle');
+      if (!inside && this.#DOM.sidebar.classList.contains('open')) {
+        this.#toggleSidebar(false);
       }
     }
-    html += '</tr>';
-    if (date > daysInMonth) break;
-  }
-  
-  html += '</tbody></table>';
-  container.innerHTML = html;
-}
 
-function computeCourseAverage(studentId, courseId) {
-  const studentGrades = state.grades[studentId] || {};
-  const courseEvalIds = state.evaluations.filter(ev => ev.courseId === courseId).map(ev => ev.id);
-  const grades = courseEvalIds.map(evalId => studentGrades[evalId]).filter(g => g !== undefined && g !== null && g !== '');
-  if (!grades.length) return NaN;
-  return grades.reduce((a,b) => parseFloat(a) + parseFloat(b), 0) / grades.length;
-}
-
-function computeOverallStudentAverage(studentId) {
-    const studentGrades = state.grades[studentId] || {};
-    const grades = Object.values(studentGrades).filter(g => g !== undefined && g !== null && g !== '');
-    if (!grades.length) return NaN;
-    return grades.reduce((a,b) => parseFloat(a) + parseFloat(b), 0) / grades.length;
-}
-
-document.querySelectorAll('.menu a').forEach(link=>{
-  link.addEventListener('click', e=>{
-    e.preventDefault();
-    document.querySelectorAll('.menu a').forEach(a=>a.classList.remove('active'));
-    link.classList.add('active');
-    renderContent(link.getAttribute('href'));
-    if (mq.matches) {
-      sidebar.classList.remove('open');
-      sidebar.classList.add('closed');
+    /**
+     * Maneja el redimensionamiento de la ventana.
+     * @private
+     */
+    #onResize() {
+      if (this.#DOM.mq.matches) {
+        this.#DOM.sidebar.classList.remove('closed');
+        this.#DOM.sidebar.classList.remove('open');
+        this.#DOM.toggleBtn.setAttribute('aria-expanded', false);
+      } else {
+        this.#DOM.sidebar.classList.remove('open');
+        this.#DOM.toggleBtn.setAttribute('aria-expanded', !this.#DOM.sidebar.classList.contains('closed'));
+      }
     }
-  });
-});
 
-updateProfileUI();
-renderContent('dashboard');
+    /**
+     * Manejador de CLICS para TODO el contenido dinámico.
+     * Usa delegación de eventos en `data-action`.
+     * @param {Event} e - El objeto de evento del clic.
+     * @private
+     */
+    #onContentClick(e) {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      const action = target.dataset.action;
+
+      switch (action) {
+        case 'reset-data':
+          if (confirm('¿Resetear datos a demo?')) {
+            localStorage.removeItem(this.#STORAGE_KEY);
+            location.reload();
+          }
+          break;
+        case 'show-add-eval-modal':
+          this.#renderAddEvaluationModal();
+          break;
+        case 'sort-by-avg': {
+          const searchTerm = this.#DOM.contentEl.querySelector('#grade-search-input')?.value || '';
+          const sortByAvg = !target.classList.contains('active');
+          this.#renderGrades({ searchTerm, sortByAvg });
+          break;
+        }
+        case 'add-announcement': {
+          const title = this.#DOM.contentEl.querySelector('#new-an-title').value.trim();
+          const content = this.#DOM.contentEl.querySelector('#new-an-content').value.trim();
+          if (!title || !content) return alert('El título y el contenido son obligatorios.');
+          this.#state.announcements.unshift({ id: TeacherApp.#genId('an-'), title, content, date: TeacherApp.#todayISO() });
+          this.#saveState();
+          this.#renderAnnouncements();
+          break;
+        }
+        case 'cal-prev':
+          this.#currentMonthView.setMonth(this.#currentMonthView.getMonth() - 1);
+          this.#renderCalendar(this.#currentMonthView);
+          break;
+        case 'cal-next':
+          this.#currentMonthView.setMonth(this.#currentMonthView.getMonth() + 1);
+          this.#renderCalendar(this.#currentMonthView);
+          break;
+        case 'edit-profile':
+          this.#renderProfileEditForm();
+          break;
+        case 'cancel-profile':
+          this.#renderProfile();
+          break;
+        case 'save-profile':
+          this.#state.teacher.name = document.getElementById('prof-name').value.trim();
+          this.#state.teacher.subject = document.getElementById('prof-subject').value.trim();
+          this.#state.teacher.email = document.getElementById('prof-email').value.trim();
+          this.#state.teacher.phone = document.getElementById('prof-phone').value.trim();
+          this.#state.teacher.bio = document.getElementById('prof-bio').value.trim();
+          this.#saveState();
+          this.#updateProfileUI();
+          this.#renderProfile();
+          break;
+      }
+    }
+
+    /**
+     * Manejador de CAMBIOS (CHANGE) para contenido dinámico.
+     * @param {Event} e - El objeto de evento 'change'.
+     * @private
+     */
+    #onContentChange(e) {
+      if (e.target.matches('.grade-input')) {
+        // FIX para la palabra reservada 'eval'
+        const { student, eval: evalId } = e.target.dataset;
+        const value = parseFloat(e.target.value);
+        if (!this.#state.grades[student]) this.#state.grades[student] = {};
+        if (isNaN(value)) {
+          delete this.#state.grades[student][evalId];
+          e.target.value = '';
+        } else {
+          const validGrade = Math.max(0, Math.min(7, value));
+          this.#state.grades[student][evalId] = validGrade;
+          if (validGrade !== value) e.target.value = validGrade;
+        }
+        this.#saveState();
+        const courseId = this.#state.evaluations.find(ev => ev.id === evalId)?.courseId;
+        if (courseId) {
+          const avg = this.#computeCourseAverage(student, courseId);
+          const avgEl = document.querySelector(`#avg-${student}-${courseId}`);
+          if (avgEl) avgEl.textContent = isNaN(avg) ? '-' : avg.toFixed(2);
+        }
+      }
+    }
+
+    /**
+     * Manejador de ESCRITURA (INPUT) para contenido dinámico.
+     * @param {Event} e - El objeto de evento 'input'.
+     * @private
+     */
+    #onContentInput(e) {
+      if (e.target.id === 'student-search-input') {
+        this.#renderStudents(e.target.value);
+      }
+      if (e.target.id === 'grade-search-input') {
+        const searchTerm = e.target.value;
+        const sortByAvg = this.#DOM.contentEl.querySelector('[data-action="sort-by-avg"]')?.classList.contains('active') || false;
+        // Optimización: Solo re-dibuja las tablas
+        this.#DOM.contentEl.querySelectorAll('.course-accordion').forEach(accordion => {
+          const courseId = accordion.dataset.courseId;
+          const course = this.#state.courses.find(c => c.id === courseId);
+          if (course) {
+            const tableContainer = accordion.querySelector('.course-content');
+            if (tableContainer) {
+              tableContainer.innerHTML = this.#renderCourseGradeTable(course, { searchTerm, sortByAvg });
+            }
+          }
+        });
+      }
+    }
+
+  } // --- FIN DE LA CLASE TeacherApp ---
+
+
+  /**
+   * ===========================================================================
+   * | INICIALIZACIÓN DE LA APLICACIÓN                                        |
+   * ===========================================================================
+   *
+   * Esta es la única línea que se ejecuta globalmente (dentro del
+   * DOMContentLoaded).
+   *
+   * Crea una nueva instancia de nuestra clase `TeacherApp`,
+   * lo que automáticamente llama al `constructor()` y pone
+   * en marcha toda la aplicación.
+   */
+  new TeacherApp();
+
+}); // --- FIN DE DOMContentLoaded ---
