@@ -1,26 +1,25 @@
 /*
 ================================================================================
 |                                                                              |
-|               HOJA DE ESTILOS PRINCIPAL: Panel de Administrador              |
-|               PROYECTO: Intranet Colegio San Agustín                         |
-|               AUTOR: Kev182-pixel (Refactorizado por Asistente)              |
+|               HOJA DE ESTILOS: Panel de Administrador (TEMA OSCURO)          |
+|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
+|               AUTOR: Kev182-pixel (Refactorizado v3 por Asistente)           |
 |                                                                              |
 ================================================================================
 |                                                                              |
-|   DESCRIPCIÓN:                                                               |
-|   Esta hoja de estilos define la apariencia completa del panel de            |
-|   administración. Ha sido refactorizada para usar Variables CSS              |
-|   (Custom Properties) para una máxima mantenibilidad y consistencia.         |
+|   DESCRIPCIÓN GENERAL:                                                       |
+|   Esta es la hoja de estilos principal para el panel de Administración.      |
+|   Ha sido refactorizada a un tema "Dark Mode" (Modo Oscuro) por defecto      |
+|   para mejorar el enfoque, la legibilidad en largas sesiones y               |
+|   proporcionar una identidad visual "premium" y autoritativa.                |
 |                                                                              |
-|   ESTRUCTURA DEL ARCHIVO:                                                    |
-|   1.  :root (Variables Globales) - Define la paleta de colores,              |
-|       tipografía, sombras, y layout.                                         |
-|   2.  Reset y Estilos Globales - Normaliza los estilos del navegador.        |
-|   3.  Layout Principal - Define la estructura .layout, .sidebar, .main.      |
-|   4.  Componentes Específicos - Estilos para Topbar, Menú, Tablas,           |
-|       Formularios, Botones y Tarjetas.                                       |
-|   5.  Animaciones y Clases de Utilidad - Define @keyframes y helpers.        |
-|   6.  Responsive (Media Queries) - Ajustes para tablets y móviles.           |
+|   FILOSOFÍA DE DISEÑO:                                                       |
+|   -   Tema Oscuro ("Midnight"): El cuerpo es un azul pizarra oscuro          |
+|       (slate-900), y los paneles son ligeramente más claros (slate-800).     |
+|   -   Alto Contraste: La paleta azul/dorada se mantiene. El texto claro      |
+|       sobre fondo oscuro maximiza la legibilidad.                            |
+|   -   Variables CSS (:root): Todo el sistema de diseño está centralizado     |
+|       en variables para un mantenimiento y temado increíblemente fácil.      |
 |                                                                              |
 ================================================================================
 */
@@ -28,59 +27,90 @@
 
 /*
 ================================================================================
-|   SECCIÓN 1: :root (Variables Globales)                                      |
+|   SECCIÓN 1: :root (Variables Globales del Sistema de Diseño)                |
 ================================================================================
 |
-|   Definimos todas nuestras "constantes" de diseño aquí.
-|   -   '--primary': El azul marino principal de la institución.
-|   -   '--accent': El azul más claro para enlaces y hover.
-|   -   '--bg-body': El fondo gris claro de la página.
-|   -   '--bg-panel': El fondo blanco de las tarjetas y formularios.
-|   -   '--text-primary': Color de texto principal (oscuro).
-|   -   '--text-light': Color de texto claro (para la sidebar).
-|   -   ... y variables para fuentes, radios de borde, sombras, etc.
+|   Este es el "centro de control" de todo el diseño.
+|   Aquí definimos nuestras constantes (colores, fuentes, sombras)
+|   que se usarán en todo el archivo.
+|
+|   *** ¡CAMBIO DRÁSTICO: NUEVA PALETA DARK MODE! ***
 |
 */
 :root {
-  /* Paleta de Colores */
-  --primary: #1c3162;            /* Azul marino principal (usado en sidebar, headers) */
-  --primary-dark: #122044;       /* Azul más oscuro (para degradados) */
-  --primary-light: #2a4699;      /* Azul más claro (para hover de botones) */
-  --accent: #4a90e2;             /* Azul acento (para bordes de menú activos) */
-  --bg-body: #f3f6fb;            /* Fondo principal de la página (gris muy claro) */
-  --bg-panel: #ffffff;            /* Fondo para tarjetas, formularios (blanco) */
-  --bg-panel-light: #f8f9ff;     /* Fondo para filas de tabla (zebra) */
-  --text-primary: #333;           /* Color de texto principal (oscuro) */
-  --text-light: #cfd8ef;          /* Color de texto principal en la sidebar (claro) */
-  --text-light-muted: #b4c1dd;   /* Color de texto secundario en la sidebar */
+  /* * ========================================
+   * Paleta de Colores (Azul y Dorado)
+   * ========================================
+   */
+  --primary: #1c3162;            /* Azul marino (Sidebar, Headers de Tabla) */
+  --primary-dark: #122044;       /* Azul más oscuro (Sidebar Gradient) */
+  --primary-light: #2a4699;      /* Azul más claro (Hover de Botones Primarios) */
+  
+  --accent: #CDA758;             /* Acento Dorado (Botones, Foco, Enlaces Activos) */
+  --accent-2: #E9D29B;           /* Dorado suave (para highlights sutiles) */
+
+  /* * ========================================
+   * ¡NÚCLEO DEL TEMA OSCURO!
+   * Colores de Fondo y Texto
+   * ========================================
+   */
+  --bg-body: #0f172a;            /* FONDO PRINCIPAL: Azul Pizarra Oscuro (Tailwind Slate-900) */
+  --bg-panel: #1e293b;            /* FONDO DE PANEL: Azul Pizarra más claro (Tailwind Slate-800) */
+  --bg-panel-light: #334155;     /* FONDO HOVER/ZEBRA: Azul Pizarra (Tailwind Slate-700) */
+  
+  --text-primary: #e2e8f0;         /* TEXTO PRINCIPAL: Casi blanco (Tailwind Slate-200) */
+  --text-muted: #94a3b8;          /* TEXTO SECUNDARIO: Gris/Slate (Tailwind Slate-400) */
+  
+  --border-color: #334155;       /* COLOR DE BORDE: Coincide con el fondo de hover */
+  
+  /* * ========================================
+   * Colores Específicos (Sidebar y Estado)
+   * ========================================
+   */
+  --text-light: #cfd8ef;          /* Texto principal en la sidebar (se mantiene) */
+  --text-light-muted: #b4c1dd;   /* Texto secundario en la sidebar (se mantiene) */
   --text-white: #ffffff;
-  --text-muted: #777;
-  --text-danger: #b40000;
-  --border-color: #e0e0e0;       /* Borde estándar (gris claro) */
-  --border-color-light: rgba(255, 255, 255, 0.1); /* Borde en la sidebar */
+  --text-danger: #f87171;         /* Rojo claro para peligro (visible en fondo oscuro) */
+  --text-danger-border: #b91c1c;  /* Borde rojo oscuro */
 
-  /* Tipografía */
-  --font-main: "Poppins", sans-serif; /* Fuente principal */
+  /* * ========================================
+   * Tipografía
+   * ========================================
+   */
+  --font-main: "Poppins", sans-serif; /* Fuente principal para toda la app */
 
-  /* Radii (Radios de Borde) */
-  --radius-sm: 6px;               /* Radio pequeño (botones de acción) */
-  --radius-md: 10px;              /* Radio medio (tarjetas, inputs) */
-  --radius-lg: 14px;              /* Radio grande (formularios) */
+  /* * ========================================
+   * Radii (Radios de Borde)
+   * ========================================
+   */
+  --radius-sm: 6px;               /* Radio pequeño (botones de acción, inputs) */
+  --radius-md: 10px;              /* Radio medio (tarjetas, formularios) */
+  --radius-lg: 14px;              /* Radio grande */
   --radius-round: 50%;            /* Círculo perfecto (avatares) */
 
-  /* Sombras */
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08); /* Sombra suave */
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.06); /* Sombra media */
-  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.1);  /* Sombra más grande */
+  /* * ========================================
+   * Sombras (Elevación)
+   * ========================================
+   */
+  /* Las sombras son más sutiles en modo oscuro, a menudo un brillo suave */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.25);
   
-  /* Layout */
-  --sidebar-width: 260px;         /* Ancho de la barra lateral */
-  --topbar-height: 100px;         /* Alto de la barra superior */
+  /* * ========================================
+   * Layout (Dimensiones de Estructura)
+   * ========================================
+   */
+  --sidebar-width: 260px;         /* Ancho de la barra lateral en desktop */
+  --topbar-height: 100px;         /* Alto de la barra superior en desktop */
   --topbar-height-mobile: 70px;   /* Alto de la barra superior en móvil */
 
-  /* Transiciones */
-  --transition-main: 0.3s ease;   /* Transición estándar */
-  --transition-fast: 0.2s ease;   /* Transición rápida */
+  /* * ========================================
+   * Transiciones (Animación)
+   * ========================================
+   */
+  --transition-main: 0.3s ease;   /* Transición estándar para efectos de hover */
+  --transition-fast: 0.2s ease;   /* Transición rápida para clics y focos */
 }
 
 
@@ -89,22 +119,46 @@
 |   SECCIÓN 2: Reset Básico y Estilos Globales                                 |
 ================================================================================
 |
-|   Normalizamos los estilos por defecto del navegador para
-|   asegurar consistencia entre Chrome, Firefox, Safari, etc.
+|   Normalizamos los estilos por defecto del navegador.
 |
 */
+
+/**
+ * Reseteo universal (Box Sizing).
+ * 'box-sizing: border-box' es una regla esencial que le dice al
+ * navegador que el 'width' y 'height' de un elemento deben incluir
+ * el 'padding' y el 'border', no sumarlos por fuera.
+ * Esto simplifica enormemente la creación de layouts.
+ */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Incluye padding y border en el tamaño total */
+  box-sizing: border-box;
   font-family: var(--font-main); /* Aplica la fuente principal a todo */
 }
 
+/**
+ * Estilos base para <html>.
+ * 'scroll-behavior: smooth' anima el desplazamiento al
+ * hacer clic en enlaces de ancla (ej. #top).
+ */
+html {
+  -webkit-text-size-adjust: 100%; /* Previene el zoom de texto automático en iOS */
+  scroll-behavior: smooth;
+}
+
+/**
+ * Estilos base para <body>.
+ * - 'height: 100vh' y 'overflow: hidden' establecen que el <body>
+ * ocupe toda la pantalla pero no tenga scroll. El scroll
+ * se manejará internamente en el panel de contenido (.content).
+ * - *** ¡CAMBIO DRÁSTICO! *** Aplicamos el fondo y texto del tema oscuro.
+ */
 body {
-  background: var(--bg-body); /* Fondo gris claro */
-  color: var(--text-primary); /* Texto oscuro por defecto */
-  height: 100vh; /* Ocupa el 100% de la altura de la ventana */
-  overflow: hidden; /* Evita el scroll en el body, lo movemos al .content */
+  background: var(--bg-body); /* Fondo oscuro */
+  color: var(--text-primary); /* Texto claro */
+  height: 100vh;
+  overflow: hidden;
 }
 
 
@@ -140,7 +194,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  height: 100vh; /* Asegura que el main también tenga altura completa */
+  height: 100vh;
 }
 
 /**
@@ -153,20 +207,21 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 30px 40px;
-  background: var(--bg-body); /* Asegura el fondo correcto */
+  background: var(--bg-body); /* Fondo oscuro */
 }
 
 /**
  * Pie de página al final del .main.
+ * *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
  */
 .footer {
   text-align: center;
   padding: 10px;
-  background: var(--bg-panel);
+  background: var(--bg-panel); /* Panel oscuro */
   font-size: 0.85rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0; /* Evita que se encoja */
+  color: var(--text-muted); /* Texto gris claro */
+  border-top: 1px solid var(--border-color); /* Borde oscuro */
+  flex-shrink: 0;
 }
 
 
@@ -175,16 +230,14 @@ body {
 |   SECCIÓN 4: Componente - Sidebar (Barra Lateral)                            |
 ================================================================================
 |
-|   Estilos para la barra de navegación lateral izquierda.
+|   La sidebar se mantiene con su fondo azul primario, creando un
+|   contraste elegante con el nuevo fondo del body.
 |
 */
 
 /**
  * La barra lateral de navegación.
- * - 'width: var(--sidebar-width)' usa nuestra variable de ancho.
- * - 'background: linear-gradient(...)' usa nuestras variables de color primario.
- * - 'transition' permite la animación suave al abrir/cerrar en móvil.
- * - 'overflow-y: auto' añade scroll si el menú es muy largo.
+ * - Se mantiene oscura, usando las variables --primary.
  */
 .sidebar {
   width: var(--sidebar-width);
@@ -195,7 +248,9 @@ body {
   padding: 20px 0;
   transition: transform var(--transition-main);
   overflow-y: auto;
-  flex-shrink: 0; /* Evita que la sidebar se encoja */
+  flex-shrink: 0;
+  /* La sidebar ahora tiene un borde derecho para separarla del body oscuro */
+  border-right: 1px solid var(--border-color); 
 }
 
 /**
@@ -211,14 +266,13 @@ body {
 
 /**
  * El avatar circular.
- * - 'border-radius: var(--radius-round)' lo hace un círculo.
- * - 'display: flex' y 'align/justify' centran las iniciales.
+ * Se mantiene con fondo claro para contrastar con la sidebar oscura.
  */
 .profile .avatar {
   width: 50px;
   height: 50px;
-  background: var(--bg-panel-light); /* Fondo claro */
-  color: var(--primary); /* Texto oscuro */
+  background: var(--bg-panel-light); /* Fondo gris claro */
+  color: var(--primary); /* Texto azul oscuro */
   border-radius: var(--radius-round);
   display: flex;
   align-items: center;
@@ -247,7 +301,7 @@ body {
  * - 'margin-top: auto' empuja este bloque al fondo de la sidebar.
  */
 .logout-form {
-  margin-top: auto; /* ¡Magia de Flexbox! */
+  margin-top: auto;
   padding: 15px 20px;
   border-top: 1px solid var(--border-color-light);
 }
@@ -259,7 +313,7 @@ body {
   width: 100%;
   background: none;
   border: none;
-  color: var(--text-light-muted); /* Color grisáceo */
+  color: var(--text-light-muted);
   font-family: var(--font-main);
   font-size: 15px;
   font-weight: 500;
@@ -274,9 +328,13 @@ body {
   font-size: 16px;
 }
 
+/**
+ * Hover del botón Logout.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .logout-btn:hover {
-  color: var(--text-white); /* Se ilumina al pasar el mouse */
-  transform: translateX(4px); /* Sutil movimiento */
+  color: var(--accent); /* <-- Acento Dorado */
+  transform: translateX(4px);
 }
 
 
@@ -309,32 +367,34 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 25px;
-  color: var(--text-light); /* Texto claro por defecto */
+  color: var(--text-light);
   text-decoration: none;
   font-size: 0.95rem;
-  border-left: 4px solid transparent; /* Borde izquierdo invisible */
+  border-left: 4px solid transparent;
   transition: all var(--transition-main);
   cursor: pointer;
 }
 
 /**
  * Efecto Hover para enlaces y summaries.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .menu a:hover,
 .menu summary:hover {
-  background: var(--border-color-light); /* Fondo sutil */
-  color: var(--text-white); /* Texto blanco brillante */
-  border-left: 4px solid var(--accent); /* Borde de acento azul */
+  background: var(--border-color-light);
+  color: var(--text-white);
+  border-left: 4px solid var(--accent); /* <-- Acento Dorado */
 }
 
 /**
  * Estilo para el enlace/summary ACTIVO (página actual).
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .menu a.active,
 .menu summary.active {
-  background: rgba(255, 255, 255, 0.15); /* Fondo más pronunciado */
+  background: rgba(255, 255, 255, 0.15);
   color: var(--text-white);
-  border-left: 4px solid var(--text-white); /* Borde blanco sólido */
+  border-left: 4px solid var(--accent-2); /* <-- Dorado Suave */
   font-weight: 600;
 }
 
@@ -361,26 +421,25 @@ body {
 
 /**
  * Hover para enlaces del submenú.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .menu .sub-menu a:hover {
   background: rgba(255, 255, 255, 0.12);
   color: var(--text-white);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent); /* <-- Acento Dorado */
   border-radius: var(--radius-sm);
 }
 
 /**
  * Estilo para el <summary> (el "botón" del desplegable).
- * 'position: relative' para posicionar la flecha.
  */
 .menu summary {
   position: relative;
-  padding-right: 35px; /* Espacio para la flecha */
+  padding-right: 35px;
 }
 
 /**
  * La flecha (ícono de FontAwesome) que indica el desplegable.
- * Se añade usando un pseudo-elemento ::after.
  */
 .menu summary::after {
   content: "\f107"; /* Icono FontAwesome: caret-down */
@@ -400,10 +459,11 @@ body {
 
 /**
  * Rota la flecha 180 grados cuando el <details> está abierto.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .menu details[open] summary::after {
   transform: rotate(180deg);
-  color: var(--accent);
+  color: var(--accent); /* <-- Acento Dorado */
 }
 
 
@@ -413,56 +473,40 @@ body {
 ================================================================================
 |
 |   Estilos para la barra superior fija.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
 |
 */
 
-/**
- * La barra superior.
- * - 'height: var(--topbar-height)' usa nuestra variable.
- * - 'background: var(--bg-panel)' (blanco).
- * - 'box-shadow' le da una sutil separación del contenido.
- * - 'position: sticky' y 'top: 0' la mantiene fija.
- * - 'z-index: 100' la pone por encima del contenido al hacer scroll.
- */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 18px;
   height: var(--topbar-height);
-  background: var(--bg-panel);
+  background: var(--bg-panel); /* <-- Fondo de panel oscuro */
   padding: 0 28px;
-  box-shadow: var(--shadow-sm);
-  position: sticky; /* Fija en la parte superior del .main */
+  box-shadow: var(--shadow-sm); /* Sombra sutil */
+  position: sticky;
   top: 0;
   z-index: 100;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color); /* Borde para separar */
 }
 
-/**
- * Título de la página en la Topbar.
- */
 .topbar-title {
   font-weight: 600;
-  font-size: 1.125rem; /* 18px */
-  color: var(--primary);
+  font-size: 1.125rem;
+  color: var(--text-primary); /* <-- Texto claro */
 }
 
-/**
- * Botón "Hamburguesa" (Toggle)
- */
 .toggle {
   background: none;
   border: none;
-  font-size: 1.375rem; /* 22px */
-  color: var(--primary);
+  font-size: 1.375rem;
+  color: var(--text-primary); /* <-- Texto claro */
   cursor: pointer;
 }
 
-/**
- * Mini-perfil en la Topbar.
- * - 'margin-left: auto' lo empuja a la derecha.
- */
 .user-mini {
   display: flex;
   align-items: center;
@@ -470,14 +514,11 @@ body {
   margin-left: auto;
 }
 
-/**
- * Avatar circular pequeño.
- */
 .avatar-mini {
   width: 35px;
   height: 35px;
-  background: var(--primary);
-  color: var(--text-white);
+  background: var(--accent); /* <-- Fondo Dorado */
+  color: var(--primary-dark);  /* <-- Texto oscuro */
   border-radius: var(--radius-round);
   display: flex;
   align-items: center;
@@ -492,14 +533,17 @@ body {
 ================================================================================
 |
 |   Estilos genéricos y específicos para todas las tablas de datos.
-|   Usamos variables para unificar su apariencia.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
 |
 */
 
-/**
- * Estilo base para todas las tablas de datos
- * (Aplicado a .tabla-notas, .tabla-profesores, .tabla-pagos, .tabla-apoderados)
- */
+.tabla-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
 .tabla-notas,
 .tabla-profesores,
 .tabla-pagos,
@@ -509,33 +553,25 @@ body {
   font-size: 0.9rem;
 }
 
-/**
- * Celdas de encabezado (th) y datos (td)
- */
 .tabla-notas th, .tabla-notas td,
 .tabla-profesores th, .tabla-profesores td,
 .tabla-pagos th, .tabla-pagos td,
 .tabla-apoderados th, .tabla-apoderados td {
-  padding: 10px 12px; /* Padding unificado */
+  padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color); /* Borde oscuro */
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text-primary); /* Texto claro */
 }
 
-/**
- * Encabezado de tabla (th)
- * - Fondo oscuro (primario) y texto claro.
- * - 'position: sticky' y 'top: 0' congela el encabezado
- * cuando la tabla está dentro de un contenedor con scroll.
- */
 .tabla-notas th,
 .tabla-profesores th,
 .tabla-pagos th,
 .tabla-apoderados th {
-  background: var(--primary);
+  background: var(--primary); /* Fondo azul oscuro */
   color: var(--text-white);
   font-weight: 600;
   font-size: 0.9rem;
@@ -544,15 +580,15 @@ body {
   z-index: 2;
 }
 
-/**
- * Filas pares (Zebra-striping)
- * - Usamos un fondo de panel claro para legibilidad.
+/*
+ * Eliminamos el "zebra striping" (filas pares) para un
+ * look más limpio y minimalista en modo oscuro.
  */
 .tabla-notas tr:nth-child(even),
 .tabla-profesores tr:nth-child(even),
 .tabla-pagos tr:nth-child(even),
 .tabla-apoderados tr:nth-child(even) {
-  background: var(--bg-panel-light);
+  background: transparent; /* Sin color de fondo */
 }
 
 /**
@@ -562,62 +598,41 @@ body {
 .tabla-profesores tr:hover,
 .tabla-pagos tr:hover,
 .tabla-apoderados tr:hover {
-  background: #eef2ff; /* Un color hover sutil */
+  background: var(--bg-panel-light); /* Fondo de hover sutil */
   transition: background var(--transition-fast);
 }
 
 /**
- * Estilos específicos para campos editables DENTRO de una tabla.
+ * Campos editables DENTRO de una tabla.
  */
 .tabla-profesores input {
   width: 95%;
   padding: 5px 6px;
-  border: 1px solid transparent; /* Invisible por defecto */
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background-color: transparent;
-  color: var(--text-primary);
+  color: var(--text-primary); /* Texto claro */
   font-size: 0.9rem;
+  transition: all var(--transition-fast);
 }
 
 /**
- * Estilo del input cuando la fila (tr) está en modo de edición.
- * - El input se vuelve visible y "editable".
+ * Input en modo de edición.
  */
 .tabla-profesores tr.editando input {
-  background-color: var(--bg-panel);
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 0 2px rgba(28, 49, 98, 0.1);
+  background-color: var(--bg-body); /* Fondo más oscuro */
+  border: 1px solid var(--accent); /* Borde Dorado */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
-/**
- * Celda de Acciones (Botones Editar/Guardar/Eliminar)
- * - Alineada a la derecha.
- */
-.tabla-profesores td:last-child {
-  width: 200px;
-  text-align: right;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-.acciones {
-  display: flex; /* Añadido para mejor control */
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-.tabla-profesores td:last-child > button {
-  display: inline-block;
-  vertical-align: middle;
-}
 
 /*
 ================================================================================
 |   SECCIÓN 8: Componentes - Formularios                                       |
 ================================================================================
 |
-|   Estilos para los diferentes formularios de la aplicación.
-|   Intentamos unificarlos usando variables.
+|   Estilos para los formularios.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
 |
 */
 
@@ -629,13 +644,14 @@ body {
 .comunicados-panel,
 .comunicados-form,
 .profesores-lista {
-  background: var(--bg-panel);
+  background: var(--bg-panel); /* Fondo de panel oscuro */
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 25px 30px;
   margin: 30px auto;
   animation: fadeIn var(--transition-main);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color); /* Borde oscuro */
+  max-width: 950px;
 }
 
 /**
@@ -646,11 +662,11 @@ body {
 .comunicados-panel h2,
 .comunicados-form h2,
 .profesores-lista h2 {
-  color: var(--primary);
+  color: var(--text-primary); /* Texto claro */
   font-size: 1.4rem;
   margin-bottom: 15px;
   font-weight: 600;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color); /* Borde oscuro */
   padding-bottom: 10px;
 }
 
@@ -664,7 +680,7 @@ body {
   margin-top: 10px;
   margin-bottom: 5px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-muted); /* Texto gris claro */
   font-size: 0.9rem;
 }
 
@@ -680,16 +696,17 @@ body {
 .comunicados-form textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #d9dce3;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  background: var(--bg-panel-light);
+  background: var(--bg-body); /* Fondo de body (más oscuro) */
   font-size: 0.95rem;
-  color: var(--text-primary);
+  color: var(--text-primary); /* Texto claro */
   transition: all var(--transition-fast);
 }
 
 /**
  * Estilo de Foco para inputs/selects
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .form-alumno input:focus,
 .form-alumno select:focus,
@@ -698,18 +715,10 @@ body {
 .comunicados-form input:focus,
 .comunicados-form select:focus,
 .comunicados-form textarea:focus {
-  border-color: var(--primary);
-  background: var(--bg-panel);
-  box-shadow: 0 0 0 3px rgba(28, 49, 98, 0.12);
+  border-color: var(--accent); /* Borde Dorado */
+  background: var(--bg-panel); /* Fondo de panel */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
   outline: none;
-}
-
-/**
- * Estilo para <textarea>
- */
-.comunicados-form textarea {
-  resize: vertical;
-  min-height: 120px;
 }
 
 /**
@@ -718,7 +727,7 @@ body {
 .btn-volver {
   background: var(--bg-panel-light);
   border: 1px solid var(--border-color);
-  color: var(--primary);
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 600;
   padding: 8px 16px;
@@ -736,33 +745,35 @@ body {
  * Contenedor de acciones del formulario (botón de guardar)
  */
 .form-actions {
-  grid-column: 1 / -1; /* Ocupa todas las columnas en un grid */
+  grid-column: 1 / -1;
   text-align: right;
   margin-top: 20px;
 }
 
 /**
  * Botón principal de "Guardar" o "Registrar"
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
  */
 .btn-guardar {
-  background: var(--primary);
-  color: var(--text-white);
+  background: var(--accent); /* <-- Acento Dorado */
+  color: var(--primary-dark); /* <-- Texto oscuro para contrastar */
   border: none;
   padding: 12px 24px;
   border-radius: var(--radius-sm);
-  font-weight: 600;
+  font-weight: 700; /* Más bold */
   font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 8px 16px rgba(28, 49, 98, 0.18);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   transition: all var(--transition-fast);
 }
 .btn-guardar:hover {
-  background: var(--primary-light);
-  box-shadow: 0 10px 20px rgba(28, 49, 98, 0.22);
+  background: var(--accent-2); /* Dorado suave */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
 }
 .btn-guardar:active {
   transform: scale(0.98);
 }
+
 
 /*
 ================================================================================
@@ -771,6 +782,7 @@ body {
 |
 |   Estilos para los botones pequeños de Editar, Guardar, Eliminar
 |   que aparecen dentro de las filas de la tabla.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
 |
 */
 
@@ -778,7 +790,7 @@ body {
  * Estilo base para los botones de acción
  */
 .btn-editar,
-.btn-guardar.btn-accion, /* .btn-accion es un modificador imaginario */
+.btn-guardar.btn-accion,
 .btn-eliminar {
   border: none;
   border-radius: var(--radius-sm);
@@ -791,33 +803,35 @@ body {
   white-space: nowrap;
 }
 
-/* Botón Editar (Estilo claro) */
+/* Botón Editar (Estilo Dorado Sutil) */
 .btn-editar {
-  background: #e8eafc;
-  color: var(--primary);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent-2);
 }
 .btn-editar:hover {
-  background: #d9defc;
-}
-
-/* Botón Guardar (Estilo oscuro - diferente de .btn-guardar principal) */
-.profesores-lista .btn-guardar {
-  background: var(--primary);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
   color: var(--text-white);
 }
+
+/* Botón Guardar (Estilo Dorado Fuerte) */
+.profesores-lista .btn-guardar {
+  background: var(--accent);
+  color: var(--primary-dark);
+}
 .profesores-lista .btn-guardar:hover {
-  background: var(--primary-light);
+  background: var(--accent-2);
 }
 
 /* Botón Eliminar (Estilo de peligro) */
 .btn-eliminar {
-  background: var(--bg-panel);
+  background: transparent;
   color: var(--text-danger);
-  border: 1px solid var(--text-danger);
+  border: 1px solid var(--text-danger-border);
 }
 .btn-eliminar:hover {
   background: var(--text-danger);
   color: var(--text-white);
+  border-color: var(--text-danger);
 }
 
 /* Botón "Nuevo" (+ redondo) */
@@ -829,30 +843,91 @@ body {
   height: 38px;
   border-radius: var(--radius-round);
   border: none;
-  background: var(--primary);
-  color: var(--text-white);
+  background: var(--accent); /* <-- Acento Dorado */
+  color: var(--primary-dark);
   font-size: 1.6rem;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(28, 49, 98, 0.25);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
   transition: all var(--transition-fast);
 }
 .btn-nuevo:hover {
-  background: var(--primary-light);
+  background: var(--accent-2);
   transform: scale(1.1);
 }
 .btn-nuevo:active {
-  background: var(--primary-dark);
+  background: var(--accent);
   transform: scale(0.95);
 }
 .btn-nuevo:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-2);
   outline-offset: 3px;
 }
 
 
 /*
 ================================================================================
-|   SECCIÓN 10: Animaciones y Clases de Utilidad                               |
+|   SECCIÓN 10: Componentes Específicos (Cursos, Pagos, etc.)                  |
+================================================================================
+*/
+
+/**
+ * Tarjeta de Curso Plegable (<details>)
+ */
+.curso-card {
+  background: var(--primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all var(--transition-main);
+  border: 1px solid var(--border-color);
+}
+.curso-header {
+  background: var(--primary);
+  color: var(--text-white);
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  list-style: none;
+}
+.curso-header::-webkit-details-marker { display: none; }
+.curso-header::after {
+  content: "\f078"; /* caret-down */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 0.9rem;
+  transition: transform var(--transition-main);
+}
+.curso-card[open] .curso-header::after {
+  transform: rotate(180deg);
+}
+.curso-body {
+  background: var(--bg-panel); /* Fondo de panel oscuro */
+  padding: 18px 20px;
+  animation: fadeIn var(--transition-main);
+}
+
+/**
+ * Layout del panel de Comunicados (2 columnas)
+ */
+.comunicados-layout {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 30px;
+  align-items: start;
+}
+.filtro-extra {
+  display: none;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 11: Animaciones y Clases de Utilidad                               |
 ================================================================================
 */
 
@@ -878,16 +953,17 @@ body {
  */
 .sidebar-overlay {
   position: fixed;
-  inset: 0; /* top, left, right, bottom = 0 */
+  inset: 0;
   background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px); /* Efecto blur añadido */
   opacity: 0;
-  visibility: hidden; /* Oculto y no clickeable */
+  visibility: hidden;
   transition: opacity var(--transition-fast), visibility var(--transition-fast);
-  z-index: 150; /* Por debajo de la sidebar (200) pero encima de todo (100) */
+  z-index: 150;
 }
 .sidebar-overlay.show {
   opacity: 1;
-  visibility: visible; /* Visible y clickeable */
+  visibility: visible;
 }
 
 /**
@@ -902,11 +978,10 @@ body.no-scroll {
 
 /*
 ================================================================================
-|   SECCIÓN 11: Responsive (Media Queries)                                     |
+|   SECCIÓN 12: Responsive (Media Queries)                                     |
 ================================================================================
 |
 |   Ajustes para pantallas más pequeñas (tablets y móviles).
-|   (Desktop-First en este caso, se ajusta *hacia abajo*).
 |
 */
 
@@ -916,10 +991,10 @@ body.no-scroll {
  */
 @media (max-width: 1200px) {
   .tabla-profesores td:last-child {
-    width: 180px; /* Reduce el ancho de la columna de acciones */
+    width: 180px;
   }
   .acciones {
-    flex-wrap: wrap; /* Permite que los botones se apilen */
+    flex-wrap: wrap;
     justify-content: flex-start;
   }
 }
@@ -931,12 +1006,12 @@ body.no-scroll {
 @media (max-width: 900px) {
   #form-profesor,
   .form-alumno {
-    grid-template-columns: 1fr; /* Cambia los formularios a una sola columna */
+    grid-template-columns: 1fr;
   }
   .formulario-profesor,
   .formulario-alumno {
     padding: 25px;
-    max-width: 95%; /* Ocupa más ancho de pantalla */
+    max-width: 95%;
   }
   .formulario-profesor .form-top {
     flex-direction: column;
@@ -952,33 +1027,22 @@ body.no-scroll {
 @media (max-width: 768px) {
   /**
    * En móvil, la sidebar se oculta fuera de la pantalla.
-   * - 'position: fixed' la saca del flujo normal.
-   * - 'z-index: 200' la pone por encima de todo.
-   * - 'transform: translateX(-100%)' la esconde a la izquierda.
    */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 240px; /* Sidebar más angosta */
+    width: 240px;
     height: 100vh;
     z-index: 200;
     transform: translateX(-100%);
     box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
   }
-
-  /**
-   * La clase .open (añadida por JS) la trae a la vista.
-   */
   .sidebar.open {
     transform: translateX(0);
   }
-
-  /**
-   * El .main ahora ocupa toda la pantalla.
-   */
   .main {
-    margin-left: 0;
+    margin-left: 0; /* El main ocupa todo el ancho */
   }
 
   /**
