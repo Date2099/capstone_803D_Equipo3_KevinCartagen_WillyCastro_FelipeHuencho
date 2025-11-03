@@ -735,3 +735,53 @@ tbody tr:last-child .cal-day {
     font-size: 1.1rem;
   }
 }
+/* --- ESTILOS PARA DASHBOARD KPIs (AÑADIR AL FINAL) --- */
+.mini-kpi-grid {
+  display: grid;
+  /* Crea 3 columnas, pero se ajustan en móvil */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: .75rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.mini-kpi .label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-kpi .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Estilos para la lista de tareas demo */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.task-list li {
+  padding-bottom: .8rem;
+  border-bottom: 1px solid var(--border);
+}
+.task-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.task-list li strong {
+  color: var(--primary);
+}
+.task-list li div {
+  font-size: .85rem;
+  color: var(--muted);
+}
