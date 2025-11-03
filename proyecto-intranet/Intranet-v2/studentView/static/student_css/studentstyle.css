@@ -1,37 +1,230 @@
-/* ======================
-   ESTILO INTRANET COLEGIO SAN AGUSTÍN
-======================== */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS PRINCIPAL: Panel de Estudiante                 |
+|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
+|               AUTOR: Kev182-pixel (Refactorizado v4 por Asistente)           |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   DESCRIPCIÓN GENERAL:                                                       |
+|   Esta hoja de estilos define la identidad visual completa del panel de      |
+|   ESTUDIANTE. Utiliza el tema institucional (Azul y Dorado).                  |
+|                                                                              |
+|   METODOLOGÍA:                                                               |
+|   -   Variables CSS (:root): Todo el sistema de diseño está centralizado     |
+|       para un mantenimiento y temado increíblemente fácil.                   |
+|   -   Layout: Se usa un layout 'fixed' para la sidebar en móvil y un          |
+|       layout 'sticky' (implícito por el margin) en desktop.                  |
+|   -   BEM (Modificado): Se utilizan nombres de clase semánticos              |
+|       (ej. .card, .clase-card) para una estructura clara.                    |
+|   -   Comentarios Extensos: Cada sección y regla clave está documentada      |
+|       para explicar su propósito y facilitar futuras modificaciones.         |
+|                                                                              |
+================================================================================
+*/
 
+
+/*
+================================================================================
+|   SECCIÓN 1: :root (Variables Globales del Sistema de Diseño)                |
+================================================================================
+|
+|   Este es el "centro de control" de todo el diseño.
+|   Aquí definimos nuestras constantes (colores, fuentes, sombras)
+|   que se usarán en todo el archivo.
+|
+*/
 :root {
-  --color-primary: #0F294C;   /* Azul marino */
-  --color-secondary: #CDA758; /* Dorado */
-  --color-light: #F8F9FB;
-  --color-text: #1a1a1a;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --radius: 12px;
-  --sidebar-width: 260px;
-  --transition: all 0.3s ease;
+  /* * ========================================
+   * Paleta de Colores (Azul y Dorado)
+   * ========================================
+   */
+  --color-primary: #0F294C;        /* Azul marino principal (Institucional) */
+  --color-secondary: #CDA758;      /* Acento Dorado (Botones, Foco, Enlaces Activos) */
+  --color-secondary-light: #f7e3a1; /* Dorado más claro (para degradados) */
+  --color-primary-text: #3a0e0e;   /* Texto oscuro para usar sobre fondo dorado */
+
+  /* * ========================================
+   * Colores de Fondo y Texto (Neutros)
+   * ========================================
+   */
+  --bg-body: #F8F9FB;             /* Fondo principal de la página (gris muy claro) */
+  --bg-panel: #ffffff;             /* Fondo para tarjetas, formularios (blanco) */
+  --bg-panel-light: #fafafa;       /* Fondo para filas de tabla (zebra) */
+  --bg-panel-hover: #f5f5f5;       /* Fondo para hover de filas */
+  
+  --text-primary: #1a1a1a;         /* Color de texto principal (casi negro) */
+  --text-secondary: #444;          /* Color de texto secundario */
+  --text-muted: #777;              /* Texto gris para información secundaria */
+  --text-light: #dce3ec;           /* Color de texto principal en la sidebar (claro) */
+  --text-light-muted: #f0f0f0;     /* Color de texto secundario en la sidebar */
+  --text-white: #ffffff;
+  
+  --border-color: #eee;            /* Borde estándar (gris claro) */
+  --border-light: rgba(255, 255, 255, 0.1); /* Borde en la sidebar (blanco traslúcido) */
+
+  /* * ========================================
+   * Tipografía
+   * ========================================
+   */
+  --font-main: "Poppins", sans-serif; /* Fuente principal para toda la app */
+
+  /* * ========================================
+   * Radii (Radios de Borde)
+   * ========================================
+   */
+  --radius-sm: 4px;                /* Radio pequeño (eventos de calendario) */
+  --radius-md: 10px;               /* Radio medio (iconos de clase) */
+  --radius-lg: 12px;               /* Radio grande (tarjetas, inputs) */
+  --radius-round: 50%;             /* Círculo perfecto (avatares) */
+
+  /* * ========================================
+   * Sombras (Elevación)
+   * ========================================
+   */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);   /* Sombra estándar */
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.15); /* Sombra para hover de tarjeta */
+  --shadow-lg: 0 4px 12px rgba(15, 41, 76, 0.15); /* Sombra de perfil */
+
+  /* * ========================================
+   * Layout (Dimensiones de Estructura)
+   * ========================================
+   */
+  --sidebar-width: 260px;          /* Ancho de la barra lateral */
+  --topbar-height: 88px;           /* Alto de la barra superior */
+
+  /* * ========================================
+   * Transiciones (Animación)
+   * ========================================
+   */
+  --transition-main: 0.3s ease;    /* Transición estándar para efectos de hover */
+  --transition-fast: 0.2s ease;    /* Transición rápida para clics y focos */
 }
 
-/* ======================
-   BASE
-======================== */
+
+/*
+================================================================================
+|   SECCIÓN 2: Reset Básico y Estilos Globales                                 |
+================================================================================
+|
+|   Normalizamos los estilos por defecto del navegador para
+|   asegurar consistencia entre Chrome, Firefox, Safari, etc.
+|
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Fundamental: width/height incluyen padding/border */
+  font-family: var(--font-main); /* Aplica la fuente principal a todo */
+}
+
+html, body {
+  overflow-x: hidden; /* Previene el scroll lateral, especialmente en móvil */
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
 
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: var(--color-light);
-  color: var(--color-text);
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  /* 'height: 100vh' y 'overflow: hidden' se evitan aquí
+     para permitir el scroll natural de la página de perfil/notas,
+     que puede ser larga.
+  */
 }
 
+/*
+ * Esta clase se añadirá al <body> con JavaScript
+ * cuando la sidebar móvil esté abierta, para prevenir
+ * que el contenido de fondo haga scroll.
+ */
+body.menu-open {
+  overflow: hidden;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 3: Layout Principal                                                |
+================================================================================
+|
+|   Define la estructura base de la aplicación:
+|   - .layout (Contenedor Flex)
+|     - .sidebar (Navegación)
+|     - .main (Contenido)
+|
+*/
+
+/**
+ * Contenedor principal de la aplicación.
+ * Usa Flexbox para poner la sidebar y el main uno al lado del otro.
+ * 'min-height' asegura que el layout ocupe al menos toda la
+ * altura de la ventana, permitiendo que el footer quede abajo.
+ */
 .layout {
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden; /* Previene desbordes */
 }
 
-/* ======================
-   SIDEBAR
-======================== */
+/**
+ * Contenedor del contenido principal (Topbar + Content + Footer).
+ * - 'flex: 1' hace que ocupe todo el espacio sobrante.
+ * - 'display: flex' y 'flex-direction: column' apila los elementos.
+ * - 'margin-left' crea el espacio para la sidebar en desktop.
+ * - 'transition' anima este margen cuando la sidebar se oculta (en futuros rediseños).
+ */
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-width); /* Espacio para la sidebar en desktop */
+  transition: margin-left var(--transition-main);
+  display: flex;
+  flex-direction: column; /* Apila Topbar, Content y Footer */
+  min-width: 0; /* Arreglo de Flexbox para prevenir desbordes */
+}
+
+/**
+ * El área de contenido principal donde viven las vistas.
+ * - 'flex: 1' hace que esta área crezca y empuje el footer hacia abajo.
+ */
+.content {
+  padding: 30px;
+  background-color: var(--bg-body);
+  flex: 1; /* <-- Asegura que esta área ocupe el espacio sobrante */
+}
+
+/**
+ * Pie de página al final del .main.
+ */
+.footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: transparent; /* Fondo transparente, se ve el fondo del body */
+  padding: 20px 0;
+  width: 100%;
+  flex-shrink: 0; /* Evita que se encoja */
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 4: Componente - Sidebar (Barra Lateral)                            |
+================================================================================
+|
+|   Estilos para la barra de navegación lateral izquierda.
+|
+*/
+
+/**
+ * La barra lateral de navegación.
+ * - 'position: fixed' la saca del flujo y la fija en la pantalla.
+ * - 'z-index: 1000' la pone por encima de todo.
+ * - 'transform' se usa para ocultarla/mostrarla en móvil.
+ */
 .sidebar {
   position: fixed;
   top: 0;
@@ -39,115 +232,155 @@ body {
   width: var(--sidebar-width);
   height: 100%;
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--text-white);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-main);
   z-index: 1000;
 }
 
+/**
+ * Estado cerrado de la sidebar (para móvil).
+ * La mueve 100% a la izquierda, fuera de la pantalla.
+ */
 .sidebar.closed {
   transform: translateX(-100%);
 }
 
-/* Perfil */
+/**
+ * Contenedor del perfil del estudiante en la sidebar.
+ */
 .profile {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 20px 25px;
   margin-bottom: 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-light);
 }
 
+/**
+ * El avatar circular.
+ * Usa el color de acento (Dorado) para el fondo.
+ */
 .avatar {
   width: 48px;
   height: 48px;
   background-color: var(--color-secondary);
-  color: var(--color-primary);
+  color: var(--color-primary); /* Texto oscuro para contrastar con el dorado */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   font-size: 18px;
+  flex-shrink: 0; /* Evita que se encoja */
 }
 
 .profile-info {
   display: flex;
   flex-direction: column;
   line-height: 1.3;
+  min-width: 0; /* Arreglo para text-overflow */
 }
 
 .profile-info div:first-child {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade "..." si el nombre es muy largo */
 }
 
 .role {
   font-size: 13px;
-  color: #f0f0f0;
+  color: var(--text-light-muted);
 }
 
-/* ======================
-   MENÚ LATERAL
-======================== */
+/**
+ * Contenedor de la lista de enlaces de navegación.
+ */
 .menu {
   display: flex;
   flex-direction: column;
   padding: 0 10px;
 }
 
+/**
+ * Estilo base para cada enlace <a> del menú.
+ */
 .menu a {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #dce3ec;
+  color: var(--text-light);
   text-decoration: none;
   font-weight: 500;
   padding: 12px 20px;
-  border-radius: var(--radius);
-  transition: var(--transition);
+  border-radius: var(--radius-lg); /* Radio estandarizado */
+  transition: var(--transition-main);
 }
 
+/**
+ * Estilo para el enlace ACTIVO (página actual).
+ * Usa el color de acento (Dorado).
+ */
 .menu a.active {
   background-color: var(--color-secondary);
-  color: var(--color-primary);
+  color: var(--color-primary); /* Texto oscuro */
+  font-weight: 600; /* Más énfasis */
 }
 
+/**
+ * Estilo de hover para enlaces que NO están activos.
+ * Fondo sutil blanco traslúcido.
+ */
 .menu a:hover:not(.active) {
   background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-white); /* Texto más brillante */
 }
 
-/* Cerrar sesión */
+/**
+ * Botón de "Cerrar sesión" en el fondo.
+ * - 'margin-top: auto' lo empuja al fondo (gracias a flex-direction: column).
+ */
 .logout {
   margin-top: auto;
-  color: #ffdddd;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #ffdddd; /* Un color rojo sutil de "peligro" */
+  border-top: 1px solid var(--border-light);
 }
 
-/* ======================
-   MAIN / TOPBAR
-======================== */
-.main {
-  flex: 1;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
-}
 
+/*
+================================================================================
+|   SECCIÓN 5: Componente - Topbar (Barra Superior)                            |
+================================================================================
+*/
+
+/**
+ * La barra superior que contiene el título y el mini-perfil.
+ * - 'position: sticky' y 'top: 0' la mantiene fija en la parte
+ * superior del área de .main al hacer scroll.
+ */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 15px;
-  height: 88px;
-  background: #fff;
+  height: var(--topbar-height);
+  background: var(--bg-panel); /* Fondo blanco */
   padding: 0 20px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm); /* Sombra estándar */
   position: sticky;
   top: 0;
   z-index: 100;
+  flex-shrink: 0; /* Evita que se encoja */
 }
 
+/**
+ * El botón de "hamburguesa" para abrir/cerrar la sidebar en móvil.
+ * - 'display: none' por defecto (oculto en desktop).
+ * - Se mostrará en el media query.
+ */
 .toggle {
   background: none;
   border: none;
@@ -157,11 +390,19 @@ body {
   display: none; /* Oculto en escritorio */
 }
 
+/**
+ * Título de la página en la Topbar.
+ */
 .topbar-title {
   font-weight: 600;
   font-size: 18px;
+  color: var(--color-primary); /* Texto azul primario */
 }
 
+/**
+ * Mini-perfil en la Topbar.
+ * - 'margin-left: auto' lo empuja a la derecha.
+ */
 .user-mini {
   display: flex;
   align-items: center;
@@ -169,31 +410,36 @@ body {
   margin-left: auto;
 }
 
+/**
+ * Avatar circular pequeño en la Topbar.
+ * Usa el color de acento (Dorado).
+ */
 .avatar-mini {
   width: 35px;
   height: 35px;
   background: var(--color-secondary);
   color: var(--color-primary);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
 }
 
-/* ======================
-   CONTENIDO
-======================== */
-.content {
-  padding: 30px;
-  background-color: var(--color-light);
-  flex: 1;
-}
 
+/*
+================================================================================
+|   SECCIÓN 6: Componentes Generales (Card, Stat Cards)                        |
+================================================================================
+*/
+
+/**
+ * Estilo base para todas las "tarjetas" o paneles de contenido.
+ */
 .card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: 20px 25px;
   margin-bottom: 25px;
 }
@@ -201,102 +447,57 @@ body {
 .card-title {
   font-weight: 600;
   font-size: 20px;
+  color: var(--color-primary); /* Título de tarjeta en azul */
+  margin-bottom: 15px; /* Espacio añadido */
 }
 
+/**
+ * Contenedor para las tarjetas de estadísticas (KPIs).
+ * - 'display: flex' y 'flex-wrap: wrap' permite que se
+ * ajusten automáticamente en pantallas más pequeñas.
+ */
 .stat-cards-container {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
+/**
+ * Tarjeta de estadística individual.
+ * - 'flex: 1 1 250px' (flex-grow, flex-shrink, flex-basis)
+ * Significa: "Crece (1), Encógete (1), pero tu tamaño base es 250px".
+ * Esto crea un layout de grilla responsivo sin media queries.
+ */
 .stat-card {
   flex: 1 1 250px;
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: #fff;
-  border-radius: var(--radius);
+  color: var(--text-white);
+  border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
-/* ======================
-   FOOTER
-======================== */
-.footer {
-  text-align: center;
-  font-size: 13px;
-  color: var(--color-muted);
-  background: transparent;
-  padding: 20px 0;
-  position: relative;
-  bottom: 0;
-  width: 100%;
-}
 
-/* ======================
-   OVERLAY Y RESPONSIVE
-======================== */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: none;
-  z-index: 900;
-}
+/*
+================================================================================
+|   SECCIÓN 7: Vistas Específicas (Mis Clases, Tabla, Calendario, Perfil)      |
+================================================================================
+|
+|   Estilos para los componentes que son únicos de cada vista.
+|
+*/
 
-@media (max-width: 992px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
+/* --- Vista: Mis Clases --- */
 
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .toggle {
-    display: block; /* Solo visible en pantallas pequeñas */
-  }
-}
-/* ======================
-   EVITAR SCROLL LATERAL EN MÓVIL
-======================== */
-
-/* Elimina desbordes y movimientos */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-}
-
-/* Evita que el sidebar abierto empuje el body */
-.layout {
-  overflow-x: hidden;
-}
-
-/* Asegura que el overlay cubra bien la pantalla */
-#overlay {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  z-index: 900;
-}
-
-/* Cuando el sidebar está abierto, el fondo queda bloqueado */
-body.menu-open {
-  overflow: hidden;
-}
-/* === MIS CLASES === */
-
+/**
+ * Grilla para las tarjetas de clases.
+ * - 'grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))'
+ * Es una técnica de CSS Grid moderna. Crea tantas columnas como
+ * quepan, asegurando que cada una tenga al menos 280px.
+ */
 .clases-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -304,33 +505,39 @@ body.menu-open {
   margin-top: 20px;
 }
 
+/**
+ * Tarjeta para una clase individual.
+ * - 'border-left' usa el color dorado para un acento visual.
+ * - 'transition' anima la tarjeta en el hover.
+ */
 .clase-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
-  border-left: 6px solid var(--color-secondary);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 6px solid var(--color-secondary); /* Acento Dorado */
+  transition: transform var(--transition-main), box-shadow var(--transition-main);
 }
 
 .clase-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  transform: translateY(-4px); /* Eleva la tarjeta */
+  box-shadow: var(--shadow-md); /* Sombra más grande */
 }
 
 .clase-icon {
   background: var(--color-primary);
-  color: #fff;
-  border-radius: 10px;
+  color: var(--text-white);
+  border-radius: var(--radius-md);
   width: 55px;
   height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
+  flex-shrink: 0;
 }
 
 .clase-info h3 {
@@ -343,29 +550,35 @@ body.menu-open {
 .clase-info p {
   margin: 3px 0;
   font-size: 14px;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .no-clases {
   text-align: center;
-  color: var(--color-muted);
+  color: var(--text-muted);
   font-style: italic;
+  padding: 20px;
 }
-/* ======================
-   TABLA DE NOTAS (ESTILO INSTITUCIONAL)
-======================== */
 
+
+/* --- Vista: Tabla de Notas --- */
+
+/**
+ * Contenedor (card) para la tabla de notas.
+ * 'overflow: hidden' es importante para que el radio
+ * se aplique al .tabla-header.
+ */
 .tabla-card {
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow);
-  background: #fff;
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-panel);
   margin-top: 20px;
 }
 
 .tabla-header {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--text-white);
   padding: 12px 18px;
 }
 
@@ -378,25 +591,33 @@ body.menu-open {
   gap: 8px;
 }
 
+/**
+ * Contenedor del cuerpo de la tabla.
+ * 'overflow-x: auto' añade scroll horizontal
+ * si la tabla no cabe en pantallas móviles.
+ */
 .tabla-body {
   padding: 0;
   overflow-x: auto;
 }
 
+/**
+ * Estilos para la tabla de notas.
+ */
 .tabla-notas {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
-  background: #fff;
+  background: var(--bg-panel);
 }
 
 .tabla-notas thead {
-  background: #fff;
-  border-bottom: 2px solid #eee;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .tabla-notas th {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 14px;
   padding: 12px 10px;
@@ -404,95 +625,123 @@ body.menu-open {
 
 .tabla-notas td {
   font-size: 14px;
-  color: #333;
+  color: var(--text-secondary);
   padding: 10px 10px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
 }
 
+/* Zebra striping (filas pares) */
 .tabla-notas tr:nth-child(even) {
-  background-color: #fafafa;
+  background-color: var(--bg-panel-light);
 }
 
 .tabla-notas tr:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-panel-hover);
 }
 
+/* Alinea la primera columna (nombre) a la izquierda */
 .tabla-notas td:first-child,
 .tabla-notas th:first-child {
   text-align: left;
   padding-left: 18px;
 }
-/* ======================
-   CALENDARIO DE EVALUACIONES
-======================== */
 
+
+/* --- Vista: Calendario (FullCalendar) --- */
+
+/**
+ * Estilos para sobrescribir la librería FullCalendar
+ * y que coincida con nuestro tema.
+ */
 #calendar {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: var(--shadow);
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: 15px;
 }
 
+/* Título (ej: "Noviembre 2025") */
 .fc-toolbar-title {
   font-weight: 600 !important;
-  color: var(--color-primary);
+  color: var(--color-primary) !important;
 }
 
+/* Botones (Hoy, Prev, Next) */
 .fc-button {
   background: var(--color-primary) !important;
   border: none !important;
-  color: #fff !important;
+  color: var(--text-white) !important;
   font-weight: 500 !important;
-  border-radius: 6px !important;
+  border-radius: var(--radius-sm) !important;
+  transition: background-color var(--transition-fast) !important;
 }
 
+/* Hover de botones (Dorado) */
 .fc-button:hover {
   background: var(--color-secondary) !important;
+  color: var(--color-primary-text) !important;
 }
 
+/* Número del día */
 .fc-daygrid-day-number {
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--text-primary);
 }
 
+/* Eventos (Evaluaciones) */
 .fc-event {
   background-color: var(--color-secondary) !important;
   border: none !important;
-  color: #3a0e0e !important;
-  border-radius: 4px !important;
+  color: var(--color-primary-text) !important; /* Texto oscuro sobre dorado */
+  border-radius: var(--radius-sm) !important;
   font-weight: 500;
+  padding: 2px 4px; /* Más padding */
 }
-/* ======================
-   PERFIL DE ALUMNO — FORMATO COMPACTO Y CENTRADO
-====================== */
 
+
+/* --- Vista: Perfil de Alumno --- */
+
+/**
+ * Tarjeta principal de la vista de perfil.
+ */
 .perfil-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(15, 41, 76, 0.15);
-  overflow: hidden;
-  font-family: 'Poppins', sans-serif;
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden; /* Para que el banner se ajuste al radio */
+  font-family: var(--font-main);
   max-width: 1150px;
   margin: 0 auto 40px;
 }
 
+/**
+ * Banner superior con degradado.
+ */
 .perfil-banner {
-  background: linear-gradient(180deg, #0F294C 0%, #3B5273 100%);
+  background: linear-gradient(180deg, var(--color-primary) 0%, #3B5273 100%);
   height: 130px;
-  border-radius: 12px 12px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
+/**
+ * Contenedor del avatar (se superpone al banner).
+ * 'margin-top: -50px' es lo que crea el efecto "flotante".
+ */
 .perfil-avatar {
   text-align: center;
   margin-top: -50px;
+  position: relative; /* Para que esté por encima del banner */
 }
 
+/**
+ * El círculo del avatar (Dorado).
+ */
 .avatar-circle {
   width: 90px;
   height: 90px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #f7e3a1, #bfa75b);
-  color: #0F294C;
+  border-radius: var(--radius-round);
+  background: radial-gradient(circle at 30% 30%, var(--color-secondary-light), var(--color-secondary));
+  color: var(--color-primary);
   font-weight: 700;
   font-size: 1.8rem;
   display: flex;
@@ -500,17 +749,18 @@ body.menu-open {
   justify-content: center;
   margin: 0 auto 10px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  border: 4px solid var(--bg-panel); /* Borde blanco para separarlo */
 }
 
 .perfil-avatar h2 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #0F294C;
+  color: var(--color-primary);
   margin-bottom: 2px;
 }
 
 .perfil-username {
-  color: #777;
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -521,6 +771,10 @@ body.menu-open {
   margin-top: 2px;
 }
 
+/**
+ * Cuerpo del perfil, contiene las dos cajas de info.
+ * Usa Flexbox para ponerlas lado a lado.
+ */
 .perfil-body {
   display: flex;
   justify-content: center;
@@ -528,10 +782,13 @@ body.menu-open {
   padding: 20px 30px 25px;
 }
 
+/**
+ * Caja de información (Datos Personales, Datos Académicos).
+ */
 .perfil-info-box {
-  flex: 1 1 48%;
-  background: #f9f9f9;
-  border-radius: 10px;
+  flex: 1 1 48%; /* Crece, se encoge, base del 48% */
+  background: #f9f9f9; /* Fondo ligeramente gris */
+  border-radius: var(--radius-md);
   padding: 18px 22px;
   box-shadow: 0 3px 8px rgba(15, 41, 76, 0.1);
 }
@@ -551,18 +808,99 @@ body.menu-open {
 .perfil-info-box td {
   padding: 6px 0;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-secondary);
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+.perfil-info-box tr:last-child td {
+  border-bottom: none; /* Elimina el borde en la última fila */
 }
 
 .perfil-info-box td:first-child {
   font-weight: 600;
-  color: #0F294C;
-  width: 35%;
+  color: var(--color-primary);
+  width: 35%; /* Ancho fijo para la "etiqueta" */
 }
 
+
+/*
+================================================================================
+|   SECCIÓN 8: Clases de Utilidad y Responsive                                 |
+================================================================================
+*/
+
+/**
+ * Overlay para la Sidebar Móvil
+ * Este es el fondo oscuro que aparece detrás de la
+ * sidebar cuando se abre en modo móvil.
+ */
+#overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  z-index: 900; /* Por debajo de la sidebar (1000) */
+}
+
+/**
+ * Media Query para pantallas pequeñas (móviles y tablets).
+ * Punto de ruptura: 992px.
+ */
+@media (max-width: 992px) {
+  
+  /**
+   * En móvil, la sidebar está oculta por defecto
+   * (movida 100% a la izquierda).
+   */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  /**
+   * La clase .open (añadida por JS) la trae a la vista.
+   */
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /**
+   * El .main ahora ocupa toda la pantalla, ya que
+   * la sidebar es flotante ('fixed').
+   */
+  .main {
+    margin-left: 0;
+  }
+
+  /**
+   * Muestra el botón de hamburguesa (toggle),
+   * que estaba oculto en desktop.
+   */
+  .toggle {
+    display: block;
+  }
+}
+
+/**
+ * Media Query para pantallas más pequeñas (móviles).
+ * Punto de ruptura: 768px.
+ */
 @media (max-width: 768px) {
+  /**
+   * En móvil, las dos cajas de información
+   * del perfil se apilan verticalmente.
+   */
   .perfil-body {
     flex-direction: column;
   }
+  
+  /**
+   * Reduce el padding en el contenido principal
+   * para dar más espacio.
+   */
+  .content {
+    padding: 20px;
+  }
 }
+
+/* --- FIN DEL ARCHIVO CSS --- */
