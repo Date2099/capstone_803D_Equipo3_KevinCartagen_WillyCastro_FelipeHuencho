@@ -1398,5 +1398,216 @@ body.menu-open {
     width: auto; /* Permite que los botones se apilen si es necesario */
   }
 }
+/*
+================================================================================
+|   SECCIÓN 8.5: VISTA PASSWORD GATE (¡NUEVO!)                                 |
+================================================================================
+|
+|   Estilos para la tarjeta de "Acceso Restringido"
+|   que protege el Portal de Pagos.
+|   Estos estilos se añaden para hacer que la vista 'image_530fdf.png'
+|   se vea profesional y bonita.
+|
+*/
+
+/**
+ * Contenedor de la tarjeta de contraseña.
+ * Usamos Flexbox para centrar todo el contenido.
+ * Se le aplica una animación 'slideInUp'.
+ */
+.password-gate-wrapper {
+  max-width: 500px;
+  margin: 40px auto; /* Centra la tarjeta horizontalmente */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+  /* Animación de entrada */
+  animation: slideInUp 0.4s ease-out;
+}
+
+/**
+ * El ícono de candado grande.
+ * Usamos los colores primarios.
+ */
+.password-gate-icon {
+  font-size: 3rem;
+  color: var(--color-primary);
+  background: var(--bg-panel-light);
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-round);
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+}
+
+/**
+ * Subtítulo/instrucciones
+ */
+.gate-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+/**
+ * El formulario de contraseña.
+ */
+.password-gate-form {
+  width: 100%;
+  max-width: 350px; /* Limita el ancho del input */
+}
+
+/* * Usamos .form-group (clase genérica)
+ * para estilizar el formulario.
+ */
+.password-gate-form .form-group {
+  text-align: left;
+}
+
+/*
+ * Estilo para el input de contraseña.
+ * Hereda de los estilos de formulario genéricos.
+ */
+.password-gate-form input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-panel-light);
+  font-size: 1rem;
+}
+.password-gate-form input[type="password"]:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-panel);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  outline: none;
+}
+
+/* Botón de "Desbloquear" (reutiliza el estilo .btn-pagar) */
+.password-gate-form .btn-pagar {
+  width: 100%;
+  background: var(--color-primary);
+  color: var(--text-white);
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all var(--transition-main);
+}
+.password-gate-form .btn-pagar:hover {
+  background: var(--color-secondary);
+  color: var(--color-primary-text);
+}
+
+/**
+ * Mensaje de error de contraseña incorrecta.
+ */
+.gate-error-text {
+  font-size: 0.9rem;
+  color: var(--status-overdue-text); /* Color rojo */
+  font-weight: 500;
+  margin-top: 10px;
+  text-align: center;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 8.6: BOTÓN DE BLOQUEO Y ANIMACIONES DE TRANSICIÓN (¡NUEVO!)        |
+================================================================================
+*/
+
+/**
+ * Estilo para el nuevo botón "Bloquear Portal"
+ * en el encabezado del portal de pagos.
+ */
+.btn-lock-portal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-danger-border); /* Borde rojo */
+  background: var(--color-danger-bg); /* Fondo rojo pálido */
+  color: var(--color-danger-text); /* Texto rojo */
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.btn-lock-portal:hover {
+  background: var(--status-overdue-text); /* Fondo rojo oscuro */
+  color: var(--text-white); /* Texto blanco */
+  border-color: var(--status-overdue-text);
+}
+
+/**
+ * Animación de "shake" (vibración) para error
+ * Se aplica a la tarjeta de contraseña cuando es incorrecta.
+ */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/**
+ * Animación de entrada
+ * (Usada por 'animate-in' en las vistas)
+ */
+.animate-in {
+  animation: slideInUp 0.4s ease-out;
+  /* Asigna un retraso basado en la variable --anim-delay (si existe) */
+  animation-delay: var(--anim-delay, 0s); 
+}
+
+/**
+ * Animación de salida (para la tarjeta de contraseña)
+ */
+.is-fading-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 10: Animaciones (Keyframes)                                        |
+================================================================================
+|
+|   Define las animaciones de entrada y salida.
+|
+*/
+
+/*
+ * Animación de entrada (Deslizar hacia arriba)
+ */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Animación de salida (Desvanecer)
+ */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 
 /* --- FIN DEL ARCHIVO CSS --- */

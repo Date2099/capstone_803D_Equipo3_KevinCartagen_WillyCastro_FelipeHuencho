@@ -19,8 +19,11 @@
 |       inyectando HTML dinámico en el contenedor principal.                   |
 |   4.  ¡NUEVO! Implementación de un "Password Gate" (portal de contraseña)    |
 |       para la vista de "Portal de Pagos" por solicitud del cliente.          |
-|   5.  Integración con la librería FullCalendar para la vista de Calendario.  |
-|   6.  Carga de datos de perfil desde el backend (fetch).                     |
+|   5.  ¡NUEVO! Implementación de un temporizador de sesión de 30 minutos      |
+|       para el portal de pagos.                                               |
+|   6.  ¡NUEVO! Animación de transición al desbloquear el portal.              |
+|   7.  Integración con la librería FullCalendar para la vista de Calendario.  |
+|   8.  Carga de datos de perfil desde el backend (fetch).                     |
 |                                                                              |
 ================================================================================
 */
@@ -80,6 +83,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const topbarTitle = document.getElementById("topbar-title");
 
   
+  /*
+  ==============================================================================
+  | SECCIÓN 1.5: GESTIÓN DE ESTADO DEL PORTAL DE PAGOS                         |
+  ==============================================================================
+  |
+  |   Definimos variables para manejar el estado del portal de pagos,
+  |   específicamente el temporizador de sesión.
+  |
+  */
+
+  /**
+   * Almacena el ID del temporizador (`setTimeout`).
+   * Lo guardamos aquí para poder cancelarlo (con `clearTimeout`)
+   * si el usuario bloquea manualmente el portal o navega a otra sección.
+   * Inicia como 'null' (sin temporizador activo).
+   */
+  let paymentPortalTimer = null;
+
+  /**
+   * Duración de la sesión del portal de pagos en milisegundos.
+   * 30 minutos * 60 segundos/minuto * 1000 milisegundos/segundo
+   */
+  const PAYMENT_SESSION_DURATION = 30 * 60 * 1000;
+
+  /**
+   * Contraseña bruta para desbloquear el portal.
+   * Solicitada por el cliente.
+   */
+  const PORTAL_PASSWORD = "hipona-apo-2025";
+
+
   /*
   ==============================================================================
   | SECCIÓN 2: LÓGICA DE LA SIDEBAR (MENÚ LATERAL)                             |
@@ -163,6 +197,16 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function loadSection(section) {
     
+    // --- LÓGICA DE SESIÓN DE PAGOS ---
+    // Si el usuario navega a CUALQUIER OTRA sección que no sea
+    // "pagos", y el temporizador estaba activo, lo cancelamos.
+    if (section !== "pagos" && paymentPortalTimer) {
+      console.log("Navegando fuera del portal, temporizador de pagos detenido.");
+      clearTimeout(paymentPortalTimer);
+      paymentPortalTimer = null;
+    }
+    // ---------------------------------
+
     // 1. Formatear el nombre de la sección para el título
     //    (ej: "mis-clases" -> "Mis clases")
     const title = section.charAt(0).toUpperCase() + section.slice(1).replace("-", " ");
@@ -199,15 +243,21 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPerfil(content);
         break;
 
-      // ===================================================================
-      // ¡CAMBIO POR SOLICITUD DE CLIENTE!
-      // ===================================================================
-      // En lugar de ir directo al portal de pagos, llamamos
-      // a la función 'renderPasswordGate' que pedirá una contraseña.
+      // ===========================================
+      // ¡AQUÍ ESTÁ TU VISTA DE PAGOS!
+      // ===========================================
+      // Coincide con el data-section="pagos" de tu HTML.
       case "pagos":
-        renderPasswordGate(content); // Llama al "portal de contraseña"
+        // Comprueba si la sesión de pagos ya está activa (timer corriendo).
+        // Si no está activa, muestra la puerta de contraseña.
+        if (!paymentPortalTimer) {
+          renderPasswordGate(content); // Llama al "portal de contraseña"
+        } else {
+          // Si la sesión SÍ está activa, muestra el portal directamente.
+          renderPortalDePagos(content);
+        }
         break;
-      // ===================================================================
+      // ===========================================
 
       // Fallback: Si se hace clic en un enlace con un data-section
       // que no tiene un 'case', se muestra este mensaje.
@@ -275,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Se usa un template literal (backticks ``) para escribir HTML
     // de forma multilínea.
     container.innerHTML = `
-      <div class="card">
+      <div class*="card animate-in">
         <h2 class="card-title">Bienvenido, ${alumno.nombre} - ${alumno.curso}</h2>
         <p>Este es tu panel personal de estudiante.</p>
 
@@ -313,10 +363,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderClases(container) {
     // 1. Dibuja el "esqueleto" de la vista (la tarjeta y la grilla vacía).
     container.innerHTML = `
-      <div class="card">
+      <div class="card animate-in">
         <h2 class="card-title"><i class="fa-solid fa-book"></i> Mis Clases</h2>
         <p>Aquí puedes ver las asignaturas en las que estás inscrito.</p>
-        <div class="clases-grid" id="clases-list"></div>
+        <div classd="clases-grid" id="clases-list"></div>
       </div>
     `;
 
@@ -369,7 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderNotas(container) {
     // 1. Dibuja el "esqueleto" de la tabla (encabezados <thead>)
     container.innerHTML = `
-      <div class="tabla-card">
+      <div class="tabla-card animate-in">
         <div class="tabla-header">
           <h2><i class="fa-solid fa-list-check"></i> Notas</h2>
         </div>
@@ -435,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Dibuja el contenedor de la tarjeta y el <div>
     //    donde FullCalendar se "adjuntará".
     container.innerHTML = `
-      <div class="card">
+      <div class="card animate-in">
         <h2 class="card-title"><i class="fa-solid fa-calendar-days"></i> Calendario de Evaluaciones</h2>
         <div id="calendar" style="margin-top: 20px;"></div>
       </div>
@@ -524,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Genera el HTML del perfil
       //    Usamos los datos de 'alumno' para rellenar la plantilla.
       container.innerHTML = `
-        <div class="perfil-card">
+        <div class="perfil-card animate-in">
           <div class="perfil-header">
             <div class="perfil-banner"></div>
             <div class="perfil-avatar">
@@ -593,8 +643,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Dibuja el HTML del portal de pagos
     //    Esta estructura HTML coincide con el diseño de la imagen
     //    y será estilizada por las nuevas clases en 'studentstyle.css'.
+    //    Añadimos la clase 'animate-in' para la transición.
     container.innerHTML = `
-      <div class="kpi-grid">
+      <div class="kpi-grid animate-in" style="--anim-delay: 0s;">
         <article class="kpi-card">
           <div class="kpi-head">Saldo por pagar</div>
           <div class="kpi-val" id="kpi-saldo">$2.070.000</div>
@@ -617,7 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </article>
       </div>
 
-      <div class="payment-card">
+      <div class="payment-card animate-in" style="--anim-delay: 0.1s;">
         
         <header class="payment-header">
           <h3>Detalle 2025</h3>
@@ -629,6 +680,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="btn-secondary" id="btn-select-all">Seleccionar todas</button>
             <button class="btn-secondary" id="btn-clear">Limpiar</button>
             <button class="btn-secondary" id="btn-export-csv">Exportar CSV</button>
+            
+            <button class="btn-lock-portal" id="btn-lock-portal" data-action="lock-portal">
+              <i class="fa-solid fa-lock"></i>
+              <span>Bloquear Portal</span>
+            </button>
+            
             <button class="btn-primary" id="btn-pagar-seleccion">Pagar Selección</button>
           </div>
         </header>
@@ -718,6 +775,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Lógica de simulación (igual que el formulario anterior)
         alert("Iniciando pago por las cuotas seleccionadas...\n\n(Próximo paso: implementar lógica de Transbank)");
     });
+    
+    // 4. Conectamos el botón de "Bloquear Portal"
+    const lockButton = container.querySelector("#btn-lock-portal");
+    lockButton.addEventListener('click', () => {
+        // Llama a la función que bloquea el portal
+        lockPaymentPortal();
+    });
 
   } // --- Fin de renderPortalDePagos ---
 
@@ -735,14 +799,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderPasswordGate(container) {
     
     // 1. Dibuja el HTML del formulario de contraseña
+    //    Usamos las clases CSS de la nueva SECCIÓN 8.5
     container.innerHTML = `
-      <div class="card password-gate-wrapper">
+      <div class="card password-gate-wrapper animate-in">
         
         <div class="password-gate-icon">
           <i class="fa-solid fa-lock"></i>
         </div>
         
-        <h2 class="card-title" style="text-align: center;">Acceso Restringido</h2>
+        <h2 class="card-title" style="text-align: center; border: none; padding: 0; margin-bottom: 10px;">
+          Acceso Restringido
+        </h2>
+        
         <p class="gate-subtitle">
           Esta sección es solo para personal autorizado (Apoderados).
           <br>Por favor, ingrese la contraseña de acceso.
@@ -768,17 +836,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = container.querySelector("#form-password-gate");
     const passwordInput = container.querySelector("#gate-password");
     const errorMsg = container.querySelector("#gate-error-msg");
+    const cardWrapper = container.querySelector(".password-gate-wrapper");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault(); // Previene recarga de página
       const password = passwordInput.value;
 
       // 3. Comprueba la contraseña
-      if (password === "hipona-apo-2025") {
+      if (password === PORTAL_PASSWORD) {
         // --- ÉXITO ---
         // La contraseña es correcta.
-        // Llamamos a la función real que renderiza el portal de pagos.
-        renderPortalDePagos(container); // 'container' es el mismo <div> .content
+        
+        // 1. Inicia el temporizador de sesión de 30 minutos
+        startPaymentTimer();
+        
+        // 2. Ejecuta la animación de salida
+        cardWrapper.classList.add('is-fading-out');
+        
+        // 3. Después de 300ms (ver CSS), reemplaza el contenido
+        setTimeout(() => {
+          // Llamamos a la función real que renderiza el portal de pagos.
+          renderPortalDePagos(container); // 'container' es el mismo <div> .content
+        }, 300); // Duración de la animación
       
       } else {
         // --- ERROR ---
@@ -787,19 +866,70 @@ document.addEventListener("DOMContentLoaded", () => {
         errorMsg.hidden = false; // Muestra el mensaje de error
         
         // Añade un 'shake' de error al formulario
-        form.parentElement.classList.add('shake');
+        cardWrapper.classList.add('shake');
         // Quita la animación después de que termine
         setTimeout(() => {
-          form.parentElement.classList.remove('shake');
+          cardWrapper.classList.remove('shake');
         }, 500);
       }
     });
   } // --- Fin de renderPasswordGate ---
-
+  
 
   /*
   ==============================================================================
-  | SECCIÓN 5: CARGA INICIAL                                                   |
+  | SECCIÓN 5: FUNCIONES DE SESIÓN DEL PORTAL DE PAGOS                         |
+  ==============================================================================
+  |
+  |   Funciones para iniciar el temporizador y bloquear el portal.
+  |
+  */
+
+  /**
+   * Inicia el temporizador de 30 minutos.
+   * Si ya existe un temporizador, lo resetea.
+   */
+  function startPaymentTimer() {
+    // 1. Limpia cualquier temporizador antiguo (si existe)
+    if (paymentPortalTimer) {
+      clearTimeout(paymentPortalTimer);
+    }
+    
+    // 2. Muestra un log en la consola (para depuración)
+    console.log("Temporizador de sesión de pagos iniciado (30 min).");
+
+    // 3. Crea el nuevo temporizador
+    paymentPortalTimer = setTimeout(() => {
+      // 4. Esta función se ejecutará después de 30 minutos
+      console.log("Sesión del portal de pagos expirada. Bloqueando...");
+      alert("Su sesión en el portal de pagos ha expirado por inactividad.");
+      lockPaymentPortal(); // Llama a la función de bloqueo
+    }, PAYMENT_SESSION_DURATION); // 30 minutos
+  } // --- Fin de startPaymentTimer ---
+
+  /**
+   * Bloquea el portal de pagos.
+   * Esto limpia el temporizador y vuelve a renderizar
+   * la vista de "pagos", que (como el timer está en null)
+   * mostrará la puerta de contraseña.
+   */
+  function lockPaymentPortal() {
+    // 1. Limpia el temporizador (si existía)
+    if (paymentPortalTimer) {
+      clearTimeout(paymentPortalTimer);
+    }
+    paymentPortalTimer = null; // Resetea el estado
+    
+    // 2. Llama al router principal
+    //    Esto recarga la vista "pagos", que ahora
+    //    mostrará 'renderPasswordGate()'.
+    loadSection("pagos");
+  } // --- Fin de lockPaymentPortal ---
+  
+
+  /*
+  ==============================================================================
+  | SECCIÓN 6: CARGA INICIAL                                                   |
   ==============================================================================
   |
   |   Esta es la línea final que "enciende" la aplicación.
