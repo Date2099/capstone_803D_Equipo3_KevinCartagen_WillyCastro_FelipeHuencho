@@ -3,7 +3,7 @@
 |                                                                              |
 |               ARCHIVO JAVASCRIPT: Panel del Estudiante                       |
 |               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
-|               AUTOR: Kev182-pixel (Comentado por Asistente)                  |
+|               AUTOR: Kev182-pixel (Comentado v4 por Asistente)               |
 |                                                                              |
 ================================================================================
 |                                                                              |
@@ -17,8 +17,10 @@
 |       recargar la página.                                                    |
 |   3.  Renderizado de cada vista (Dashboard, Clases, Notas, etc.)             |
 |       inyectando HTML dinámico en el contenedor principal.                   |
-|   4.  Integración con la librería FullCalendar para la vista de Calendario.  |
-|   5.  Carga de datos de perfil desde el backend (fetch).                     |
+|   4.  ¡NUEVO! Implementación de un "Password Gate" (portal de contraseña)    |
+|       para la vista de "Portal de Pagos" por solicitud del cliente.          |
+|   5.  Integración con la librería FullCalendar para la vista de Calendario.  |
+|   6.  Carga de datos de perfil desde el backend (fetch).                     |
 |                                                                              |
 ================================================================================
 */
@@ -54,27 +56,27 @@ document.addEventListener("DOMContentLoaded", () => {
   |
   */
 
-  // El botón "hamburguesa" que abre/cierra la sidebar en móvil.
+  // 'toggleBtn': El botón "hamburguesa" que abre/cierra la sidebar en móvil.
   const toggleBtn = document.getElementById("toggle");
   
-  // El contenedor principal de la barra lateral (<aside>).
+  // 'sidebar': El contenedor principal de la barra lateral (<aside>).
   const sidebar = document.getElementById("sidebar");
   
-  // El fondo oscuro semitransparente que aparece en móvil
+  // 'overlay': El fondo oscuro semitransparente que aparece en móvil
   // cuando la sidebar está abierta.
   const overlay = document.getElementById("overlay");
   
-  // El contenedor principal <main> donde se "dibujarán" las vistas (SPA).
-  // (Tu HTML lo llama 'content' en el CSS, pero el HTML anterior lo llama 'content-area')
-  // Basado en tu HTML de Profesor, asumiremos que el ID es 'content-area'.
+  // 'content': El contenedor principal <main> donde se "dibujarán" las vistas (SPA).
+  // Se asume que el ID en el HTML es 'content-area'.
   const content = document.getElementById("content-area"); 
   
-  // Una lista de TODOS los enlaces <a> dentro del menú que
-  // tienen el atributo 'data-section'.
+  // 'menuLinks': Una NodeList (lista) de TODOS los enlaces <a> dentro del menú
+  // que tienen el atributo 'data-section'.
+  // IMPORTANTE: Esto ignora el enlace de "Cerrar Sesión", ¡lo cual es correcto!
   const menuLinks = document.querySelectorAll(".menu a[data-section]");
   
-  // El <h1> en la barra superior (topbar) cuyo texto cambiaremos
-  // dinámicamente.
+  // 'topbarTitle': El <h1> en la barra superior (topbar) cuyo texto cambiaremos
+  // dinámicamente al navegar entre vistas.
   const topbarTitle = document.getElementById("topbar-title");
 
   
@@ -110,18 +112,18 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.style.display = sidebar.classList.contains("open") ? "block" : "none";
       }
     });
-  }
+  } // Fin del if (toggleBtn && sidebar)
 
   // 2. Evento de Clic en el Overlay (fondo oscuro)
   //    Esto permite al usuario cerrar el menú haciendo clic
-  //    en cualquier lugar fuera de él.
+  //    en cualquier lugar fuera de él (mejora de UX).
   if (overlay) {
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("open");
       document.body.classList.remove("menu-open");
       overlay.style.display = "none";
     });
-  }
+  } // Fin del if (overlay)
 
   /**
    * 3. Función de Manejo de Redimensionamiento (Resize)
@@ -130,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * a su estado de desktop (cerrado, sin overlay).
    */
   function handleResize() {
-    // 992px es el punto de ruptura (breakpoint)
+    // 992px es el punto de ruptura (breakpoint) definido en el CSS.
     if (window.innerWidth > 992) {
       sidebar.classList.remove("open");
       document.body.classList.remove("menu-open");
@@ -197,18 +199,29 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPerfil(content);
         break;
 
+      // ===================================================================
+      // ¡CAMBIO POR SOLICITUD DE CLIENTE!
+      // ===================================================================
+      // En lugar de ir directo al portal de pagos, llamamos
+      // a la función 'renderPasswordGate' que pedirá una contraseña.
+      case "pagos":
+        renderPasswordGate(content); // Llama al "portal de contraseña"
+        break;
+      // ===================================================================
+
       // Fallback: Si se hace clic en un enlace con un data-section
       // que no tiene un 'case', se muestra este mensaje.
       default:
         content.innerHTML = `<div class="card">Sección "${section}" no implementada aún.</div>`;
         break;
     }
-  }
+  } // --- Fin de loadSection ---
 
   /**
    * 5. Conexión de Eventos del Menú (Event Binding)
    * Iteramos sobre CADA enlace <a> que encontramos en el menú
-   * y le asignamos un listener de 'click'.
+   * (los que guardamos en 'menuLinks') y le asignamos un
+   * listener de 'click'.
    */
   menuLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
@@ -232,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Llama al router principal para cargar el contenido de esa sección.
       loadSection(section);
     });
-  });
+  }); // --- Fin del forEach de menuLinks ---
 
   
   /*
@@ -255,11 +268,9 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {HTMLElement} container - El elemento .content donde se dibujará.
    */
   function renderDashboard(container) {
-    // NOTA DE DESARROLLO: La variable 'alumno' se usa aquí
-    // (ej: ${alumno.nombre}), pero no está definida en este scope.
-    // Para que funcione, 'alumno' debería ser un objeto global
-    // cargado al inicio (ej: con un fetch en la carga inicial).
-    // Por ahora, el código fallará con "ReferenceError: alumno is not defined".
+    // ¡FIX! Esta función ahora lee la variable 'alumno'
+    // que fue definida en el 'student.html'.
+    // Esto previene el error "alumno is not defined".
     
     // Se usa un template literal (backticks ``) para escribir HTML
     // de forma multilínea.
@@ -434,8 +445,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const calendarEl = container.querySelector("#calendar");
 
     // 3. Crea una nueva instancia de FullCalendar
-    //    (Esto asume que el script de FullCalendar se cargó
-    //    correctamente en el <head> del HTML).
+    //    'FullCalendar' es un objeto global que se cargó
+    //    desde el script en el HTML.
     const calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: "dayGridMonth", // Vista de mes por defecto
       height: "auto",              // Altura automática
@@ -500,7 +511,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Es crucial "intentar" (try) un fetch, y "capturar" (catch)
     // el error si el servidor falla o no responde.
     try {
-      const res = await fetch("/dashboard/perfil-data/");
+      // Usamos una URL relativa a la app 'studentView'
+      const res = await fetch("/studentView/api/perfil-data/"); // URL CORREGIDA (suposición)
       
       // Si la respuesta no es 200 (OK), lanza un error
       if (!res.ok) {
@@ -562,14 +574,237 @@ document.addEventListener("DOMContentLoaded", () => {
   } // --- Fin de renderPerfil ---
 
 
+  // ======================================================
+  // ¡NUEVA VISTA!
+  // 🔹 VISTA: PORTAL DE PAGOS
+  // ======================================================
+
+  /**
+   * ----------------------------
+   * VISTA: PORTAL DE PAGOS (Función Principal)
+   * ----------------------------
+   * Esta función es la que renderiza la vista de pagos completa
+   * (KPIs, Filtros, Tabla de Cuotas) inspirada en la imagen.
+   *
+   * @param {HTMLElement} container - El elemento .content donde se dibujará.
+   */
+  function renderPortalDePagos(container) {
+    
+    // 1. Dibuja el HTML del portal de pagos
+    //    Esta estructura HTML coincide con el diseño de la imagen
+    //    y será estilizada por las nuevas clases en 'studentstyle.css'.
+    container.innerHTML = `
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <div class="kpi-head">Saldo por pagar</div>
+          <div class="kpi-val" id="kpi-saldo">$2.070.000</div>
+          <div class="kpi-foot">Total pendiente 2025</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head">Cuotas pagadas</div>
+          <div class="kpi-val" id="kpi-cuotas">3 / 12</div>
+          <div class="kpi-foot">Año 2025</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head">Pendientes</div>
+          <div class="kpi-val" id="kpi-pendientes">3</div>
+          <div class="kpi-foot">Próximas cuotas</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-head">Atrasadas</div>
+          <div class="kpi-val" id="kpi-atrasadas" style="color: var(--status-overdue-text);">6</div>
+          <div class="kpi-foot">Cuotas vencidas</div>
+        </article>
+      </div>
+
+      <div class="payment-card">
+        
+        <header class="payment-header">
+          <h3>Detalle 2025</h3>
+          <div class="payment-filters">
+            <select id="filtro-ano" aria-label="Seleccionar Año">
+              <option>2025</option>
+              <option>2024</option>
+            </select>
+            <button class="btn-secondary" id="btn-select-all">Seleccionar todas</button>
+            <button class="btn-secondary" id="btn-clear">Limpiar</button>
+            <button class="btn-secondary" id="btn-export-csv">Exportar CSV</button>
+            <button class="btn-primary" id="btn-pagar-seleccion">Pagar Selección</button>
+          </div>
+        </header>
+
+        <div class="payment-table-wrapper">
+          <table class="payment-table">
+            <thead>
+              <tr>
+                <th class="col-checkbox"><input type="checkbox" id="check-all" aria-label="Seleccionar todo"></th>
+                <th>Mes</th>
+                <th>Vencimiento</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th class="col-acciones">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="payment-tbody">
+              </tbody>
+          </table>
+        </div> <footer class="payment-footer">
+          <details>
+            <summary>Información Importante</summary>
+            <p>
+              Aquí puede ir información relevante sobre el proceso de pago,
+              políticas de reembolso o datos de contacto de finanzas.
+            </p>
+          </details>
+        </footer>
+        
+      </div> `;
+
+    // 2. (PRÓXIMO PASO) Lógica de Fetch y Simulación
+    //    Por ahora, solo inyectamos los datos brutos.
+    const tbody = container.querySelector("#payment-tbody");
+    
+    // Datos brutos (Mock Data)
+    const cuotas = [
+      { mes: "Enero", venc: "10 ene 2025", monto: "230.000", estado: "Pagada" },
+      { mes: "Febrero", venc: "10 feb 2025", monto: "230.000", estado: "Pagada" },
+      { mes: "Marzo", venc: "10 mar 2025", monto: "230.000", estado: "Pagada" },
+      { mes: "Abril", venc: "10 abr 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Mayo", venc: "10 may 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Junio", venc: "10 jun 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Julio", venc: "10 jul 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Agosto", venc: "10 ago 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Septiembre", venc: "10 sep 2025", monto: "230.000", estado: "Atrasada" },
+      { mes: "Octubre", venc: "10 oct 2025", monto: "230.000", estado: "Pendiente" },
+      { mes: "Noviembre", venc: "10 nov 2025", monto: "230.000", estado: "Pendiente" },
+      { mes: "Diciembre", venc: "10 dic 2025", monto: "230.000", estado: "Pendiente" },
+    ];
+    
+    let rowsHtml = '';
+    // Itera sobre los datos brutos y crea el HTML de la tabla
+    cuotas.forEach(cuota => {
+      let estadoClass = '';
+      // Asigna una clase CSS basada en el estado
+      if (cuota.estado === 'Pagada') estadoClass = 'badge-paid';
+      if (cuota.estado === 'Atrasada') estadoClass = 'badge-overdue';
+      if (cuota.estado === 'Pendiente') estadoClass = 'badge-pending';
+    
+      rowsHtml += `
+        <tr>
+          <td class="col-checkbox"><input type="checkbox" aria-label="Seleccionar ${cuota.mes}"></td>
+          <td>${cuota.mes}</td>
+          <td>${cuota.venc}</td>
+          <td class="col-monto">$${cuota.monto}</td>
+          <td><span class="badge ${estadoClass}">${cuota.estado}</span></td>
+          <td class="col-acciones">
+            <button class="btn btn-pagar" ${cuota.estado === 'Pagada' ? 'disabled' : ''}>Pagar</button>
+            <button class="btn btn-comprobante" ${cuota.estado !== 'Pagada' ? 'disabled' : ''}>Comprobante</button>
+          </td>
+        </tr>
+      `;
+    });
+    
+    // Inyecta todas las filas en la tabla
+    tbody.innerHTML = rowsHtml;
+    
+    // 3. (PRÓXIMO PASO) Lógica de botones
+    //    Aquí se añadirían los listeners para 'btn-pagar-seleccion',
+    //    'btn-export-csv', y los botones individuales de "Pagar".
+    //    Por ahora, son solo visuales.
+    
+    // Obtenemos el botón de "Pagar Selección"
+    const payButton = container.querySelector("#btn-pagar-seleccion");
+    payButton.addEventListener('click', () => {
+        // Lógica de simulación (igual que el formulario anterior)
+        alert("Iniciando pago por las cuotas seleccionadas...\n\n(Próximo paso: implementar lógica de Transbank)");
+    });
+
+  } // --- Fin de renderPortalDePagos ---
+
+
+  /**
+   * ----------------------------
+   * VISTA: PORTAL DE CONTRASEÑA (Password Gate)
+   * ----------------------------
+   * Esta función se activa ANTES que 'renderPortalDePagos'.
+   * Pide una contraseña y solo si es correcta,
+   * llama a 'renderPortalDePagos'.
+   *
+   * @param {HTMLElement} container - El elemento .content donde se dibujará.
+   */
+  function renderPasswordGate(container) {
+    
+    // 1. Dibuja el HTML del formulario de contraseña
+    container.innerHTML = `
+      <div class="card password-gate-wrapper">
+        
+        <div class="password-gate-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        
+        <h2 class="card-title" style="text-align: center;">Acceso Restringido</h2>
+        <p class="gate-subtitle">
+          Esta sección es solo para personal autorizado (Apoderados).
+          <br>Por favor, ingrese la contraseña de acceso.
+        </p>
+        
+        <form id="form-password-gate" class="password-gate-form">
+          <div class="form-group">
+            <label for="gate-password">Contraseña de Acceso</label>
+            <input type="password" id="gate-password" required>
+            
+            <p id="gate-error-msg" class="gate-error-text" hidden></p>
+          </div>
+          
+          <button type="submit" class="btn btn-pagar" style="width: 100%;">
+            Desbloquear
+          </button>
+        </form>
+        
+      </div>
+    `;
+
+    // 2. Añadir el Event Listener al formulario de contraseña
+    const form = container.querySelector("#form-password-gate");
+    const passwordInput = container.querySelector("#gate-password");
+    const errorMsg = container.querySelector("#gate-error-msg");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault(); // Previene recarga de página
+      const password = passwordInput.value;
+
+      // 3. Comprueba la contraseña
+      if (password === "hipona-apo-2025") {
+        // --- ÉXITO ---
+        // La contraseña es correcta.
+        // Llamamos a la función real que renderiza el portal de pagos.
+        renderPortalDePagos(container); // 'container' es el mismo <div> .content
+      
+      } else {
+        // --- ERROR ---
+        // La contraseña es incorrecta.
+        errorMsg.textContent = "Contraseña incorrecta. Intente de nuevo.";
+        errorMsg.hidden = false; // Muestra el mensaje de error
+        
+        // Añade un 'shake' de error al formulario
+        form.parentElement.classList.add('shake');
+        // Quita la animación después de que termine
+        setTimeout(() => {
+          form.parentElement.classList.remove('shake');
+        }, 500);
+      }
+    });
+  } // --- Fin de renderPasswordGate ---
+
+
   /*
   ==============================================================================
   | SECCIÓN 5: CARGA INICIAL                                                   |
   ==============================================================================
   |
   |   Esta es la línea final que "enciende" la aplicación.
-  |   Llama a 'loadSection' con "dashboard" para que el usuario
-  |   siempre aterrice en la vista principal al cargar la página.
+  |   Tu HTML ya no carga el dashboard (está en blanco), por lo que
+  |   esta línea es VITAL para mostrar el contenido inicial.
   |
   */
   

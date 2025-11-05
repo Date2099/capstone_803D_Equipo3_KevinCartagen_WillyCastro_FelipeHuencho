@@ -3,7 +3,7 @@
 |                                                                              |
 |               HOJA DE ESTILOS PRINCIPAL: Panel de Estudiante                 |
 |               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
-|               AUTOR: Kev182-pixel (Refactorizado v4 por Asistente)           |
+|               AUTOR: Kev182-pixel (Refactorizado v5 por Asistente)           |
 |                                                                              |
 ================================================================================
 |                                                                              |
@@ -41,6 +41,7 @@
    * ========================================
    */
   --color-primary: #0F294C;        /* Azul marino principal (Institucional) */
+  --color-primary-rgb: 15, 41, 76;   /* Versión RGB (para rgba) */
   --color-secondary: #CDA758;      /* Acento Dorado (Botones, Foco, Enlaces Activos) */
   --color-secondary-light: #f7e3a1; /* Dorado más claro (para degradados) */
   --color-primary-text: #3a0e0e;   /* Texto oscuro para usar sobre fondo dorado */
@@ -58,11 +59,22 @@
   --text-secondary: #444;          /* Color de texto secundario */
   --text-muted: #777;              /* Texto gris para información secundaria */
   --text-light: #dce3ec;           /* Color de texto principal en la sidebar (claro) */
-  --text-light-muted: #f0f0f0;     /* Color de texto secundario en la sidebar */
+  --text-light-muted: #f0f0f0;     /* Color de texto sidebar secundario */
   --text-white: #ffffff;
   
   --border-color: #eee;            /* Borde estándar (gris claro) */
   --border-light: rgba(255, 255, 255, 0.1); /* Borde en la sidebar (blanco traslúcido) */
+
+  /* * ========================================
+   * Colores de Estado (para Portal de Pagos)
+   * ========================================
+   */
+  --status-paid-bg: #e8f5e9;       /* Fondo Verde (Pagado) */
+  --status-paid-text: #2e7d32;     /* Texto Verde */
+  --status-pending-bg: #fff8e1;    /* Fondo Amarillo (Pendiente) */
+  --status-pending-text: #8a6d00;  /* Texto Amarillo */
+  --status-overdue-bg: #ffe6e6;    /* Fondo Rojo (Atrasado) */
+  --status-overdue-text: #b71c1c;  /* Texto Rojo */
 
   /* * ========================================
    * Tipografía
@@ -74,9 +86,9 @@
    * Radii (Radios de Borde)
    * ========================================
    */
-  --radius-sm: 4px;                /* Radio pequeño (eventos de calendario) */
-  --radius-md: 10px;               /* Radio medio (iconos de clase) */
-  --radius-lg: 12px;               /* Radio grande (tarjetas, inputs) */
+  --radius-sm: 4px;                /* Radio pequeño (eventos de calendario, badges) */
+  --radius-md: 10px;               /* Radio medio (iconos de clase, inputs) */
+  --radius-lg: 12px;               /* Radio grande (tarjetas) */
   --radius-round: 50%;             /* Círculo perfecto (avatares) */
 
   /* * ========================================
@@ -319,6 +331,11 @@ body.menu-open {
   border-radius: var(--radius-lg); /* Radio estandarizado */
   transition: var(--transition-main);
 }
+/* Espacio para el ícono en el menú */
+.menu a i {
+  width: 20px;
+  text-align: center;
+}
 
 /**
  * Estilo para el enlace ACTIVO (página actual).
@@ -400,6 +417,14 @@ body.menu-open {
 }
 
 /**
+ * Un div vacío que usa 'flex: 1' para empujar
+ * el mini-perfil hacia la derecha.
+ */
+.spacer {
+  flex: 1;
+}
+
+/**
  * Mini-perfil en la Topbar.
  * - 'margin-left: auto' lo empuja a la derecha.
  */
@@ -429,7 +454,7 @@ body.menu-open {
 
 /*
 ================================================================================
-|   SECCIÓN 6: Componentes Generales (Card, Stat Cards)                        |
+|   SECCIÓN 6: Componentes Generales (Card, Stat Cards, Formularios)           |
 ================================================================================
 */
 
@@ -470,13 +495,83 @@ body.menu-open {
  */
 .stat-card {
   flex: 1 1 250px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  /* El color de fondo se aplica en línea con style="--card-color: ..." */
+  background: linear-gradient(135deg, var(--card-color, var(--color-primary)), var(--color-secondary));
   color: var(--text-white);
   border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
+  box-shadow: var(--shadow-sm);
+}
+.card-icon {
+  font-size: 24px;
+  opacity: 0.7;
+}
+.card-info {
+  min-width: 0;
+}
+.card-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.card-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/**
+ * Estilos de formulario genéricos (usados en Portal de Pagos)
+ */
+.form-group {
+  margin-bottom: 1.25rem; /* 20px */
+}
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.form-group select,
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-panel-light);
+  font-size: 1rem;
+  font-family: var(--font-main);
+  transition: all var(--transition-fast);
+}
+.form-group select:focus,
+.form-group input[type="number"]:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-panel);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  outline: none;
+}
+.form-actions {
+  text-align: left;
+}
+
+/* Botón de pago (especial) */
+.btn-primary-webpay {
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all var(--transition-main);
+}
+.btn-primary-webpay:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-primary-text);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -539,20 +634,26 @@ body.menu-open {
   font-size: 22px;
   flex-shrink: 0;
 }
-
+.clase-info {
+  min-width: 0; /* Para que text-overflow funcione */
+}
 .clase-info h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 .clase-info p {
   margin: 3px 0;
   font-size: 14px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 .no-clases {
   text-align: center;
   color: var(--text-muted);
@@ -787,7 +888,7 @@ body.menu-open {
  */
 .perfil-info-box {
   flex: 1 1 48%; /* Crece, se encoge, base del 48% */
-  background: #f9f9f9; /* Fondo ligeramente gris */
+  background: var(--bg-panel-light); /* Fondo ligeramente gris */
   border-radius: var(--radius-md);
   padding: 18px 22px;
   box-shadow: 0 3px 8px rgba(15, 41, 76, 0.1);
@@ -824,7 +925,388 @@ body.menu-open {
 
 /*
 ================================================================================
-|   SECCIÓN 8: Clases de Utilidad y Responsive                                 |
+|   SECCIÓN 8: VISTA PORTAL DE PAGOS (¡NUEVO!)                                 |
+================================================================================
+|
+|   Estilos inspirados en la imagen de Lirmi (image_52f0c0.png)
+|   para la vista del Portal de Pagos.
+|   Estos estilos se aplican al HTML inyectado por 'renderPortalDePagos()'
+|   en el archivo 'ui_student.js'.
+|
+*/
+
+/**
+ * Grilla para los KPIs (Indicadores Clave) de Pagos.
+ * Crea 4 columnas en desktop, que se apilan automáticamente
+ * en móvil gracias a 'auto-fit' y 'minmax'.
+ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+/**
+ * Tarjeta individual de KPI (Saldo, Cuotas, etc.)
+ * Una tarjeta simple con borde y sombra suave.
+ */
+.kpi-card {
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.kpi-card .kpi-head {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.kpi-card .kpi-val {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 5px 0;
+  line-height: 1.2;
+}
+
+.kpi-card .kpi-foot {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/**
+ * Contenedor (tarjeta) para la tabla de "Detalle de Pagos"
+ */
+.payment-card {
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 25px;
+  overflow: hidden; /* Clave para que los bordes redondeados corten la tabla */
+}
+
+/**
+ * Encabezado de la tarjeta de pagos (con filtros)
+ * Se usa Flexbox para alinear el título a la izquierda
+ * y los filtros a la derecha.
+ */
+.payment-header {
+  display: flex;
+  flex-wrap: wrap; /* Permite que los filtros bajen en móvil */
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 15px;
+}
+
+.payment-header h3 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+.payment-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Estilo base para botones y selects en los filtros */
+.payment-filters select,
+.payment-filters .btn-secondary,
+.payment-filters .btn-primary {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-panel-light);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.payment-filters select:hover,
+.payment-filters .btn-secondary:hover {
+  background: var(--bg-panel-hover);
+  border-color: #ccc;
+}
+
+/* Botón primario (Pagar) */
+.payment-filters .btn-primary {
+  background: var(--color-primary);
+  color: var(--text-white);
+  border-color: var(--color-primary);
+}
+.payment-filters .btn-primary:hover {
+  background: var(--color-secondary);
+  color: var(--color-primary-text);
+  border-color: var(--color-secondary);
+}
+
+/**
+ * Contenedor de la tabla de pagos (permite scroll horizontal)
+ */
+.payment-table-wrapper {
+  overflow-x: auto;
+}
+
+/**
+ * Tabla de Pagos (Detalle 2025)
+ */
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px; /* Ancho mínimo para forzar scroll */
+}
+
+.payment-table th,
+.payment-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.payment-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.payment-table tbody tr:hover {
+  background-color: var(--bg-panel-hover);
+}
+
+/* Columnas con estilos específicos */
+.payment-table .col-checkbox { width: 40px; text-align: center; }
+.payment-table .col-monto { font-weight: 600; color: var(--text-primary); }
+.payment-table .col-acciones { width: 250px; text-align: right; }
+
+/**
+ * "Badges" o "Pills" para los estados de pago
+ * (Pagada, Pendiente, Atrasada)
+ */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-round); /* Píldora redondeada */
+  text-transform: capitalize;
+}
+.badge-paid {
+  background-color: var(--status-paid-bg);
+  color: var(--status-paid-text);
+}
+.badge-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+.badge-overdue {
+  background-color: var(--status-overdue-bg);
+  color: var(--status-overdue-text);
+}
+
+/**
+ * Botones dentro de la tabla de pagos (Pagar, Comprobante)
+ */
+.payment-table .btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.payment-table .btn-pagar {
+  background: var(--color-primary);
+  color: var(--text-white);
+}
+.payment-table .btn-pagar:hover {
+  background: var(--color-secondary);
+  color: var(--color-primary-text);
+}
+/* Estilo para botón deshabilitado (ej: Pagar en cuota ya pagada) */
+.payment-table .btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Botón secundario (Comprobante) */
+.payment-table .btn-comprobante {
+  background: var(--bg-panel-light);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+.payment-table .btn-comprobante:hover {
+  background: var(--bg-panel-hover);
+  border-color: #ccc;
+}
+/* Estilo para botón comprobante deshabilitado */
+.payment-table .btn-comprobante:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: var(--bg-panel-hover);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/**
+ * Pie de página de la tarjeta de pagos (Información Importante)
+ */
+.payment-footer {
+  padding: 15px 25px;
+  background: var(--bg-panel-light);
+  border-top: 1px solid var(--border-color);
+}
+.payment-footer summary {
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.payment-footer p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 9: VISTA PASSWORD GATE (¡NUEVO!)                                   |
+================================================================================
+|
+|   Estilos para la tarjeta de "Acceso Restringido"
+|   que protege el Portal de Pagos.
+|
+*/
+
+/**
+ * Contenedor de la tarjeta de contraseña.
+ * Usamos Flexbox para centrar todo el contenido.
+ */
+.password-gate-wrapper {
+  max-width: 500px;
+  margin: 40px auto; /* Centra la tarjeta horizontalmente */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+}
+
+/**
+ * El ícono de candado grande.
+ */
+.password-gate-icon {
+  font-size: 3rem;
+  color: var(--color-primary);
+  background: var(--bg-panel-light);
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-round);
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+}
+
+/**
+ * Subtítulo/instrucciones
+ */
+.gate-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+/**
+ * El formulario de contraseña.
+ */
+.password-gate-form {
+  width: 100%;
+  max-width: 350px; /* Limita el ancho del input */
+}
+
+/* * Usamos .form-group y .form-actions (clases genéricas)
+ * para estilizar el formulario.
+ */
+.password-gate-form .form-group {
+  text-align: left;
+}
+.password-gate-form input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-panel-light);
+  font-size: 1rem;
+}
+.password-gate-form input[type="password"]:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-panel);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  outline: none;
+}
+
+/* Botón de "Desbloquear" */
+.password-gate-form .btn-pagar {
+  width: 100%;
+  background: var(--color-primary);
+  color: var(--text-white);
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all var(--transition-main);
+}
+.password-gate-form .btn-pagar:hover {
+  background: var(--color-secondary);
+  color: var(--color-primary-text);
+}
+
+/**
+ * Mensaje de error de contraseña incorrecta.
+ */
+.gate-error-text {
+  font-size: 0.9rem;
+  color: var(--status-overdue-text);
+  font-weight: 500;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/**
+ * Animación de "shake" (vibración) para error
+ */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 10: Clases de Utilidad y Responsive                                |
 ================================================================================
 */
 
@@ -901,628 +1383,20 @@ body.menu-open {
   .content {
     padding: 20px;
   }
+  
+  /**
+   * Apila los filtros del portal de pagos.
+   */
+  .payment-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .payment-filters {
+    flex-direction: column;
+  }
+  .payment-table .col-acciones {
+    width: auto; /* Permite que los botones se apilen si es necesario */
+  }
 }
 
 /* --- FIN DEL ARCHIVO CSS --- */
-
-/* /*
-================================================================================
-|                                                                              |
-|               HOJA DE ESTILOS PRINCIPAL: Panel de Estudiante                 |
-|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
-|               AUTOR: Kev182-pixel (Refactorizado v4 por Asistente)           |
-|                                                                              |
-================================================================================
-|                                                                              |
-|   DESCRIPCIÓN GENERAL:                                                       |
-|   Esta hoja de estilos define la identidad visual completa del panel de      |
-|   ESTUDIANTE. Utiliza el tema institucional (Azul y Dorado).                 |
-|                                                                              |
-|   METODOLOGÍA:                                                               |
-|   -   Variables CSS (:root): Todo el sistema de diseño está centralizado     |
-|       para un mantenimiento y temado increíblemente fácil.                   |
-|   -   Layout: Se usa un layout 'fixed' para la sidebar en móvil y un         |
-|       layout 'sticky' (implícito por el margin) en desktop.                  |
-|   -   BEM (Modificado): Se utilizan nombres de clase semánticos              |
-|       (ej. .card, .clase-card) para una estructura clara.                    |
-|   -   Comentarios Extensos: Cada sección y regla clave está documentada      |
-|       para explicar su propósito y facilitar futuras modificaciones.         |
-|                                                                              |
-================================================================================
-*/ 
-
-/* /*
-================================================================================
-|   SECCIÓN 1: :root (Variables Globales del Sistema de Diseño)                |
-================================================================================
-|   Este es el "centro de control" de todo el diseño.
-|   Aquí definimos nuestras constantes (colores, fuentes, sombras)
-|   que se usarán en todo el archivo.
-*/ 
-
-/* :root { */
-/*   --color-primary: #0F294C; */ /* Azul marino institucional */
-/*   --color-secondary: #CDA758; */ /* Acento dorado */
-/*   --color-secondary-light: #f7e3a1; */ /* Dorado más claro */
-/*   --color-primary-text: #3a0e0e; */ /* Texto oscuro sobre dorado */
-
-/*   --bg-body: #F8F9FB; */ /* Fondo general */
-/*   --bg-panel: #ffffff; */ /* Fondo de tarjetas */
-/*   --bg-panel-light: #fafafa; */ /* Fondo alternado */
-/*   --bg-panel-hover: #f5f5f5; */ /* Hover */
-
-/*   --text-primary: #1a1a1a; */ /* Texto principal */
-/*   --text-secondary: #444; */ /* Texto secundario */
-/*   --text-muted: #777; */ /* Texto tenue */
-/*   --text-light: #dce3ec; */ /* Texto claro (sidebar) */
-/*   --text-light-muted: #f0f0f0; */ /* Texto sidebar secundario */
-/*   --text-white: #ffffff; */ /* Blanco */
-
-/*   --border-color: #eee; */ /* Bordes */
-/*   --border-light: rgba(255, 255, 255, 0.1); */ /* Bordes suaves */
-
-/*   --font-main: "Poppins", sans-serif; */ /* Fuente principal */
-
-/*   --radius-sm: 4px; */ /* Radio pequeño */
-/*   --radius-md: 10px; */ /* Radio mediano */
-/*   --radius-lg: 12px; */ /* Radio grande */
-/*   --radius-round: 50%; */ /* Circular */
-
-/*   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1); */ /* Sombra leve */
-/*   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.15); */ /* Sombra media */
-/*   --shadow-lg: 0 4px 12px rgba(15, 41, 76, 0.15); */ /* Sombra fuerte */
-
-/*   --sidebar-width: 260px; */ /* Ancho sidebar */
-/*   --topbar-height: 88px; */ /* Alto topbar */
-
-/*   --transition-main: 0.3s ease; */ /* Transición estándar */
-/*   --transition-fast: 0.2s ease; */ /* Transición rápida */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 2: Reset Básico y Estilos Globales                                 |
-================================================================================
-*/ 
-
-/* * { */
-/*   margin: 0; */
-/*   padding: 0; */
-/*   box-sizing: border-box; */
-/*   font-family: var(--font-main); */
-/* } */
-
-/* html, body { */
-/*   overflow-x: hidden; */
-/*   width: 100%; */
-/*   max-width: 100%; */
-/*   position: relative; */
-/* } */
-
-/* body { */
-/*   background-color: var(--bg-body); */
-/*   color: var(--text-primary); */
-/* } */
-
-/* body.menu-open { */
-/*   overflow: hidden; */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 3: Layout Principal                                                |
-================================================================================
-*/ 
-
-/* .layout { */
-/*   display: flex; */
-/*   min-height: 100vh; */
-/*   overflow-x: hidden; */
-/* } */
-
-/* .main { */
-/*   flex: 1; */
-/*   margin-left: var(--sidebar-width); */
-/*   transition: margin-left var(--transition-main); */
-/*   display: flex; */
-/*   flex-direction: column; */
-/*   min-width: 0; */
-/* } */
-
-/* .content { */
-/*   padding: 30px; */
-/*   background-color: var(--bg-body); */
-/*   flex: 1; */
-/* } */
-
-/* .footer { */
-/*   text-align: center; */
-/*   font-size: 13px; */
-/*   color: var(--text-muted); */
-/*   background: transparent; */
-/*   padding: 20px 0; */
-/*   width: 100%; */
-/*   flex-shrink: 0; */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 4: Sidebar (Barra Lateral)                                         |
-================================================================================
-*/ 
-
-/* .sidebar { */
-/*   position: fixed; */
-/*   top: 0; */
-/*   left: 0; */
-/*   width: var(--sidebar-width); */
-/*   height: 100%; */
-/*   background-color: var(--color-primary); */
-/*   color: var(--text-white); */
-/*   display: flex; */
-/*   flex-direction: column; */
-/*   transition: transform var(--transition-main); */
-/*   z-index: 1000; */
-/* } */
-
-/* .sidebar.closed { */
-/*   transform: translateX(-100%); */
-/* } */
-
-/* .profile { */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 14px; */
-/*   padding: 20px 25px; */
-/*   margin-bottom: 25px; */
-/*   border-bottom: 1px solid var(--border-light); */
-/* } */
-
-/* .avatar { */
-/*   width: 48px; */
-/*   height: 48px; */
-/*   background-color: var(--color-secondary); */
-/*   color: var(--color-primary); */
-/*   display: flex; */
-/*   align-items: center; */
-/*   justify-content: center; */
-/*   font-weight: 700; */
-/*   border-radius: var(--radius-round); */
-/*   font-size: 18px; */
-/*   flex-shrink: 0; */
-/* } */
-
-/* .profile-info { */
-/*   display: flex; */
-/*   flex-direction: column; */
-/*   line-height: 1.3; */
-/*   min-width: 0; */
-/* } */
-
-/* .profile-info div:first-child { */
-/*   font-weight: 600; */
-/*   white-space: nowrap; */
-/*   overflow: hidden; */
-/*   text-overflow: ellipsis; */
-/* } */
-
-/* .role { */
-/*   font-size: 13px; */
-/*   color: var(--text-light-muted); */
-/* } */
-
-/* .menu { */
-/*   display: flex; */
-/*   flex-direction: column; */
-/*   padding: 0 10px; */
-/* } */
-
-/* .menu a { */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 10px; */
-/*   color: var(--text-light); */
-/*   text-decoration: none; */
-/*   font-weight: 500; */
-/*   padding: 12px 20px; */
-/*   border-radius: var(--radius-lg); */
-/*   transition: var(--transition-main); */
-/* } */
-
-/* .menu a.active { */
-/*   background-color: var(--color-secondary); */
-/*   color: var(--color-primary); */
-/*   font-weight: 600; */
-/* } */
-
-/* .menu a:hover:not(.active) { */
-/*   background-color: rgba(255, 255, 255, 0.08); */
-/*   color: var(--text-white); */
-/* } */
-
-/* .logout { */
-/*   margin-top: auto; */
-/*   color: #ffdddd; */
-/*   border-top: 1px solid var(--border-light); */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 5: Topbar (Barra Superior)                                         |
-================================================================================
-*/ 
-
-/* .topbar { */
-/*   display: flex; */
-/*   align-items: center; */
-/*   justify-content: flex-start; */
-/*   gap: 15px; */
-/*   height: var(--topbar-height); */
-/*   background: var(--bg-panel); */
-/*   padding: 0 20px; */
-/*   box-shadow: var(--shadow-sm); */
-/*   position: sticky; */
-/*   top: 0; */
-/*   z-index: 100; */
-/*   flex-shrink: 0; */
-/* } */
-
-/* .toggle { */
-/*   background: none; */
-/*   border: none; */
-/*   font-size: 22px; */
-/*   color: var(--color-primary); */
-/*   cursor: pointer; */
-/*   display: none; */
-/* } */
-
-/* .topbar-title { */
-/*   font-weight: 600; */
-/*   font-size: 18px; */
-/*   color: var(--color-primary); */
-/* } */
-
-/* .user-mini { */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 10px; */
-/*   margin-left: auto; */
-/* } */
-
-/* .avatar-mini { */
-/*   width: 35px; */
-/*   height: 35px; */
-/*   background: var(--color-secondary); */
-/*   color: var(--color-primary); */
-/*   border-radius: var(--radius-round); */
-/*   display: flex; */
-/*   align-items: center; */
-/*   justify-content: center; */
-/*   font-weight: 700; */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 6: Componentes Generales                                           |
-================================================================================
-*/ 
-
-/* .card { */
-/*   background: var(--bg-panel); */
-/*   border-radius: var(--radius-lg); */
-/*   box-shadow: var(--shadow-sm); */
-/*   padding: 20px 25px; */
-/*   margin-bottom: 25px; */
-/* } */
-
-/* .card-title { */
-/*   font-weight: 600; */
-/*   font-size: 20px; */
-/*   color: var(--color-primary); */
-/*   margin-bottom: 15px; */
-/* } */
-
-/* .stat-cards-container { */
-/*   display: flex; */
-/*   flex-wrap: wrap; */
-/*   gap: 20px; */
-/* } */
-
-/* .stat-card { */
-/*   flex: 1 1 250px; */
-/*   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); */
-/*   color: var(--text-white); */
-/*   border-radius: var(--radius-lg); */
-/*   padding: 20px; */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 15px; */
-/*   box-shadow: var(--shadow-sm); */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 7: Vistas Específicas (Clases, Notas, Calendario, Perfil)          |
-================================================================================
-*/ 
-
-/* .clases-grid { */
-/*   display: grid; */
-/*   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
-/*   gap: 20px; */
-/*   margin-top: 20px; */
-/* } */
-
-/* .clase-card { */
-/*   background: var(--bg-panel); */
-/*   border-radius: var(--radius-lg); */
-/*   box-shadow: var(--shadow-sm); */
-/*   padding: 20px; */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 15px; */
-/*   border-left: 6px solid var(--color-secondary); */
-/*   transition: transform var(--transition-main), box-shadow var(--transition-main); */
-/* } */
-
-/* .clase-card:hover { */
-/*   transform: translateY(-4px); */
-/*   box-shadow: var(--shadow-md); */
-/* } */
-
-/* .clase-icon { */
-/*   background: var(--color-primary); */
-/*   color: var(--text-white); */
-/*   border-radius: var(--radius-md); */
-/*   width: 55px; */
-/*   height: 55px; */
-/*   display: flex; */
-/*   align-items: center; */
-/*   justify-content: center; */
-/*   font-size: 22px; */
-/*   flex-shrink: 0; */
-/* } */
-
-/* .clase-info h3 { */
-/*   margin: 0; */
-/*   font-size: 18px; */
-/*   font-weight: 600; */
-/*   color: var(--color-primary); */
-/* } */
-
-/* .clase-info p { */
-/*   margin: 3px 0; */
-/*   font-size: 14px; */
-/*   color: var(--text-secondary); */
-/* } */
-
-/* .no-clases { */
-/*   text-align: center; */
-/*   color: var(--text-muted); */
-/*   font-style: italic; */
-/*   padding: 20px; */
-/* } */
-
-/* .tabla-card { */
-/*   border-radius: var(--radius-lg); */
-/*   overflow: hidden; */
-/*   box-shadow: var(--shadow-sm); */
-/*   background: var(--bg-panel); */
-/*   margin-top: 20px; */
-/* } */
-
-/* .tabla-header { */
-/*   background: var(--color-primary); */
-/*   color: var(--text-white); */
-/*   padding: 12px 18px; */
-/* } */
-
-/* .tabla-header h2 { */
-/*   font-size: 18px; */
-/*   font-weight: 600; */
-/*   margin: 0; */
-/*   display: flex; */
-/*   align-items: center; */
-/*   gap: 8px; */
-/* } */
-
-/* .tabla-body { */
-/*   padding: 0; */
-/*   overflow-x: auto; */
-/* } */
-
-/* .tabla-notas { */
-/*   width: 100%; */
-/*   border-collapse: collapse; */
-/*   text-align: center; */
-/*   background: var(--bg-panel); */
-/* } */
-
-/* .tabla-notas thead { */
-/*   background: var(--bg-panel); */
-/*   border-bottom: 2px solid var(--border-color); */
-/* } */
-
-/* .tabla-notas th { */
-/*   color: var(--text-primary); */
-/*   font-weight: 600; */
-/*   font-size: 14px; */
-/*   padding: 12px 10px; */
-/* } */
-
-/* .tabla-notas td { */
-/*   font-size: 14px; */
-/*   color: var(--text-secondary); */
-/*   padding: 10px 10px; */
-/*   border-bottom: 1px solid var(--border-color); */
-/* } */
-
-/* .tabla-notas tr:nth-child(even) { */
-/*   background-color: var(--bg-panel-light); */
-/* } */
-
-/* .tabla-notas tr:hover { */
-/*   background-color: var(--bg-panel-hover); */
-/* } */
-
-/* .tabla-notas td:first-child, */
-/* .tabla-notas th:first-child { */
-/*   text-align: left; */
-/*   padding-left: 18px; */
-/* } */
-
-/* #calendar { */
-/*   background: var(--bg-panel); */
-/*   border-radius: var(--radius-lg); */
-/*   box-shadow: var(--shadow-sm); */
-/*   padding: 15px; */
-/* } */
-
-/* .fc-toolbar-title { */
-/*   font-weight: 600 !important; */
-/*   color: var(--color-primary) !important; */
-/* } */
-
-/* .fc-button { */
-/*   background: var(--color-primary) !important; */
-/*   border: none !important; */
-/*   color: var(--text-white) !important; */
-/*   font-weight: 500 !important; */
-/*   border-radius: var(--radius-sm) !important; */
-/*   transition: background-color var(--transition-fast) !important; */
-/* } */
-
-/* .fc-button:hover { */
-/*   background: var(--color-secondary) !important; */
-/*   color: var(--color-primary-text) !important; */
-/* } */
-
-/* .fc-daygrid-day-number { */
-/*   font-weight: 500; */
-/*   color: var(--text-primary); */
-/* } */
-
-/* .fc-event { */
-/*   background-color: var(--color-secondary) !important; */
-/*   border: none !important; */
-/*   color: var(--color-primary-text) !important; */
-/*   border-radius: var(--radius-sm) !important; */
-/*   font-weight: 500; */
-/*   padding: 2px 4px; */
-/* } */
-
-/* .perfil-card { */
-/*   background: var(--bg-panel); */
-/*   border-radius: var(--radius-lg); */
-/*   box-shadow: var(--shadow-lg); */
-/*   overflow: hidden; */
-/*   font-family: var(--font-main); */
-/*   max-width: 1150px; */
-/*   margin: 0 auto 40px; */
-/* } */
-
-/* .perfil-banner { */
-/*   background: linear-gradient(180deg, var(--color-primary) 0%, #3B5273 100%); */
-/*   height: 130px; */
-/*   border-radius: var(--radius-lg) var(--radius-lg) 0 0; */
-/* } */
-
-/* .perfil-avatar { */
-/*   width: 110px; */
-/*   height: 110px; */
-/*   background: var(--color-secondary); */
-/*   border: 4px solid var(--bg-panel); */
-/*   border-radius: var(--radius-round); */
-/*   margin: -60px auto 10px; */
-/*   display: flex; */
-/*   align-items: center; */
-/*   justify-content: center; */
-/*   font-weight: 700; */
-/*   font-size: 28px; */
-/*   color: var(--color-primary); */
-/*   box-shadow: var(--shadow-md); */
-/* } */
-
-/* .perfil-info { */
-/*   text-align: center; */
-/*   padding: 0 20px 25px; */
-/* } */
-
-/* .perfil-info h2 { */
-/*   font-size: 22px; */
-/*   font-weight: 600; */
-/*   color: var(--color-primary); */
-/*   margin-bottom: 4px; */
-/* } */
-
-/* .perfil-info p { */
-/*   color: var(--text-muted); */
-/*   font-size: 14px; */
-/*   margin-bottom: 15px; */
-/* } */
-
-/* .perfil-detalle { */
-/*   display: grid; */
-/*   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
-/*   gap: 15px; */
-/*   text-align: left; */
-/*   padding: 0 25px 25px; */
-/* } */
-
-/* .perfil-detalle div { */
-/*   background: var(--bg-panel-light); */
-/*   padding: 15px 20px; */
-/*   border-radius: var(--radius-md); */
-/*   box-shadow: var(--shadow-sm); */
-/* } */
-
-/* .perfil-detalle label { */
-/*   display: block; */
-/*   color: var(--color-primary); */
-/*   font-weight: 600; */
-/*   margin-bottom: 5px; */
-/*   font-size: 14px; */
-/* } */
-
-/* .perfil-detalle span { */
-/*   color: var(--text-secondary); */
-/*   font-size: 14px; */
-/* } */
-
-/* *
-================================================================================
-|   SECCIÓN 8: Responsividad                                                   |
-================================================================================
-*/ 
-
-/* @media (max-width: 991px) { */
-/*   .sidebar { */
-/*     transform: translateX(-100%); */
-/*   } */
-
-/*   .sidebar.active { */
-/*     transform: translateX(0); */
-/*   } */
-
-/*   .toggle { */
-/*     display: block; */
-/*   } */
-
-/*   .main { */
-/*     margin-left: 0; */
-/*   } */
-
-/*   .content { */
-/*     padding: 20px; */
-/*   } */
-
-/*   .tabla-notas th, */
-/*   .tabla-notas td { */
-/*     font-size: 13px; */
-/*     padding: 8px; */
-/*   } */
-
-/*   .perfil-detalle { */
-/*     grid-template-columns: 1fr; */
-/*   } */
-/* } */
