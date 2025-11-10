@@ -4,14 +4,19 @@ from django.conf import settings
 
 class LoginRequiredMiddleware:
     """
-    Middleware que fuerza la autenticación en todas las vistas,
-    excepto en las rutas explícitamente exentas.
+    Middleware proteje a la pagina.
+    
+    Funciones principales:
+    - Obliga a autenticarse para acceder a cualquier vista protegida.
+    - Permite acceso libre a rutas específicas (login, logout, admin, estáticos, etc.).
+    - Impide volver a páginas autenticadas usando el botón "Atrás" del navegador
+      mediante cabeceras anti-cache.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
-        # Prefijos que no requieren autenticación (archivos estáticos, admin, etc.)
+        # Rutas que pueden ser accedidas sin autenticación por prefijo
         self.exempt_prefixes = (
             "/admin/",
             "/static/",
@@ -19,15 +24,14 @@ class LoginRequiredMiddleware:
             "/favicon.ico",
         )
 
-        # Nombres de vistas exentas (namespace:view_name)
         self.exempt_names = {
-            "inicioSesion:login",        # 👈 cambiado
-            "inicioSesion:post_login",   # 👈 cambiado
-            "inicioSesion:logout",       # 👈 opcional, según tu urls.py
+            "inicioSesion:login",
+            "inicioSesion:post_login",
+            "inicioSesion:logout",
+            "inicioSesion:diag_login",  # ruta de testeo
             "admin:login",
         }
 
-        # Construye los paths de esas vistas usando reverse()
         self.exempt_paths = set()
         for name in self.exempt_names:
             try:
@@ -35,17 +39,34 @@ class LoginRequiredMiddleware:
             except Exception:
                 pass
 
+    def _no_cache(self, response):
+        """
+        Fuerza al navegador a no guardar caché para evitar volver
+        a páginas privadas con el botón Atrás.
+        """
+        response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response["Pragma"] = "no-cache"
+        response["Expires"] = "0"
+        return response
+
     def __call__(self, request):
         path = request.path
 
-        # ✅ Permitir recursos estáticos y admin
+        # 1) Acceso libre al panel admin
+        if path.startswith("/admin"):
+            response = self.get_response(request)
+            return self._no_cache(response)
+
+        # 2) Acceso libre a archivos estáticos / media
         if any(path.startswith(p) for p in self.exempt_prefixes):
             return self.get_response(request)
 
-        # ✅ Permitir rutas exentas (por nombre o path)
+        # 3) Acceso libre a rutas explícitamente exentas
         if path in self.exempt_paths:
-            return self.get_response(request)
+            response = self.get_response(request)
+            return self._no_cache(response)
 
+        # 4) Detectar vista por nombre 
         try:
             resolved = resolve(path)
             urlname = (
@@ -56,39 +77,48 @@ class LoginRequiredMiddleware:
             urlname = None
 
         if urlname in self.exempt_names:
-            return self.get_response(request)
+            response = self.get_response(request)
+            return self._no_cache(response)
 
-        # ================================
-        # ✅ Si el usuario ya está logueado
-        # ================================
+        # 5) Usuario autenticado
         if request.user.is_authenticated:
+
+            # Si intenta acceder al login estando logueado -> redirigir a dashboard según rol
             try:
-                # Si intenta acceder al login estando logueado → redirige a su dashboard
                 if path == reverse("inicioSesion:login"):
+                    # Si es staff/superuser usar admin nativo
                     if request.user.is_superuser or request.user.is_staff:
                         return redirect("/admin/")
-                    if getattr(request.user, "role", None) == "admin":
+
+                    role = getattr(request.user, "role", None)
+                    if role == "admin":
                         return redirect(reverse("administrador:admin_dashboard"))
-                    if getattr(request.user, "role", None) == "teacher":
+                    if role == "teacher":
                         return redirect(reverse("profesorView:dashboard"))
-                    if getattr(request.user, "role", None) == "student":
+                    if role == "student":
                         return redirect(reverse("studentView:dashboard"))
-                    # Si el rol no coincide con ninguno
+                    if role == "finance_admin":
+                        return redirect("/finanzas/")
+
+
                     return redirect("/")
             except Exception:
                 return redirect("/")
 
-            return self.get_response(request)
+            # Si está autenticado y no es login -> permitir y evitar caché
+            response = self.get_response(request)
+            return self._no_cache(response)
 
-        # ================================
-        # ❌ Si NO está autenticado
-        # ================================
+        # 6) Usuario NO autenticado → mandar a login
         try:
-            login_url = reverse(settings.LOGIN_URL)  # → 'inicioSesion:login'
+            login_url = reverse(settings.LOGIN_URL)
         except Exception:
-            login_url = "/inicioSesion/"
+            login_url = "/inicioSesion/login/"
 
+        # Guardar "next" para redirigir después del login
         if path != login_url:
             return redirect(f"{login_url}?next={request.get_full_path()}")
 
-        return self.get_response(request)
+        # 7) Página de login también sin caché
+        response = self.get_response(request)
+        return self._no_cache(response)
