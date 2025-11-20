@@ -1,569 +1,1080 @@
-/* =========================================================
-   scriptadmins.js — Vista Admin COMPLETO y Responsivo
-   Reemplaza el archivo entero con este contenido.
-========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // PANEL ADMIN - SPA INTERACTIVA
+  // --- Referencias del DOM ---
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('toggle');
+  const overlay = document.getElementById('sidebar-overlay');
+  const mainContent = document.getElementById('main-content');
+  const title = document.getElementById('topbar-title');
 
-/* ---------- Selectores base ---------- */
-const sidebar   = document.getElementById('sidebar');
-const toggleBtn = document.getElementById('toggle');
-const mainEl    = document.getElementById('main-content');
-const topTitle  = document.getElementById('topbar-title');
-const mq        = window.matchMedia('(max-width: 768px)');
-const themeSwitch = document.getElementById('theme-switch');
 
-let currentSection = 'tablero';
-let adminChartInstance = null;
+  // Helper para obtener el token CSRF
+  function getCSRFToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + "=")) {
+        return cookie.substring(name.length + 1);
+      }
+    }
+    return null;
+  }
 
-/* ---------- Backdrop mobile ---------- */
-let backdrop = document.getElementById('sidebar-backdrop');
-if (!backdrop) {
-  backdrop = document.createElement('div');
-  backdrop.id = 'sidebar-backdrop';
-  backdrop.className = 'sidebar-backdrop';
-  document.body.appendChild(backdrop);
-}
-function openSidebar(){ sidebar.classList.remove('closed'); backdrop.classList.add('show'); }
-function closeSidebar(){ sidebar.classList.add('closed'); backdrop.classList.remove('show'); }
+  // Funciones básicas
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+  function openSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.add('open');
+    overlay?.classList.add('show');
+    document.body.classList.add('no-scroll');
+  }
+  function closeSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.remove('open');
+    overlay?.classList.remove('show');
+    document.body.classList.remove('no-scroll');
+  }
 
-/* ---------- Sidebar toggle/responsive ---------- */
-function updateSidebar() { mq.matches ? closeSidebar() : (sidebar.classList.remove('closed'), backdrop.classList.remove('show')); }
-updateSidebar();
-mq.addEventListener('change', updateSidebar);
+  // Botón toggle y overlay 
+  toggleBtn?.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlay?.addEventListener('click', closeSidebar);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+  });
 
-toggleBtn.addEventListener('click', () => {
-  if (sidebar.classList.contains('closed')) openSidebar();
-  else closeSidebar();
-});
+  // Resaltar item activo 
+  function clearActive() {
+    document.querySelectorAll('.menu a, .menu summary').forEach(el => el.classList.remove('active'));
+  }
+  const links = document.querySelectorAll('.menu a[data-section]');
+  const summaries = document.querySelectorAll('.menu summary');
+  summaries.forEach(summary => {
+    summary.addEventListener('click', () => {
+      setTimeout(() => {
+        clearActive();
+        if (summary.parentElement.open) summary.classList.add('active');
+      }, 0);
+    });
+  });
 
-document.addEventListener('click', (e) => {
-  if (!mq.matches) return;
-  const insideSidebar = sidebar.contains(e.target);
-  const onToggle = toggleBtn.contains(e.target);
-  const onBackdrop = e.target === backdrop;
-  if ((!insideSidebar && !onToggle) || onBackdrop) closeSidebar();
-});
 
-/* ---------- Tema claro/oscuro ---------- */
-const savedTheme = localStorage.getItem('theme');
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-function applyTheme(mode){
-  if (mode === 'dark') document.documentElement.setAttribute('data-theme','dark');
-  else document.documentElement.removeAttribute('data-theme');
-  if (themeSwitch) themeSwitch.checked = mode === 'dark';
-}
-applyTheme(savedTheme ? savedTheme : (prefersDark.matches ? 'dark' : 'light'));
-themeSwitch?.addEventListener('change', () => {
-  const mode = themeSwitch.checked ? 'dark' : 'light';
-  localStorage.setItem('theme', mode);
-  applyTheme(mode);
-  if (currentSection === 'tablero') renderAdminDashboardChart();
-});
+  //  Ver Cursos
+  async function cargarVerCursos() {
+    try {
+      const response = await fetch("/adminview/api/cursos/");
+      if (!response.ok) throw new Error("Error al obtener los cursos");
 
-/* ---------- Modal simple ---------- */
-const modal       = document.getElementById('modal');
-const modalBody   = document.getElementById('modal-body');
-const modalHead   = document.getElementById('modal-title');
-const modalFoot   = document.getElementById('modal-foot');
-const modalClose  = document.getElementById('modal-close');
+      const data = await response.json();
+      let html = `<div class="ver-cursos">`;
 
-function openModal({title='', body='', foot=''}) {
-  modalHead.textContent = title;
-  modalBody.innerHTML = body;
-  modalFoot.innerHTML = foot || `<button class="btn btn-secondary" id="modal-ok">Cerrar</button>`;
-  modal.classList.add('show');
-  document.getElementById('modal-ok')?.addEventListener('click', closeModal);
-}
-function closeModal(){ modal.classList.remove('show'); }
-modalClose?.addEventListener('click', closeModal);
-modal?.addEventListener('click', e => { if (e.target.classList.contains('modal-backdrop')) closeModal(); });
+      data.cursos.forEach(c => {
+        html += `
+          <details class="curso-card">
+            <summary class="curso-header">
+              <div class="curso-titulo">${c.curso}</div>
+            </summary>
+            <div class="curso-body">
+              <table class="tabla-notas">
+                <thead>
+                  <tr><th>Alumno</th><th>RUT</th><th>Correo</th></tr>
+                </thead>
+                <tbody>
+                  ${c.alumnos.map(a => `
+                    <tr>
+                      <td>${a.nombre}</td>
+                      <td>${a.rut}</td>
+                      <td>${a.correo}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </details>`;
+      });
 
-/* ---------- Datos mock ---------- */
-const studentData = {
-  'pk-a': [{ id: 'SAH-PK-001', name: 'Ana Contreras', parent: 'Luis Contreras', status: 'Activo' }],
-  'k-a':  [{ id: 'SAH-K-005',  name: 'Benjamín Soto', parent: 'Carla Soto', status: 'Activo' }],
-  '1b-a': [
-    { id: 'SAH-1B-012', name: 'Carlos Díaz',     parent: 'Mariela Soto',  status: 'Activo' },
-    { id: 'SAH-1B-013', name: 'Daniela Espinoza',parent: 'Jorge Espinoza',status: 'Activo' }
-  ],
-  '8b-a': [{ id: 'SAH-8B-080', name: 'Elena Martínez',  parent: 'Roberto Martínez', status: 'Activo' }],
-  '1m-a': [{ id: 'SAH-1M-095', name: 'Francisco Núñez', parent: 'Teresa Núñez',     status: 'Activo' }],
-  '4m-a': [
-    { id: 'SAH-4M-101', name: 'Fernanda Muñoz', parent: 'Ricardo Muñoz',  status: 'Activo' },
-    { id: 'SAH-4M-102', name: 'Gabriel Rojas',  parent: 'Verónica Rojas', status: 'Inactivo' },
-    { id: 'SAH-4M-103', name: 'Hugo Salazar',   parent: 'Mónica Salazar', status: 'Activo' }
-  ]
-};
+      html += `</div>`;
+      mainContent.innerHTML = html;
+      title.textContent = "Ver Cursos";
+    } catch (error) {
+      console.error("Error al cargar cursos", error);
+      mainContent.innerHTML = `
+        <div class="error-msg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Error al cargar los cursos
+        </div>`;
+    }
+  }
 
-/* ---------- Vistas: HTML de cada sección ---------- */
-const contentData = {
-  'tablero': {
-    title: 'Panel de Control',
-  html: `
-    <div class="kpi-grid">
-      <div class="card kpi"><div class="kpi-icon students"><i class="fa-solid fa-user-graduate"></i></div><div class="kpi-info"><div class="num">90</div><div class="label">Estudiantes</div></div></div>
-      <div class="card kpi"><div class="kpi-icon parents"><i class="fa-solid fa-user-group"></i></div><div class="kpi-info"><div class="num">152</div><div class="label">Padres</div></div></div>
-      <div class="card kpi"><div class="kpi-icon teachers"><i class="fa-solid fa-chalkboard-user"></i></div><div class="kpi-info"><div class="num">11</div><div class="label">Profesores</div></div></div>
-      <div class="card kpi"><div class="kpi-icon revenue"><i class="fa-solid fa-dollar-sign"></i></div><div class="kpi-info"><div class="num">$18.5M</div><div class="label">Ingresos del Mes</div></div></div>
-    </div>
+  //  Profesores
 
-    <div class="quick-actions" style="margin:1rem 0">
-      <button class="quick-pill" data-action="nuevo-alumno"><i class="fa-solid fa-user-plus"></i> Nuevo alumno</button>
-      <button class="quick-pill" data-action="comunicado"><i class="fa-solid fa-bullhorn"></i> Enviar comunicado</button>
-      <button class="quick-pill" data-action="pagos"><i class="fa-solid fa-wallet"></i> Revisar pagos</button>
-      <button class="quick-pill" data-action="usuarios"><i class="fa-solid fa-user-gear"></i> Administrar usuarios</button>
-    </div>
+  async function cargarProfesores() {
+    try {
+      const response = await fetch("/adminview/api/profesores/");
+      if (!response.ok) throw new Error("Error al obtener los profesores");
 
-    <div class="mini-cards">
-      <div class="card mini">
-        <i class="fa-solid fa-percent"></i>
-        <div>
-          <div style="font-weight:700">Tasa pago mes</div>
-          <div class="progress"><div class="progress-bar" style="width:93%"></div></div>
-          <small class="muted">93% · 84/90</small>
-        </div>
-      </div>
-      <div class="card mini">
-        <i class="fa-solid fa-user-check"></i>
-        <div>
-          <div style="font-weight:700">Asistencia promedio</div>
-          <canvas id="spark-asistencia" height="36"></canvas>
-          <small class="muted">Últimos 7 días</small>
-        </div>
-      </div>
-      <div class="card mini">
-        <i class="fa-solid fa-paper-plane"></i>
-        <div>
-          <div style="font-weight:700">Comunicados enviados</div>
-          <div style="font-size:1.1rem;font-weight:800">8</div>
-          <small class="muted">2 pendientes</small>
-        </div>
-      </div>
-    </div>
+      const data = await response.json();
 
-    <div class="panel-grid">
-      <div class="card chart-card">
-        <h3 class="card-title">Resumen Financiero 2025</h3>
-        <div class="chart-container"><canvas id="admin-chart"></canvas></div>
-      </div>
-
-      <div class="card">
-        <h3 class="card-title">Cobranza del mes</h3>
-        <div class="flex-col gap-8">
-          <div style="width:100%;max-width:260px;margin:auto">
-            <canvas id="donut-cobranza" height="220"></canvas>
+      let html = `
+        <div class="profesores-lista">
+          <div class="profesores-header">
+            <h2>Listado de Profesores</h2>
+            <button id="btn-nuevo-profesor" class="btn-nuevo">+</button>
           </div>
-          <ul class="list-clean">
-            <li><span class="dot dot-paid"></span> Pagado <strong>$15.3M</strong></li>
-            <li><span class="dot dot-pending"></span> Pendiente <strong>$2.1M</strong></li>
-            <li><span class="dot dot-overdue"></span> Atrasado <strong>$1.1M</strong></li>
-          </ul>
-        </div>
-      </div>
-    </div>
+          <table class="tabla-profesores">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Asignatura</th>
+         
+                <th>Correo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
 
-    <div class="card" style="margin-top:1rem">
-      <h3 class="card-title">Actividad reciente</h3>
-      <ul class="timeline">
-        <li><span class="time">09:40</span> Pago de <strong>Juan Pérez</strong> — $230.000</li>
-        <li><span class="time">09:12</span> Comunicado “Reunión apoderados” a 1°B</li>
-        <li><span class="time">08:50</span> Agregado <strong>Ana Soto</strong> a 8°A</li>
-      </ul>
-    </div>
-  `
-  },
-  'estudiantes': {
-    title: 'Navegador de Cursos',
-    html: `
-      <div class="page-header">
-        <h2>Navegador de Cursos</h2>
-        <button class="btn" id="add-course"><i class="fa-solid fa-plus"></i> Agregar Curso</button>
-      </div>
-      <div class="course-grid">
-        <div class="course-card js-view-course" data-course-id="pk-a" data-course-name="Pre-Kinder A">
-          <div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div>
-          <div class="course-card-info"><h4>Pre-Kinder A</h4><p>Prof. Jefa: Carmen Soto</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div>
+      data.profesores.forEach(p => {
+        html += `
+          <tr data-id="${p.id}">
+            <td><input type="text" name="first_name" value="${p.first_name} ${p.last_name}" disabled></td>
+            <td><input type="text" name="asignaturas" value="${p.asignaturas}" disabled></td>
+
+            <td><input type="text" name="email" value="${p.email}" disabled></td>
+            <td>
+              <div class="acciones">
+                <button class="btn-editar">Editar</button>
+                <button class="btn-guardar" disabled>Guardar</button>
+                <button class="btn-eliminar">Eliminar</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>`;
+
+      mainContent.innerHTML = html;
+      title.textContent = "Profesores";
+
+      // Botón para nuevo profesor 
+      document.getElementById("btn-nuevo-profesor")?.addEventListener("click", () => {
+        title.textContent = "Agregar Profesor";
+        mainContent.innerHTML = `
+          <div class="formulario-profesor">
+            <div class="form-top">
+              <h2>Registrar Profesor</h2>
+              <button id="volver-profesores" class="btn-volver">← Volver</button>
+            </div>
+            <form id="form-profesor">
+              <label>RUT:</label>
+              <input type="text" name="rut" required>
+              <label>Nombre:</label>
+              <input type="text" name="first_name" required>
+              <label>Apellido:</label>
+              <input type="text" name="last_name" required>
+              <label>Correo electrónico:</label>
+              <input type="email" name="email" required>
+              <label>Asignatura:</label>
+              <input type="text" name="asignatura" required>
+              <label>Título:</label>
+              <input type="text" name="title">
+              <label>¿Es jefe de curso?</label>
+              <select name="is_head_teacher">
+                <option value="false">No</option>
+                <option value="true">Sí</option>
+              </select>
+              <label>Curso asignado:</label>
+              <select name="curso_id">
+                <option value="">Seleccionar curso...</option>
+                <option value="PG">Playgroup</option>
+                <option value="PK">Prekínder</option>
+                <option value="K">Kínder</option>
+                <option value="1">1° Básico</option>
+                <option value="2">2° Básico</option>
+                <option value="3">3° Básico</option>
+                <option value="4">4° Básico</option>
+                <option value="5">5° Básico</option>
+                <option value="6">6° Básico</option>
+                <option value="7">7° Básico</option>
+                <option value="8">8° Básico</option>
+                <option value="1M">1° Medio</option>
+                <option value="2M">2° Medio</option>
+                <option value="3M">3° Medio</option>
+                <option value="4M">4° Medio</option>
+              </select>
+              <label>Año:</label>
+              <input type="number" name="year" value="2025">
+              <div class="form-actions">
+                <button type="submit" class="btn-guardar">Registrar Profesor</button>
+              </div>
+            </form>
+          </div>`;
+
+        document.getElementById("volver-profesores")?.addEventListener("click", async () => {
+          await cargarProfesores();
+        });
+
+        const form = document.getElementById("form-profesor");
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = Object.fromEntries(new FormData(form).entries());
+          formData.role = "teacher";
+
+          try {
+            const response = await fetch("/adminview/api/profesores/crear/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+              },
+              body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+              alert("✅ Profesor registrado correctamente.");
+              await cargarProfesores();
+            } else {
+              alert("⚠️ Error: " + (result.error || "No se pudo registrar el profesor."));
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("❌ No se pudo conectar con el servidor.");
+          }
+        });
+      });
+
+    } catch (error) {
+      console.error("Error al cargar profesores", error);
+      mainContent.innerHTML = `
+        <div class="error-msg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Error al cargar los profesores
+        </div>`;
+    }
+  }
+
+  // Delegación de eventos (Editar / Guardar / Eliminar)
+
+  mainContent.addEventListener("click", async (e) => {
+    const btn = e.target;
+    const row = btn.closest("tr");
+
+    if (!btn.classList.contains("btn-editar") &&
+      !btn.classList.contains("btn-guardar") &&
+      !btn.classList.contains("btn-eliminar")) return;
+    if (!row) return;
+
+    // EDITAR 
+    if (btn.classList.contains("btn-editar")) {
+      const inputs = row.querySelectorAll("input");
+      inputs.forEach(i => i.disabled = false);
+      row.querySelector(".btn-guardar").disabled = false;
+      row.classList.add("editando");
+      return;
+    }
+
+    // GUARDAR 
+    if (btn.classList.contains("btn-guardar")) {
+
+      const id = row.dataset.id;
+      const inputs = row.querySelectorAll("input");
+      const data = {};
+      inputs.forEach(i => data[i.name] = i.value.trim());
+
+      try {
+        const response = await fetch(`/adminview/api/profesores/${id}/actualizar/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          btn.textContent = "✅ Guardado";
+          btn.disabled = true;
+          row.classList.remove("editando");
+          inputs.forEach(i => i.disabled = true);
+          setTimeout(() => btn.textContent = "💾 Guardar", 2000);
+        } else {
+          alert("⚠️ Error: " + (result.error || "No se pudo actualizar."));
+        }
+      } catch (error) {
+        console.error("Error al actualizar:", error);
+        alert("❌ No se pudo conectar con el servidor.");
+      }
+      return;
+    }
+
+    // ELIMINAR 
+    if (btn.classList.contains("btn-eliminar")) {
+      const id = row.dataset.id;
+      const nombre = row.querySelector('input[name="first_name"]')?.value || "Profesor";
+
+      if (!confirm(`¿Seguro que deseas eliminar al profesor "${nombre}"?`)) return;
+
+      try {
+        const response = await fetch(`/adminview/api/profesores/${id}/eliminar/`, {
+          method: "DELETE",
+          headers: { "X-CSRFToken": getCSRFToken() },
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          row.remove();
+          alert(`🗑️ Profesor "${nombre}" eliminado correctamente.`);
+        } else {
+          alert("⚠️ Error: " + (result.error || "No se pudo eliminar."));
+        }
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+        alert("❌ No se pudo conectar con el servidor.");
+      }
+      return;
+    }
+  });
+
+
+  // Agregar Alumno
+  async function cargarAgregarAlumno() {
+    title.textContent = "Agregar Alumno";
+
+    mainContent.innerHTML = `
+      <div class="formulario-alumno">
+        <div class="form-top">
+          <h2>Registro de Alumno</h2>
+          <button id="volver-cursos" class="btn-volver">← Volver</button>
         </div>
-        <div class="course-card js-view-course" data-course-id="k-a" data-course-name="Kinder A">
-          <div class="course-card-icon"><i class="fa-solid fa-shapes"></i></div>
-          <div class="course-card-info"><h4>Kinder A</h4><p>Prof. Jefa: Mónica Bravo</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1 Alumno</span></div>
-        </div>
-        <div class="course-card js-view-course" data-course-id="1b-a" data-course-name="1° Básico A">
-          <div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div>
-          <div class="course-card-info"><h4>1° Básico A</h4><p>Prof. Jefa: Laura Pérez</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 2 Alumnos</span></div>
-        </div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>2° Básico A</h4><p>Prof. Jefe: Juan Torres</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>3° Básico A</h4><p>Prof. Jefa: Inés Morales</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-pencil"></i></div><div class="course-card-info"><h4>4° Básico A</h4><p>Prof. Jefe: Carlos Rojas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>5° Básico A</h4><p>Prof. Jefe: Esteban Paredes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>6° Básico A</h4><p>Prof. Jefa: Sandra Fuentes</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div><div class="course-card-info"><h4>7° Básico A</h4><p>Prof. Jefe: Miguel Ángel</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card js-view-course" data-course-id="8b-a" data-course-name="8° Básico A">
-          <div class="course-card-icon"><i class="fa-solid fa-book-open"></i></div>
-          <div class="course-card-info"><h4>8° Básico A</h4><p>Prof. Jefa: Rosa Espinoza</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1</span></div>
-        </div>
-        <div class="course-card js-view-course" data-course-id="1m-a" data-course-name="I° Medio A">
-          <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-          <div class="course-card-info"><h4>I° Medio A</h4><p>Prof. Jefe: Arturo Vidal</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 1</span></div>
-        </div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>II° Medio A</h4><p>Prof. Jefa: Carolina Neira</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card"><div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div><div class="course-card-info"><h4>III° Medio A</h4><p>Prof. Jefe: Marcelo Salas</p></div><div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 0</span></div></div>
-        <div class="course-card js-view-course" data-course-id="4m-a" data-course-name="IV° Medio A">
-          <div class="course-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-          <div class="course-card-info"><h4>IV° Medio A</h4><p>Prof. Jefe: Mario Vargas</p></div>
-          <div class="course-card-stats"><span><i class="fa-solid fa-user"></i> 3</span></div>
-        </div>
-      </div>`
-  },
-  'agregar-alumno': {
-    title: 'Agregar Alumno',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Agregar Alumno</h3>
-        <form id="form-add-student" class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem">
-          <div class="field"><label class="label">Nombre</label><input class="input" name="nombre" required></div>
-          <div class="field"><label class="label">RUT</label><input class="input" name="rut" required></div>
-          <div class="field"><label class="label">Apoderado</label><input class="input" name="apoderado"></div>
-          <div class="field"><label class="label">Curso</label>
-            <select class="select" name="curso" required>
-              <option value="1b-a">1° Básico A</option>
-              <option value="8b-a">8° Básico A</option>
-              <option value="1m-a">I° Medio A</option>
-              <option value="4m-a">IV° Medio A</option>
+
+        <form id="form-alumno" class="form-alumno">
+          <div class="form-section">
+            <h3>Datos del Alumno</h3>
+
+            <label>RUT:</label>
+            <input type="text" name="rut" placeholder="Ej: 21.345.678-9" required>
+
+            <label>Nombres:</label>
+            <input type="text" name="nombres" required>
+
+            <label>Apellidos:</label>
+            <input type="text" name="apellidos" required>
+
+            <label>Fecha de Nacimiento:</label>
+            <input type="date" name="fecha_nacimiento" required>
+
+            <label>Comuna:</label>
+            <input type="text" name="comuna" placeholder="Ej: San Antonio">
+
+            <label>Curso:</label>
+            <select name="curso" required>
+              <option value="">Seleccionar curso...</option>
+              <option value="PG">Playgroup</option>
+              <option value="PK">Prekínder</option>
+              <option value="K">Kínder</option>
+              <option value="1">1° Básico</option>
+              <option value="2">2° Básico</option>
+              <option value="3">3° Básico</option>
+              <option value="4">4° Básico</option>
+              <option value="5">5° Básico</option>
+              <option value="6">6° Básico</option>
+              <option value="7">7° Básico</option>
+              <option value="8">8° Básico</option>
+              <option value="1M">1° Medio</option>
+              <option value="2M">2° Medio</option>
+              <option value="3M">3° Medio</option>
+              <option value="4M">4° Medio</option>
+            </select>
+
+            <label>Estado:</label>
+            <select name="estado_alumno">
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
             </select>
           </div>
-          <div class="field" style="grid-column:1/-1">
-            <button class="btn" type="submit"><i class="fa-solid fa-save"></i> Guardar</button>
+
+          <div class="form-section">
+            <h3>Datos del Apoderado</h3>
+
+            <label>RUT Apoderado:</label>
+            <input type="text" name="rut_apoderado" required>
+
+            <label>Nombre Apoderado:</label>
+            <input type="text" name="nombre_apoderado" required>
+
+            <label>Correo Apoderado:</label>
+            <input type="email" name="email_apoderado" placeholder="ejemplo@correo.com">
+
+            <label>Teléfono:</label>
+            <input type="text" name="telefono_apoderado" placeholder="+56 9 1234 5678">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-guardar">Registrar Alumno</button>
           </div>
         </form>
-      </div>`
-  },
-  'profesores': {
-    title: 'Profesores',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Listado de Profesores</h3>
-        <div class="table-wrapper">
-          <table class="data-table" id="table-prof">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Asignatura</th><th>Email</th><th>Acciones</th></tr></thead>
-            <tbody>
-              <tr><td>PF-001</td><td>María González</td><td>Matemáticas</td><td>maria.g@colegio.cl</td>
-                  <td><button class="btn btn-compact js-mail" data-mail="maria.g@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
-              <tr><td>PF-002</td><td>Carlos Vega</td><td>Historia</td><td>carlos.v@colegio.cl</td>
-                  <td><button class="btn btn-compact js-mail" data-mail="carlos.v@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
-              <tr><td>PF-003</td><td>Isabel Ríos</td><td>Lenguaje</td><td>isabel.r@colegio.cl</td>
-                  <td><button class="btn btn-compact js-mail" data-mail="isabel.r@colegio.cl"><i class="fa-solid fa-envelope"></i></button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>`
-  },
-  'asignaturas': {
-    title: 'Asignaturas',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Asignaturas</h3>
-        <ul>
-          <li>Matemáticas</li><li>Lenguaje</li><li>Historia</li><li>Ciencias</li>
-        </ul>
-      </div>`
-  },
-  'revision-pagos': {
-    title: 'Revisión de Pagos',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Revisión de Pagos</h3>
-        <div class="table-wrapper">
-          <table class="data-table" id="table-pagos">
-            <thead><tr><th>Alumno</th><th>Mes</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
-            <tbody>
-              <tr><td>Ana Contreras</td><td>Septiembre</td><td>$230.000</td>
-                <td><span class="status status-review">En revisión</span></td>
-                <td><button class="btn btn-compact js-approve" data-id="1"><i class="fa-solid fa-check"></i></button></td></tr>
-              <tr><td>Benjamín Soto</td><td>Septiembre</td><td>$230.000</td>
-                <td><span class="status status-paid">Pagado</span></td>
-                <td><button class="btn btn-compact js-refund" data-id="2"><i class="fa-solid fa-rotate-left"></i></button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>`
-  },
-  'comunicados': {
-    title: 'Comunicados',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Comunicados</h3>
-        <div class="field"><button class="btn" id="new-comm"><i class="fa-solid fa-plus"></i> Nuevo Comunicado</button></div>
-        <ul id="comm-list">
-          <li><strong>15/09/2025:</strong> Examen Final de Matemáticas.</li>
-          <li><strong>18/09/2025:</strong> Feriado - No hay clases.</li>
-        </ul>
-      </div>`
-  },
-  'usuarios': {
-    title: 'Usuarios',
-    html: `
-      <div class="card">
-        <h3 class="card-title">Usuarios del Sistema</h3>
-        <div class="table-wrapper">
-          <table class="data-table" id="table-users">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr></thead>
-            <tbody>
-              <tr><td>U-001</td><td>Sr. Admin</td><td>Administración</td>
-                <td><button class="btn btn-compact js-reset" data-user="U-001"><i class="fa-solid fa-key"></i></button></td></tr>
-              <tr><td>U-002</td><td>Felipe Huencho</td><td>Alumno</td>
-                <td><button class="btn btn-compact js-reset" data-user="U-002"><i class="fa-solid fa-key"></i></button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>`
-  }
-};
-function renderDonutCobranza() {
-  const el = document.getElementById('donut-cobranza');
-  if (!el) return;
-  const ctx = el.getContext('2d');
-  const paid=15300000, pending=2100000, overdue=1100000;
-
-  new Chart(ctx, {
-    type:'doughnut',
-    data:{
-      labels:['Pagado','Pendiente','Atrasado'],
-      datasets:[{ data:[paid,pending,overdue], backgroundColor:['#16a34a','#f59e0b','#ef4444'], borderWidth:0 }]
-    },
-    options:{ responsive:true, cutout:'65%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>`${c.label}: $${Number(c.raw).toLocaleString('es-CL')}` } } } }
-  });
-}
-
-function renderSparkAsistencia() {
-  const el = document.getElementById('spark-asistencia');
-  if (!el) return;
-
-  // Alto fijo y contenedor controlado
-  el.style.height = '36px';
-  const wrap = el.parentElement;
-  if (wrap) { wrap.style.minWidth = '220px'; wrap.style.width = '100%'; }
-
-  // limpiar instancia previa si la hubiera guardada
-  if (el._chart) { el._chart.destroy(); }
-
-  const data = [88, 91, 92, 90, 93, 94, 92];
-  const ctx = el.getContext('2d');
-
-  el._chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map((_, i) => i + 1),
-      datasets: [{
-        data,
-        tension: 0.35,
-        borderWidth: 2,
-        pointRadius: 0,
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      scales: { x: { display: false }, y: { display: false, suggestedMin: 80, suggestedMax: 100 } },
-      elements: { line: { capBezierPoints: true } }
-    }
-  });
-}
-
-
-
-/* ---------- Render: Tablero (Chart.js) ---------- */
-function renderAdminDashboardChart() {
-  const canvas = document.getElementById('admin-chart');
-  if (!canvas) return;
-  if (adminChartInstance) adminChartInstance.destroy();
-
-  const container = canvas.closest('.chart-container');
-  if (container) {
-    const h = Math.max(240, Math.min(420, Math.round(window.innerHeight * 0.38)));
-    container.style.height = h + 'px';
-  }
-
-  const ctx = canvas.getContext('2d');
-  const height = canvas.clientHeight || 320;
-  const grad = ctx.createLinearGradient(0, 0, 0, height);
-  const dark = document.documentElement.hasAttribute('data-theme');
-  grad.addColorStop(0, dark ? 'rgba(201,156,46,0.95)' : 'rgba(16,43,78,0.95)');
-  grad.addColorStop(1, dark ? 'rgba(201,156,46,0.65)' : 'rgba(16,43,78,0.65)');
-
-  const labels = ['Abr','May','Jun','Jul','Ago','Sep'];
-  const dataValues = [12000,15000,14000,18000,17000,18500];
-
-  adminChartInstance = new Chart(canvas, {
-    type: 'bar',
-    data: { labels, datasets: [{ label:'Ingresos', data: dataValues, backgroundColor: grad, borderRadius: 10, borderSkipped: false, barThickness: 'flex', maxBarThickness: 64 }] },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: (ctx) => 'Ingresos: $' + Number(ctx.parsed?.y ?? ctx.raw).toLocaleString('es-CL') }
-        }
-      },
-      scales: {
-        x: { grid: { display:false }, ticks: { font: { weight: 700 } } },
-        y: {
-          beginAtZero: true,
-          suggestedMax: Math.max(...dataValues) * 1.12,
-          grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid') || 'rgba(15,23,42,.06)', borderDash: [4,4] },
-          ticks: { callback: v => '$' + Number(v).toLocaleString('es-CL'), stepSize: 2000 }
-        }
-      },
-      interaction: { mode: 'index', intersect: false }
-    }
-  });
-}
-let resizeRAF;
-window.addEventListener('resize', () => {
-  if (currentSection !== 'tablero') return;
-  cancelAnimationFrame(resizeRAF);
-  resizeRAF = requestAnimationFrame(renderAdminDashboardChart);
-});
-
-/* ---------- Render: tabla alumnos ---------- */
-function renderStudentTable(courseId, courseName) {
-  const students = studentData[courseId] || [];
-  const rows = students.map(s => `
-    <tr>
-      <td>${s.id}</td>
-      <td class="user-cell">
-        <div class="avatar" style="width:36px;height:36px;font-size:.85rem">${s.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div><div style="font-weight:600">${s.name}</div><div style="font-size:.85rem;color:#6b7280">${s.parent}</div></div>
-      </td>
-      <td>${s.status}</td>
-      <td class="action-buttons">
-        <button class="action-btn view btn btn-compact" data-student-id="${s.id}" title="Ver"><i class="fa-solid fa-eye"></i></button>
-        <button class="action-btn delete btn btn-compact btn-danger" data-student-id="${s.id}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="4">No hay alumnos en este curso.</td></tr>`;
-
-  mainEl.innerHTML = `
-    <div class="page-header">
-      <h2>Alumnos — ${courseName}</h2>
-      <button class="btn js-back-to-courses"><i class="fa-solid fa-arrow-left"></i> Volver a Cursos</button>
-    </div>
-    <div class="card">
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead><tr><th>ID</th><th>Alumno</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
       </div>
-    </div>`;
-  topTitle.textContent = `Alumnos — ${courseName}`;
-}
+    `;
 
-/* ---------- Render genérico + wiring por sección ---------- */
-function renderContent(section) {
-  currentSection = section;
-  const entry = contentData[section];
-  if (!entry) {
-    mainEl.innerHTML = `<div class="card"><p>Sección no encontrada: ${section}</p></div>`;
-    topTitle.textContent = 'Sección';
-    return;
-  }
-  topTitle.textContent = entry.title;
-  mainEl.innerHTML = entry.html;
-
-  if (section === 'tablero') {
-  renderAdminDashboardChart();
-  renderDonutCobranza();
-  renderSparkAsistencia();
-}
-;
-
-  if (section === 'estudiantes') {
-    mainEl.querySelectorAll('.js-view-course').forEach(card => {
-      card.addEventListener('click', () => renderStudentTable(card.dataset.courseId, card.dataset.courseName));
+    document.getElementById("volver-cursos")?.addEventListener("click", async () => {
+      await cargarVerCursos();
     });
-    document.getElementById('add-course')?.addEventListener('click', () => {
-      openModal({
-        title: 'Agregar Curso',
-        body: `<div class="field"><label class="label">Nombre</label><input class="input"></div>
-               <div class="field"><label class="label">Profesor Jefe</label><input class="input"></div>`,
-      });
-    });
-  }
 
-  if (section === 'agregar-alumno') {
-    document.getElementById('form-add-student')?.addEventListener('submit', (e) => {
+    const form = document.getElementById("form-alumno");
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const fd = new FormData(e.currentTarget);
-      openModal({
-        title: 'Alumno guardado',
-        body: `<p><strong>${fd.get('nombre')}</strong> asignado a <strong>${fd.get('curso')}</strong>.</p>`,
-      });
-      e.currentTarget.reset();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/adminview/api/alumnos/registrar/", {
+          method: "POST",
+          headers: { "X-CSRFToken": getCSRFToken() },
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message || "✅ Alumno registrado correctamente.");
+          form.reset();
+        } else {
+          alert("⚠️ Error: " + (result.error || "No se pudo registrar el alumno."));
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("❌ No se pudo conectar con el servidor.");
+      }
     });
   }
 
-  if (section === 'profesores') {
-    mainEl.querySelectorAll('.js-mail').forEach(b =>
-      b.addEventListener('click', () => openModal({ title:'Enviar correo', body:`<p>Redactar a <strong>${b.dataset.mail}</strong> (simulado)</p>` }))
-    );
-  }
 
-  if (section === 'revision-pagos') {
-    mainEl.querySelectorAll('.js-approve').forEach(b =>
-      b.addEventListener('click', () => openModal({ title:'Aprobar pago', body:'Pago marcado como aprobado (simulado).' }))
-    );
-    mainEl.querySelectorAll('.js-refund').forEach(b =>
-      b.addEventListener('click', () => openModal({ title:'Reversar pago', body:'Pago marcado para reversa (simulado).' }))
-    );
-  }
+  // Ver Pagos
 
-  if (section === 'comunicados') {
-    document.getElementById('new-comm')?.addEventListener('click', () => {
-      openModal({
-        title:'Nuevo Comunicado',
-        body:`<div class="field"><label class="label">Título</label><input class="input" id="c-title"></div>
-              <div class="field"><label class="label">Contenido</label><textarea class="input" id="c-body"></textarea></div>`,
-        foot:`<button class="btn" id="save-comm"><i class="fa-solid fa-save"></i> Publicar</button>
-              <button class="btn btn-secondary" id="modal-ok">Cancelar</button>`
+  async function cargarVerPagos() {
+    try {
+      const response = await fetch("/adminview/api/pagos/");
+      if (!response.ok) throw new Error("Error al obtener los pagos");
+      const data = await response.json();
+
+      let html = `<div class="ver-pagos">`;
+      const secciones = [
+        { titulo: "Pendientes", key: "pendientes" },
+        { titulo: "Pagados", key: "pagados" },
+        { titulo: "Fallidos", key: "fallidos" },
+        { titulo: "Reembolsados", key: "reembolsados" },
+      ];
+
+      secciones.forEach(sec => {
+        const pagosPorMes = data[sec.key] || {};
+        if (Object.keys(pagosPorMes).length === 0) return;
+
+        html += `<section class="bloque-pagos">
+          <h3>${sec.titulo}</h3>`;
+
+        Object.entries(pagosPorMes).forEach(([mes, pagos]) => {
+          html += `
+            <details class="mes-card">
+              <summary>${mes}</summary>
+              <table class="tabla-pagos">
+                <thead>
+                  <tr><th>Alumno</th><th>Concepto</th><th>Monto</th><th>Fecha</th></tr>
+                </thead>
+                <tbody>
+                  ${pagos.map(p => `
+                    <tr>
+                      <td>${p.alumno}</td>
+                      <td>${p.concepto}</td>
+                      <td>${p.monto}</td>
+                      <td>${p.fecha}</td>
+                    </tr>`).join("")}
+                </tbody>
+              </table>
+            </details>`;
+        });
+
+        html += `</section>`;
       });
-      document.getElementById('save-comm')?.addEventListener('click', () => {
-        const t = document.getElementById('c-title').value || '(sin título)';
-        const list = document.getElementById('comm-list');
-        const today = new Date().toLocaleDateString('es-CL');
-        list.insertAdjacentHTML('beforeend', `<li><strong>${today}:</strong> ${t}</li>`);
-        closeModal();
+
+      html += `</div>`;
+      mainContent.innerHTML = html;
+      title.textContent = "Revisión de Pagos";
+    } catch (error) {
+      console.error("Error al cargar pagos", error);
+      mainContent.innerHTML = `
+        <div class="error-msg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Error al cargar los pagos.
+        </div>`;
+    }
+  }
+
+
+  //  Comunicados
+  async function cargarComunicados() {
+    title.textContent = "Comunicados";
+
+    mainContent.innerHTML = `
+    <div class="comunicados-layout">
+
+      <div class="comunicados-form">
+        <h2><i class="fa-solid fa-bullhorn"></i> Enviar Comunicado</h2>
+
+        <form id="form-comunicado">
+
+          <div class="form-group">
+            <label>Asunto:</label>
+            <input type="text" name="asunto" placeholder="Escribe el asunto del mensaje..." required>
+          </div>
+
+          <div class="form-group">
+            <label>Mensaje:</label>
+            <textarea name="mensaje" rows="6" placeholder="Escribe aquí el comunicado..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Enviar a:</label>
+            <select name="destino" id="destino">
+              <option value="todos">Todos los usuarios</option>
+              <option value="curso">Por curso</option>
+              <option value="alumno">Alumno específico</option>
+              <option value="manual">Correo manual</option>
+            </select>
+          </div>
+
+          <div id="filtro-curso" class="filtro-extra">
+            <label>Seleccionar curso:</label>
+            <input type="text" name="curso_id" placeholder="Ej: 4to Medio A">
+          </div>
+
+          <div id="filtro-alumno" class="filtro-extra">
+            <label>RUT del alumno:</label>
+            <input type="text" name="rut" placeholder="Ej: 12345678-9">
+          </div>
+
+          <div id="filtro-manual" class="filtro-extra">
+            <label>Correo electrónico destino:</label>
+            <input type="email" name="email_manual" placeholder="Ej: nombre@correo.com">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-guardar">Enviar Comunicado</button>
+          </div>
+
+        </form>
+      </div>
+
+
+      <div class="comunicados-lista">
+
+        <div class="header-lista">
+          <h3><i class="fa-solid fa-address-book"></i> Listado de Apoderados</h3>
+
+          <div class="tabla-toolbar">
+            <input 
+              type="text" 
+              id="buscar-apoderado" 
+              class="input-busqueda"
+              placeholder=" Buscar alumno, RUT o apoderado..."
+            >
+          </div>
+        </div>
+
+        <div class="tabla-wrapper">
+          <table class="tabla-apoderados">
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>RUT</th>
+                <th>Apoderado</th>
+                <th>Correo</th>
+              </tr>
+            </thead>
+
+            <tbody id="tabla-apoderados-body">
+              <tr><td colspan="4">Cargando datos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+    // Mostrar/ocultar filtros extra según el destino
+    const destino = document.getElementById("destino");
+    destino.addEventListener("change", (e) => {
+      document.querySelectorAll(".filtro-extra").forEach(div => div.style.display = "none");
+      if (e.target.value === "curso") document.getElementById("filtro-curso").style.display = "block";
+      if (e.target.value === "alumno") document.getElementById("filtro-alumno").style.display = "block";
+      if (e.target.value === "manual") document.getElementById("filtro-manual").style.display = "block";
+    });
+
+    // Cargar tabla de apoderados
+    await cargarApoderadosEnTabla();
+
+    //  Buscador de apoderados
+    const buscador = document.getElementById("buscar-apoderado");
+
+    buscador.addEventListener("input", (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      const filas = document.querySelectorAll("#tabla-apoderados-body tr");
+
+      filas.forEach(row => {
+        const texto = row.textContent.toLowerCase();
+        row.style.display = texto.includes(term) ? "" : "none";
+      });
+    });
+
+    // Enviar comunicado
+    const form = document.getElementById("form-comunicado");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/adminview/api/comunicados/enviar/", {
+          method: "POST",
+          body: formData,
+          headers: { "X-CSRFToken": getCSRFToken() },
+        });
+
+        const result = await response.json();
+        alert("✅ " + result.message);
+        form.reset();
+      }
+      catch (error) {
+        console.error("Error al enviar comunicado:", error);
+        alert("❌ Error al conectar con el servidor.");
+      }
+    });
+  }
+
+
+  async function cargarApoderadosEnTabla() {
+    const tbody = document.getElementById("tabla-apoderados-body");
+    try {
+      const response = await fetch("/adminview/api/apoderados/");
+      const data = await response.json();
+
+      tbody.innerHTML = "";
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">No hay apoderados registrados.</td></tr>`;
+        return;
+      }
+
+      data.forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.alumno}</td>
+            <td>${item.rut}</td>
+            <td>${item.apoderado}</td>
+            <td>${item.email || "—"}</td>
+          </tr>
+        `;
+      });
+    } catch (error) {
+      console.error("Error al cargar apoderados:", error);
+      tbody.innerHTML = `<tr><td colspan="4">Error al cargar datos.</td></tr>`;
+    }
+  }
+
+
+
+  //  Horarios 
+  async function cargarHorarios() {
+    title.textContent = "Horarios";
+
+    // pantalla de carga
+    mainContent.innerHTML = `
+    <div class="card">
+      <h2>Horarios</h2>
+      <p>Cargando horarios de los profesores...</p>
+    </div>
+  `;
+
+    try {
+      const resp = await fetch("/adminview/api/horarios/");
+      if (!resp.ok) throw new Error("No se pudo obtener los horarios");
+
+      const data = await resp.json();
+      const profesores = data.profesores || [];
+
+      if (!profesores.length) {
+        mainContent.innerHTML = `
+        <div class="card">
+          <h2>Horarios</h2>
+          <p>No hay horarios registrados.</p>
+        </div>`;
+        return;
+      }
+
+      let html = `<div class="horarios-wrapper">`;
+
+      profesores.forEach(p => {
+        html += `
+      <div class="card horario-card">
+        <div class="horario-header">
+          <strong>${p.profesor}</strong>
+          <span>${p.horarios.length} bloque(s)</span>
+        </div>
+
+        <div class="horario-body">
+          <table class="tabla-generica">
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Inicio</th>
+                <th>Término</th>
+                <th>Asignatura</th>
+                <th>Curso</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${p.horarios.map(h => `
+                <tr>
+                  <td>${h.dia}</td>
+                  <td>${h.inicio}</td>
+                  <td>${h.termino}</td>
+                  <td>${h.asignatura}</td>
+                  <td>${h.curso || "—"}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      `;
+      });
+
+      html += `</div>`;
+      mainContent.innerHTML = html;
+
+      // Activar animación después de cargar
+      activarAnimacionHorarios();
+
+    } catch (err) {
+      console.error(err);
+      mainContent.innerHTML = `
+      <div class="card">
+        <h2>Horarios</h2>
+        <p>Error al cargar los horarios.</p>
+      </div>
+    `;
+    }
+  }
+
+  // Animación suave al abrir/cerrar bloques de horarios
+
+  function activarAnimacionHorarios() {
+    const cards = document.querySelectorAll(".horario-card");
+
+    cards.forEach(card => {
+      const header = card.querySelector(".horario-header");
+      const body = card.querySelector(".horario-body");
+
+      // Cerrar inicialmente
+      body.style.maxHeight = "0px";
+      body.style.opacity = "0";
+
+      header.addEventListener("click", () => {
+        const isOpen = card.classList.contains("open");
+
+        if (isOpen) {
+          // CERRAR
+          body.style.maxHeight = body.scrollHeight + "px";
+          requestAnimationFrame(() => {
+            body.style.maxHeight = "0px";
+            body.style.opacity = "0";
+          });
+          card.classList.remove("open");
+
+        } else {
+          // ABRIR
+          body.style.maxHeight = body.scrollHeight + "px";
+          body.style.opacity = "1";
+          card.classList.add("open");
+
+          body.addEventListener("transitionend", () => {
+            if (card.classList.contains("open")) {
+              body.style.maxHeight = "none";
+            }
+          }, { once: true });
+        }
       });
     });
   }
 
-  if (section === 'usuarios') {
-    mainEl.querySelectorAll('.js-reset').forEach(b =>
-      b.addEventListener('click', () => openModal({ title:'Reset de contraseña', body:`Se reseteó la contraseña de <strong>${b.dataset.user}</strong> (simulado).` }))
-    );
-  }
-}
 
-/* ---------- Menú lateral: navegación ---------- */
-document.querySelectorAll('.menu a[data-section]').forEach(link => {
-  link.addEventListener('click', (e) => {
+
+  //Asignaturas
+
+  async function cargarAsignaturas() {
+    title.textContent = "Asignaturas";
+
+    try {
+      const resp = await fetch("/adminview/api/asignaturas/");
+      if (!resp.ok) throw new Error("No se pudo obtener las asignaturas");
+      const data = await resp.json();
+
+      const asignaturas = data.asignaturas || [];
+
+      let html = `
+      <div class="card card-asignaturas">
+        <div class="asignaturas-header">
+          <div>
+            <h2>Asignaturas del colegio</h2>
+            <p class="card-subtitle">
+              Vista consolidada de ramos por curso y año académico.
+            </p>
+          </div>
+          <span class="badge badge-info">${asignaturas.length} registro(s)</span>
+        </div>
+
+        ${asignaturas.length === 0 ? `
+          <p class="empty-msg">No hay asignaturas registradas.</p>
+        ` : `
+          <div class="tabla-toolbar">
+            <input 
+              type="text" 
+              id="buscador-asignaturas" 
+              class="input-busqueda" 
+              placeholder="Buscar por asignatura, curso o profesor..."
+            >
+          </div>
+
+          <div class="tabla-wrapper">
+            <table class="tabla-generica" id="tabla-asignaturas">
+              <thead>
+                <tr>
+                  <th>Asignatura</th>
+                  <th>Curso</th>
+                  <th>Año</th>
+                  <th>Profesor</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${asignaturas.map(a => `
+                  <tr>
+                    <td>${a.name}</td>
+                    <td>${a.curso || "—"}</td>
+                    <td>${a.year || "—"}</td>
+                    <td>${a.teacher || "—"}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    `;
+
+      mainContent.innerHTML = html;
+
+      //  Filtro rápido en la tabla
+      const inputBuscador = document.getElementById("buscador-asignaturas");
+      if (inputBuscador) {
+        const filas = Array.from(
+          document.querySelectorAll("#tabla-asignaturas tbody tr")
+        );
+
+        inputBuscador.addEventListener("input", (e) => {
+          const term = e.target.value.toLowerCase().trim();
+
+          filas.forEach(row => {
+            const texto = row.textContent.toLowerCase();
+            row.style.display = texto.includes(term) ? "" : "none";
+          });
+        });
+      }
+
+    } catch (err) {
+      console.error(err);
+      mainContent.innerHTML = `
+      <div class="error-msg">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Error al cargar las asignaturas.
+      </div>
+    `;
+    }
+  }
+
+
+
+
+
+
+// Navegación SPA
+
+links.forEach(link => {
+  link.addEventListener("click", async (e) => {
     e.preventDefault();
-    const sec = link.dataset.section;
-    if (!sec) return;
-    document.querySelectorAll('.menu a').forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-    link.closest('details.menu-group') && (link.closest('details.menu-group').open = true);
-    renderContent(sec);
-    if (mq.matches) closeSidebar();
+
+    // Actualizar estado visual
+    clearActive();
+    link.classList.add("active");
+
+    const section = link.getAttribute("data-section");
+
+    switch (section) {
+
+
+      //DASHBOARD
+
+      case "tablero":
+        title.textContent = "Panel de Control";
+        mainContent.innerHTML = `
+          <h1>Bienvenido</h1>
+          <p>Resumen general del sistema:</p>
+
+          <div class="tarjetas-resumen">
+            <div class="tarjeta" id="card-estudiantes">Estudiantes: —</div>
+            <div class="tarjeta" id="card-profesores">Profesores: —</div>
+            <div class="tarjeta" id="card-apoderados">Apoderados: —</div>
+            <div class="tarjeta" id="card-admins">Administrativos: —</div>
+          </div>
+
+          <div class="dashboard-charts">
+            <div class="chart-box">
+              <div class="chart-title">Estado de Pagos</div>
+              <canvas id="graficoPagos"></canvas>
+            </div>
+
+            <div class="chart-box">
+              <div class="chart-title">Distribución de Usuarios</div>
+              <canvas id="graficoUsuarios"></canvas>
+            </div>
+          </div>
+        `;
+
+        // Cargar datos desde backend 
+        try {
+          const resp = await fetch("/adminview/api/dashboard/stats/");
+          const stats = await resp.json();
+
+          // Actualizar tarjetas
+          document.getElementById("card-estudiantes").textContent = `Estudiantes: ${stats.total_students}`;
+          document.getElementById("card-profesores").textContent  = `Profesores: ${stats.total_teachers}`;
+          document.getElementById("card-apoderados").textContent  = `Apoderados: ${stats.total_guardians}`;
+          document.getElementById("card-admins").textContent      = `Administrativos: ${stats.total_admins}`;
+
+
+          // GRÁFICO: PAGOS 
+          new Chart(document.getElementById("graficoPagos"), {
+            type: "bar",
+            data: {
+              labels: ["Pendientes", "Pagados", "Fallidos"],
+              datasets: [{
+                label: "Pagos",
+                data: [
+                  stats.pagos_pendientes,
+                  stats.pagos_pagados,
+                  stats.pagos_fallidos
+                ],
+                backgroundColor: ["#F4C542", "#21C29D", "#E74C3C"],
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false }
+              }
+            }
+          });
+
+
+          //  GRÁFICO: USUARIOS 
+
+          new Chart(document.getElementById("graficoUsuarios"), {
+            type: "doughnut",
+            data: {
+              labels: ["Estudiantes", "Profesores", "Apoderados", "Administrativos"],
+              datasets: [{
+                data: [
+                  stats.total_students,
+                  stats.total_teachers,
+                  stats.total_guardians,
+                  stats.total_admins
+                ],
+                backgroundColor: ["#4A68FF", "#34D399", "#2DC8D2", "#F4B400"],
+                borderWidth: 2
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: "55%"
+            }
+          });
+
+        } catch (error) {
+          console.error("Error cargando dashboard:", error);
+          mainContent.innerHTML += `
+            <div class="error-msg">
+              No se pudieron cargar los gráficos del tablero.
+            </div>
+          `;
+        }
+
+        break;
+
+
+      //  Otras Secciones
+      case "estudiantes":
+        await cargarVerCursos();
+        break;
+
+      case "profesores":
+        await cargarProfesores();
+        break;
+
+      case "agregar-alumno":
+        await cargarAgregarAlumno();
+        break;
+
+      case "revision-pagos":
+        await cargarVerPagos();
+        break;
+
+      case "comunicados":
+        await cargarComunicados();
+        break;
+
+      case "asignaturas":
+        await cargarAsignaturas();
+        break;
+
+      case "horarios":
+        await cargarHorarios();
+        break;
+
+      default:
+        mainContent.innerHTML = `
+          <h1>${link.textContent}</h1>
+          <p>Sección "${section}" en construcción...</p>
+        `;
+        title.textContent = link.textContent.trim();
+    }
+
+    if (isMobile()) closeSidebar();
   });
 });
 
-/* ---------- Carga inicial ---------- */
-renderContent('tablero');
+
+
+  // Cargar TABLERO automáticamente al entrar
+  const linkTablero = document.querySelector('a[data-section="tablero"]');
+  if (linkTablero) linkTablero.click();
+});
+
+
+
