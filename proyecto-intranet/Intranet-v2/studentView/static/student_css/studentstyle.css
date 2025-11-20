@@ -422,45 +422,130 @@ body.menu-open {
   text-align: left;
   padding-left: 18px;
 }
-/* ======================
-   CALENDARIO DE EVALUACIONES
-======================== */
+/* ===========================================
+   NUEVO ESTILO DE CALENDARIO (FullCalendar)
+============================================== */
 
-#calendar {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  padding: 15px;
-}
+/* * El JS ya renderiza el calendario dentro de un <div class="card">,
+ * así que solo necesitamos estilizar los elementos internos de FullCalendar.
+ * Usamos #calendar para asegurar que solo afectamos a ESTE calendario.
+ */
 
-.fc-toolbar-title {
-  font-weight: 600 !important;
+/* --- 1. Toolbar (Botones y Título) --- */
+
+/* Título (ej: "Noviembre 2025") */
+#calendar .fc-toolbar-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
   color: var(--color-primary);
 }
 
-.fc-button {
-  background: var(--color-primary) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 500 !important;
-  border-radius: 6px !important;
-}
-
-.fc-button:hover {
-  background: var(--color-secondary) !important;
-}
-
-.fc-daygrid-day-number {
+/* Todos los botones (Prev, Next, Today, Month, Week, Day) */
+#calendar .fc-button {
+  background: var(--color-primary);
+  border: none;
+  color: #fff;
   font-weight: 500;
-  color: var(--color-text);
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 8px 16px;
+  text-transform: capitalize;
+  transition: var(--transition);
+  opacity: 1;
 }
 
-.fc-event {
-  background-color: var(--color-secondary) !important;
-  border: none !important;
-  color: #3a0e0e !important;
-  border-radius: 4px !important;
-  font-weight: 500;
+/* Hover/Focus (usamos el dorado) */
+#calendar .fc-button:hover,
+#calendar .fc-button:focus,
+#calendar .fc-button:active {
+  background: var(--color-secondary);
+  color: var(--color-primary); /* Texto oscuro sobre fondo dorado */
+  box-shadow: 0 4px 12px rgba(205, 167, 88, 0.3); /* Sombra dorada */
+}
+
+/* Botón "Activo" (ej: 'Month' cuando está en vista de mes) */
+#calendar .fc-button-primary.fc-button-active {
+  background: var(--color-secondary);
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+/* El botón "Today" lo hacemos diferente */
+#calendar .fc-today-button {
+  background: #f0f3f7; /* Un gris/azul claro */
+  color: var(--color-primary);
+}
+#calendar .fc-today-button:hover {
+  background: #e0e6ec;
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+/* --- 2. Vista (Días de la semana y celdas) --- */
+
+/* Cabecera (Lunes, Martes, etc.) */
+#calendar .fc-col-header-cell-cushion {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  padding: 10px 4px;
+  border: none;
+}
+
+/* Borde de la cabecera */
+#calendar .fc-scrollgrid-section-header th {
+   border-bottom: 2px solid #f0f3f7;
+}
+
+/* Líneas de la rejilla */
+#calendar .fc-daygrid-day,
+#calendar .fc-col-header-cell {
+  border-color: #f0f3f7; /* Un borde muy sutil */
+}
+
+/* El número del día (1, 2, 3...) */
+#calendar .fc-daygrid-day-number {
+  font-weight: 600;
+  color: #333;
+  padding: 8px;
+}
+
+/* Celda del día de HOY */
+#calendar .fc-day-today {
+  background: rgba(205, 167, 88, 0.08); /* Dorado muy claro */
+  border: none;
+}
+#calendar .fc-day-today .fc-daygrid-day-number {
+  color: var(--color-primary); /* Número en azul primario */
+}
+
+/* --- 3. Eventos --- */
+
+/* El evento en sí */
+#calendar .fc-event {
+  background-color: var(--color-secondary);
+  border: 1px solid #b8964e; /* Borde dorado más oscuro */
+  color: var(--color-primary); /* Texto azul oscuro */
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 4px;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+#calendar .fc-event:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Asegura que los bordes del calendario no se vean feos */
+#calendar .fc-view,
+#calendar .fc-scrollgrid {
+  border: none;
 }
 /* ======================
    PERFIL DE ALUMNO — FORMATO COMPACTO Y CENTRADO
@@ -566,351 +651,314 @@ body.menu-open {
     flex-direction: column;
   }
 }
-/* ===== Modal Portal Pagos ===== */
-.modal-pin {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  animation: fadeIn 0.2s ease-out;
-}
 
-.modal-pin-box {
-  background: #fff;
-  width: 360px;
-  padding: 26px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  animation: scaleIn 0.15s ease-out;
-}
+/* ===========================================
+   NUEVO ESTILO DE HORARIO
+============================================== */
 
-.modal-pin-box h3 {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 5px;
-  color: #0b1a3c;
-}
-
-.modal-pin-box p {
-  font-size: 15px;
-  color: #444;
-  margin-bottom: 18px;
-}
-
-.modal-pin-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  box-sizing: border-box;
-}
-
-.modal-pin-btn {
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+/* Primero, estilos para el contenedor que crea tu JS */
+.horario-card .card-title {
   font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 0px;
 }
 
-.modal-pin-btn.confirm {
-  background: #1c3162;
-  color: #fff;
-}
-
-.modal-pin-btn.cancel {
-  background: #eee;
-  color: #333;
-  margin-top: 6px;
-}
-
-.modal-pin-btn.cancel:hover {
-  background: #ddd;
-}
-
-#pin-error {
-  color: #c70000;
-  margin-top: 8px;
+.horario-sub {
   font-size: 14px;
+  color: #777;
+  margin-top: 4px;
+  margin-bottom: 20px;
 }
 
-/* Animaciones */
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-@keyframes scaleIn { from {transform:scale(.92);} to {transform:scale(1);} }
-
-
-
-
-
-.btn-cerrar-pin {
-    margin-top: 15px;
-    padding: 8px 14px;
-    background: #d9534f;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+/* Wrapper para responsive móvil */
+.horario-wrapper {
+  width: 100%;
+  overflow-x: auto; /* Permite scroll lateral en pantallas pequeñas */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ===== PORTAL DE PAGOS — Estilo Premium ===== */
-
-.portal-wrapper {
-  max-width: 1200px;
-  margin: auto;
-}
-
-.portal-header {
-  margin-bottom: 18px;
-}
-
-.portal-header h2 {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 8px;
-}
-
-.portal-header p {
-  font-size: 15px;
-  margin: 2px 0;
-  color: #555;
-}
-
-.tabla-container {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
+/* La tabla principal */
+.horario-table {
+  width: 100%;
+  /* Clave para que el border-radius funcione */
+  border-collapse: separate; 
+  border-spacing: 0;
+  
+  margin-top: 0;
+  font-family: 'Poppins', sans-serif; /* ¡IMPORTANTE: Usar la fuente correcta! */
+  background: #ffffff;
+  
+  /* Sombra y borde consistentes */
+  border: 1px solid #eef2f7; 
+  border-radius: 12px; /* Redondeado como tus .card */
+  overflow: hidden; /* Oculta los bordes que se salen */
   box-shadow: var(--shadow);
 }
 
-.tabla-pagos {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tabla-pagos thead tr {
+/* ===========================================
+   CABECERA (Días de la semana)
+============================================== */
+.horario-table thead th {
   background: var(--color-primary);
-  color: white;
-  font-weight: 600;
-}
-
-.tabla-pagos th,
-.tabla-pagos td {
-  padding: 14px 18px;
-  font-size: 14px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.tabla-pagos tbody tr:hover {
-  background: #f6f8fb;
-}
-
-/* Estado badges */
-.badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.badge-paid {
-  background: #e6f7ec;
-  color: #0a7b34;
-}
-
-.badge-pending {
-  background: #fff3d6;
-  color: #b88200;
-}
-
-.badge-overdue {
-  background: #ffe0e0;
-  color: #b60000;
-}
-
-/* Botones */
-.btn-portal {
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: 0.2s;
-}
-
-.btn-subir-comprobante {
-  background: var(--color-secondary);
   color: #fff;
-}
-
-.btn-subir-comprobante:hover {
-  background: #b48e3c;
-}
-
-.btn-cerrar-pin {
-  margin-top: 18px;
-  padding: 10px 16px;
-  background: #c62828;
-  color: white;
-  border-radius: 8px;
+  border-bottom: none;
+  padding: 16px 12px;
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: center;
+  
+  /* Línea separadora sutil entre días */
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Celda superior izquierda ("Hora") */
+.horario-table thead th:first-child {
+  background: #f8f9fb; /* Fondo claro */
+  color: var(--color-primary);
+  font-weight: 700;
+  border-left: none;
+  /* Borde inferior para alinear con las celdas de hora */
+  border-bottom: 1px solid #eef2f7; 
+}
+
+/* ===========================================
+   CUERPO (Horas y Asignaturas)
+============================================== */
+.horario-table tbody td {
+  padding: 14px 12px;
+  text-align: center;
+  vertical-align: middle;
   border: none;
-  cursor: pointer;
-  transition: 0.2s;
+  
+  /* Rejilla sutil */
+  border-bottom: 1px solid #eef2f7;
+  border-left: 1px solid #eef2f7;
+  
+  transition: background-color 0.2s ease;
 }
 
-.btn-cerrar-pin:hover {
-  background: #a61e1e;
+/* Quitar bordes innecesarios */
+.horario-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.horario-table tbody td:first-child {
+  border-left: none;
 }
 
-/* ===== Portal Pagos - Diseño Premium ===== */
-.pagos-top h2 {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0F294C;
+/* Columna de las Horas (08:00 - 09:30, etc.) */
+.horario-table tbody td.hora {
+  background: #f8f9fb;
+  color: #333;
+  font-weight: 600;
+  font-size: 13px;
+  width: 120px; /* Ancho fijo para la hora */
+  text-align: center;
 }
-.sub {
-    font-size: 15px;
-    color: #5a5a5a;
-    margin: 4px 0;
+
+/* ===========================================
+   CONTENIDO DE LAS CELDAS (¡Importante!)
+   (Estilos para el strong/small que inyecta tu JS)
+============================================== */
+
+/* Nombre de la Asignatura */
+.horario-table tbody td strong {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-primary);
+  margin-bottom: 2px;
 }
-.barra-progreso {
-    margin-top: 12px;
-    height: 8px;
-    background: #e6e8ec;
-    border-radius: 10px;
+
+/* Nombre del Profesor */
+.horario-table tbody td small {
+  display: block;
+  font-size: 12px;
+  color: #777;
 }
-.progreso {
-    height: 100%;
-    background: #CDA758;
-    border-radius: 10px;
-    transition: width .4s;
+
+/* Celda vacía */
+.vacio {
+  color: #aaa;
+  font-style: italic;
+  font-size: 13px;
 }
-.tiny {
-    margin-top: 6px;
+
+/* Efecto hover en las filas */
+.horario-table tbody tr:hover td {
+  background: #f5f8ff; /* Un hover azulado muy sutil */
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .horario-table {
     font-size: 13px;
-    color: #666;
-}
-
-/* Cards grid */
-.tarjetas-pagos {
-    margin-top: 20px;
-    display: grid;
-    gap: 15px;
-}
-
-.pago-card {
-    background: #fff;
-    padding: 22px;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-
-    /* Sombra intensa y profunda */
-    box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.25),
-        0 6px 15px rgba(0, 0, 0, 0.15);
-
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* Hover con sensación de elevarse aún más */
-.pago-card:hover {
-    transform: translateY(-6px);
-    box-shadow:
-        0 18px 45px rgba(0, 0, 0, 0.3),
-        0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-
-.pc-mes {
-    font-size: 17px;
-    font-weight: 600;
-    color: #0F294C;
-}
-.pc-det {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-    color: #555;
+  }
+  .horario-table tbody td.hora {
+    width: 110px;
+    font-size: 12px;
+  }
+  .horario-table tbody td strong {
     font-size: 14px;
-}
-.pc-monto {
-    font-weight: bold;
+  }
 }
 
-/* footer line */
-.pc-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* ===========================================
+   MEJORAS "POTENTES" Y ESTÉTICAS
+   (Añadir al final de studentstyle.css)
+============================================== */
+
+/* 1. Definimos animaciones y sombras mejoradas
+--------------------------------------------- */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-.badge-ok {
-    background: #d3fcd3;
-    color: #0a7a0a;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 600;
-}
-.badge-pend {
-    background: #fff4d1;
-    color: #b98300;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 600;
+:root {
+  /* Una sombra más suave y moderna */
+  --shadow: 0 4px 12px rgba(15, 41, 76, 0.08);
+  /* Una sombra más pronunciada para el hover */
+  --shadow-hover: 0 8px 24px rgba(15, 41, 76, 0.15);
 }
 
-/* Pay button */
-.btn-pay-card {
-    background: #CDA758;
-    border: none;
-    padding: 8px 13px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: #fff;
-    cursor: pointer;
-    transition: .2s;
-}
-.btn-pay-card:hover {
-    background: #b99748;
+/* 2. Suavizado global
+--------------------------------------------- */
+html {
+  scroll-behavior: smooth;
 }
 
-/* Check icon */
-.ic-check {
-    font-size: 20px;
-    color: #0a7a0a;
-    font-weight: bold;
+/* 3. Sidebar (Menú lateral)
+--------------------------------------------- */
+.menu a {
+  /* Hacemos que la transición sea más "elástica" */
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Close access button */
-.btn-cerrar-elegante {
-    margin-top: 25px;
-    padding: 10px 18px;
-    background: #b32626;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: .2s;
-}
-.btn-cerrar-elegante:hover {
-    background: #8b1f1f;
+/* Efecto "pop" en el ícono al pasar el mouse */
+.menu a:hover i {
+  transform: scale(1.1) rotate(-5deg);
 }
 
-.badge-review {
-    background: #9e9e9e;
-    color: white;
+/* Le damos más presencia al link activo */
+.menu a.active {
+  box-shadow: 0 4px 12px -2px rgba(205, 167, 88, 0.4);
+  transform: translateX(5px);
+  color: #0F294C !important; /* Asegurar color de texto */
 }
 
+/* 4. Tarjetas (Cards)
+--------------------------------------------- */
+
+/* Transición suave para TODAS las tarjetas base */
+.card, .stat-card, .clase-card, .perfil-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto "flotar" para las tarjetas al pasar el mouse */
+.card:hover, 
+.stat-card:hover, 
+.perfil-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 5. STAT-CARDS (Efecto Shimmer/Brillo)
+   ¡Este es el efecto más "potente"!
+--------------------------------------------- */
+.stat-card {
+  position: relative;
+  overflow: hidden; /* Necesario para el efecto */
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* El "brillo" */
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  
+  transform: translateX(-100%);
+  animation: shimmer 3.5s infinite linear;
+  animation-delay: 1s; /* Empieza después de 1s */
+}
+
+/* 6. Tabla de Notas
+--------------------------------------------- */
+
+/* Hacemos la cabecera de la tabla "pegajosa" (sticky) */
+.tabla-notas thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fdfdfd; /* Fondo para que no se vea el texto de abajo */
+  border-bottom: 3px solid var(--color-primary);
+}
+
+/* Hacemos la transición de hover más suave */
+.tabla-notas tr {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Sombra sutil en la fila al pasar el mouse */
+.tabla-notas tr:hover {
+  background-color: #fff;
+  box-shadow: 0 1px 10px rgba(15, 41, 76, 0.07);
+}
+
+/* Destacamos la columna de Promedio */
+.tabla-notas td:last-child {
+  font-weight: 700;
+  font-size: 15px;
+  background-color: #f8f9fb;
+  color: var(--color-primary);
+}
+
+/* 7. Perfil de Alumno
+--------------------------------------------- */
+.avatar-circle {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hacemos que el avatar del perfil resalte al pasar el mouse */
+.avatar-circle:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.perfil-info-box {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* También las cajas de información */
+.perfil-info-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 8. Horario
+--------------------------------------------- */
+.horario-table {
+  border: 1px solid #d0d7e1;
+  border-radius: 12px; /* Redondear bordes */
+  box-shadow: var(--shadow);
+}
+
+/* Suavizar el hover de las celdas */
+.horario-table tbody td {
+  transition: background-color 0.2s ease;
+}
+
+.horario-table tbody tr:hover td {
+  background-color: #f7faff;
+}
