@@ -1,160 +1,130 @@
-/* ===========================================
-   ESTILO PANEL PROFESOR - VERSIÓN COMPLETA (v3)
-   (Colegio San Agustín)
-============================================== */
-
-/* --- 1. Variables Globales y Base --- */
 :root {
-  --color-primary: #0F294C;  /* Azul marino */
-  --color-secondary: #CDA758; /* Dorado */
+  --color-primary: #0F294C;
+  --color-secondary: #CDA758;
   --color-light: #F8F9FB;
   --color-text: #1a1a1a;
-  --color-danger: #d94343;
-  --color-warning: #e09400;
-  
-  --shadow: 0 4px 12px rgba(15, 41, 76, 0.08);
-  --shadow-hover: 0 8px 24px rgba(15, 41, 76, 0.15);
+  --shadow: 0 2px 8px rgba(0, 0, 0, .1);
   --radius: 12px;
   --sidebar-width: 260px;
-  --transition: all 0.3s ease;
-}
-
-/* --- NUEVA ANIMACIÓN --- */
-@keyframes fadeInTable {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background-color: var(--color-light);
-  color: var(--color-text);
-  line-height: 1.6;
+  background: var(--color-light);
+  color: var(--color-text)
 }
-/* ... (Todo el código base de .layout, .sidebar, .topbar, etc. se mantiene igual) ... */
+
 .layout {
   display: flex;
-  min-height: 100vh;
+  min-height: 100vh
 }
+
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   width: var(--sidebar-width);
   height: 100%;
-  background-color: var(--color-primary);
+  background: var(--color-primary);
   color: #fff;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease;
-  z-index: 1000;
+  z-index: 1000
 }
-.sidebar.closed {
-  transform: translateX(-100%);
-}
+
 .profile {
   display: flex;
-  align-items: center;
   gap: 14px;
+  align-items: center;
   padding: 20px 25px;
-  margin-bottom: 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, .1)
 }
+
 .avatar {
   width: 48px;
   height: 48px;
-  background-color: var(--color-secondary);
+  background: var(--color-secondary);
   color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  border-radius: 50%;
-  font-size: 18px;
+  border-radius: 50%
 }
-.profile-info {
-  line-height: 1.3;
-}
-.profile-info div:first-child {
-  font-weight: 600;
-}
-.role {
-  font-size: 13px;
-  color: #f0f0f0;
-}
+
 .menu {
   display: flex;
   flex-direction: column;
-  padding: 0 10px;
+  padding: 0 10px
 }
+
 .menu a {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: #dce3ec;
   text-decoration: none;
   font-weight: 500;
-  padding: 13px 20px;
-  border-radius: var(--radius);
-  transition: var(--transition);
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: .2s
 }
-.menu a i {
-  width: 20px;
-  text-align: center;
-  font-size: 16px;
-}
+
 .menu a.active {
-  background-color: var(--color-secondary);
-  color: var(--color-primary);
-  box-shadow: 0 4px 12px -2px rgba(205, 167, 88, 0.4);
-  transform: translateX(5px);
+  background: var(--color-secondary);
+  color: var(--color-primary)
 }
+
 .menu a:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.08);
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, .08)
 }
+
 .logout {
   margin-top: auto;
   color: #ffdddd;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, .1)
 }
+
 .main {
   flex: 1;
   margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
+  transition: .3s
 }
+
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   gap: 15px;
   height: 88px;
   background: #fff;
-  padding: 0 30px;
+  padding: 0 20px;
   box-shadow: var(--shadow);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 100
 }
+
 .toggle {
   background: none;
   border: none;
   font-size: 22px;
   color: var(--color-primary);
   cursor: pointer;
-  display: none;
+  display: none
 }
+
 .topbar-title {
-  font-weight: 600;
-  font-size: 20px;
+  font-weight: 600
 }
+
 .user-mini {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
+  margin-left: auto
 }
+
 .avatar-mini {
   width: 35px;
   height: 35px;
@@ -164,703 +134,739 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 700
 }
+
 .content {
   padding: 30px;
-  background-color: var(--color-light);
-  flex: 1;
+  background: var(--color-light)
 }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 18px 38px rgba(0,0,0,0.15);
+  padding: 25px 30px;
+  margin-bottom: 28px;
+}
+
+
+.card-title {
+  font-weight: 600;
+  font-size: 20px
+}
+
+
+
+.tabla-card {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #fff;
+  margin-top: 20px
+}
+
+.tabla-body {
+  overflow-x: auto
+}
+
+.tabla-notas {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  background: #fff
+}
+
+.tabla-notas thead {
+  border-bottom: 2px solid #eee
+}
+
+.tabla-notas th {
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 10px
+}
+
+.tabla-notas td {
+  font-size: 14px;
+  color: #333;
+  padding: 10px 10px;
+  border-bottom: 1px solid #eee
+}
+
 .footer {
   text-align: center;
   font-size: 13px;
-  color: #888;
+  color: #7a7a7a;
   background: transparent;
-  padding: 20px 0;
+  padding: 20px 0
 }
-.card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 25px 30px;
-  margin-bottom: 25px;
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .4);
+  display: none;
+  z-index: 900
 }
-.card-title {
-  font-weight: 600;
-  font-size: 22px;
-  color: var(--color-primary);
-  margin: 0 0 15px 0;
+
+@media(max-width:992px) {
+  .sidebar {
+    transform: translateX(-100%)
+  }
+
+  .sidebar.open {
+    transform: translateX(0)
+  }
+
+  .main {
+    margin-left: 0
+  }
+
+  .toggle {
+    display: block
+  }
 }
-.hoy-box {
-  background: #f0f3f7;
-  border-left: 5px solid var(--color-primary);
-  padding: 18px 22px;
-  border-radius: 8px;
-  font-size: 16px;
+
+
+
+
+
+
+/* GRID ELEGANTE */
+.clases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px 10px 40px 10px;
+}
+
+/* TARJETA ESTILO UNIVERSITARIO */
+.clase-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 28px 22px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    transition: .25s ease;
+    border: 1px solid #e7e7e7;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+
+    position: relative;
+}
+
+/* LÍNEA SUPERIOR UNIVERSITARIA */
+.clase-card::before {
+    content: "";
+    width: 100%;
+    height: 5px;
+    background: var(--color-secondary);
+    border-radius: 14px 14px 0 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* HOVER PREMIUM */
+.clase-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-3px);
+}
+
+/* ICONO PROFESIONAL */
+.clase-icon {
+    background: #0F294C15;
+    color: var(--color-primary);
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+}
+
+/* TÍTULO DEL CURSO */
+.clase-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+/* CONTENEDOR DE BOTONES */
+.clase-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+/* BOTÓN PRINCIPAL */
+.btn-ver {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: .2s;
+}
+
+/* BOTÓN SECUNDARIO */
+.btn-eval {
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: .2s;
+}
+
+.btn-ver:hover, .btn-eval:hover {
+    opacity: 0.85;
+}
+
+/* ========= TARJETAS ENTERPRISE (Nivel Universidad) ========== */
+
+.clases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 40px;
+    margin-top: 30px;
+}
+
+/* Card corporativa */
+.course-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #d9d9d9;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: .25s ease;
+    padding-bottom: 20px;
+}
+
+.course-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+}
+
+/* Header premium */
+.course-header {
+    background: var(--color-primary);
+    padding: 16px 28px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* ⬅ CENTRAR */
+    gap: 12px;
+}
+
+/* GRID DE ALUMNOS — modo tarjetas */
+.alumnos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin-top: 30px;
+}
+
+.alumno-card {
+    background: #ffffff;
+    padding: 18px 22px;
+    border-radius: 14px;
+    border: 1.7px solid #d4d4d4;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    transition: 0.25s ease;
+}
+
+.alumno-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
+.alumno-icon {
+    font-size: 26px;
+    color: var(--color-primary);
+}
+
+.alumno-info h4 {
+    font-size: 15px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.alumno-info .rut {
+    font-size: 13px;
+    color: #666;
+}
+
+
+.course-header i {
+    font-size: 22px;
+}
+
+.course-body {
+    padding: 25px 24px;
+    text-align: center;       /* ⬅ Centra todo */
+}
+
+.course-title {
+    font-size: 26px !important;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+}
+
+
+.actions {
+    justify-content: center;  /* ⬅ Centra los botones */
+}
+
+.btn-academic {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 15px !important;
+    padding: 12px 20px;
+}
+
+.btn-academic.blue {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.btn-academic.yellow {
+    background: var(--color-secondary);
+    color: #ffffff;
+}
+
+.btn-academic:hover {
+    opacity: 0.88;
+}
+.btn-academic.yellow:hover {
+    background: #b89342;            /* un dorado más oscuro */
+}
+/* === FORMULARIO CREAR EVALUACIÓN === */
+
+.eval-card {
+    padding: 30px 35px;
+}
+
+.eval-form-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 25px 20px; /* ← separación vertical y horizontal */
+    margin-top: 20px;
+}
+
+.eval-label {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.eval-select,
+.input-field {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #d4d4d4;
+    font-size: 15px;
+    box-sizing: border-box; /* ← evita desbordes */
+}
+
+.eval-select:focus,
+.input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 6px rgba(15, 41, 76, 0.25);
+}
+
+/* Botón largo */
+.btn-full {
+    grid-column: span 5;
+    margin-top: 15px;
+}
+.ingresar-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 30px 35px;
+    box-shadow: 0 18px 38px rgba(0,0,0,0.12);
+    margin-bottom: 30px;
+}
+.ingresar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.ingresar-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.ingresar-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.7px solid #d4d4d4;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fff;
+    transition: .2s;
+}
+
+.ingresar-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 6px rgba(15,41,76,0.25);
+}
+.tabla-card {
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+    background: white;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.tabla-body {
+    overflow-x: auto;
+}
+
+.tabla-notas input {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.tabla-notas input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 6px rgba(15,41,76,0.25);
+}
+
+
+/* ===== ACORDEÓN PREMIUM ===== */
+
+.acordeon-item {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1.5px solid #d8dde8;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin-bottom: 18px;
+    overflow: hidden;
+    transition: .28s ease;
+}
+
+.acordeon-item.opened {
+    border-color: var(--color-secondary);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.15);
+}
+
+/* ===== HEADER ===== */
+.acordeon-header {
+    padding: 20px 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.acordeon-arrow {
+    transition: .25s ease;
+}
+
+/* ===== BODY con animación ===== */
+
+
+
+
+
+
+
+
+/* ===== TABLA PREMIUM ===== */
+
+.tabla-alumnos {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 15px;
+}
+
+/* Header */
+.tabla-alumnos thead {
+    background: #0F294C;
+    color: white;
+}
+
+.tabla-alumnos th {
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 600;
+}
+
+/* Celdas */
+.tabla-alumnos td {
+    padding: 12px 18px;
+    border-bottom: 1px solid #e8edf3;
+}
+
+/* Zebra stripes */
+.tabla-alumnos tbody tr:nth-child(even) {
+    background: #f6f8fc;
+}
+
+/* Hover row */
+.tabla-alumnos tbody tr:hover {
+    background: #eef3fb;
+    transition: 0.25s;
+}
+
+.acordeon-body {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 26px;   
+    transform: translateY(-8px) scale(0.98);
+    overflow: hidden;
+    transition: 0.35s ease;
+}
+.acordeon-body.open {
+    max-height: 800px;   
+    opacity: 1;
+    padding: 16px 26px 20px;   
+    transform: translateY(0) scale(1);
+}
+/* === PERFIL PREMIUM === */
+
+.perfil-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.12);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.perfil-banner {
+    height: 120px;
+    background: linear-gradient(135deg, #0F294C, #17406e);
+}
+
+.perfil-header {
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.perfil-avatar {
+    margin-top: -50px;
+}
+
+.avatar-circle {
+    width: 95px;
+    height: 95px;
+    background: #CDA758;
+    color: #0F294C;
+    font-weight: 700;
+    font-size: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 12px auto;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+.perfil-nombre {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    color: #0F294C;
+}
+
+.perfil-sub {
+    font-size: 15px;
+    color: #555;
+    margin-top: 4px;
+}
+
+.perfil-body {
+    padding: 30px 40px;
+}
+
+.perfil-info-box {
+    background: #f7f9fc;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.perfil-info-box h3 {
+    margin-bottom: 15px;
+    font-size: 20px;
+    color: #0F294C;
+}
+
+.perfil-info-box table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.perfil-info-box td:first-child {
+    font-weight: 600;
+    color: #333;
+    padding: 10px 0;
+    width: 170px;
+}
+
+.perfil-info-box td:last-child {
+    color: #444;
+    padding: 10px 0;
 }
 .prox-card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 25px 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+  border: 1px solid #e6e8f0;
+  margin-top: 25px;
 }
+
 .prox-title {
-  font-weight: 600;
   font-size: 20px;
-  color: var(--color-primary);
-  margin: 0 0 15px 0;
-}
-.prox-item {
+  font-weight: 700;
+  color: #0F294C;
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.prox-title i {
+  font-size: 20px;
+  color: var(--color-secondary);
+}
+
+.prox-item {
+  display: flex;
   justify-content: space-between;
-  padding: 18px 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  background: #f6f8fc;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #dde2ec;
+  margin-bottom: 14px;
+  transition: 0.25s ease;
 }
-.prox-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+
+.prox-item:hover {
+  background: #edf1f9;
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
 }
-.prox-item:first-of-type {
-  padding-top: 0;
-}
+
 .prox-left {
   display: flex;
   flex-direction: column;
 }
+
 .prox-desc {
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  color: #0F294C;
 }
+
 .prox-meta {
   font-size: 14px;
-  color: #666;
+  color: #555;
+  margin-top: 1px;
+}
+
+.prox-date {
+  background: var(--color-primary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .prox-date {
+  padding: 8px 16px;
+  border-radius: 8px;
   font-weight: 600;
+  display: inline-block;
+  color: white;
+}
+
+.prox-date.normal { background: var(--color-primary); }
+.prox-date.warning { background: #CDA758; }
+.prox-date.danger { background: #d9534f; }
+.hoy-box {
+  background: #f5f8ff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border-left: 4px solid #0F294C;
+  color: #324a97;
   font-size: 15px;
-  text-align: right;
-  flex-shrink: 0;
-  margin-left: 20px;
-}
-.prox-date.danger { color: var(--color-danger); }
-.prox-date.warning { color: var(--color-warning); }
-.prox-date.normal { color: var(--color-primary); }
-
-/* --- 5. "Mis Cursos" (.course-card) --- */
-.clases-grid, .cursos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-}
-
-.course-card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  transition: var(--transition);
-  border-top: 4px solid var(--color-primary);
-  text-align: center;
-}
-
-.course-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-hover);
-}
-
-.course-header {
-  padding-top: 30px; 
-  display: flex;
-  justify-content: center;
-}
-
-.course-header i {
-  font-size: 28px;
-  color: #fff;
-  background-color: var(--color-primary);
-  border-radius: 50%;
-  width: 65px;
-  height: 65px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(15, 41, 76, 0.25);
-  transition: all 0.3s ease;
-}
-.course-header i::before {
-  font-family: "Font Awesome 6 Free";
-  content: "\f02d";
-  font-weight: 900;
-}
-
-.course-card:hover .course-header i {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(15, 41, 76, 0.3);
-}
-
-.course-body {
-  padding: 20px 30px 30px;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.course-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0 0 20px 0;
-  flex-grow: 1;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   margin-top: 10px;
 }
-
-.btn-academic {
-  padding: 13px 15px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow);
-  transform: translateY(0);
-}
-.btn-academic:hover {
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-3px);
-}
-.btn-academic.blue {
-  background: var(--color-primary);
-  color: #fff;
-}
-.btn-academic.blue:hover {
-  background: #0a1c33;
-}
-.btn-academic.yellow {
-  background: var(--color-secondary);
-  color: var(--color-primary);
-}
-.btn-academic.yellow:hover {
-  background: #b8964e;
-}
-
-/* --- 6. "Alumnos" (.alumnos-grid) --- */
-.badge-count {
-  font-size: 14px;
-  font-weight: 500;
-  background: var(--color-secondary);
-  color: var(--color-primary);
-  padding: 4px 10px;
-  border-radius: 20px;
-  margin-left: 10px;
-}
-
-.alumnos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-.alumno-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: #f9faff;
-  padding: 15px 20px;
-  border-radius: 10px;
-  border: 1px solid #eef2f7;
-}
-.alumno-icon {
-  font-size: 20px;
-  background: #e0e8f3;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--color-primary);
-}
-.alumno-icon::before {
-  font-family: "Font Awesome 6 Free";
-  content: "\f007"; /* fa-user */
-  font-weight: 900;
-}
-.alumno-info h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-.alumno-info .rut {
-  font-size: 13px;
-  color: #555;
-}
+/* Botón "Volver a cursos" */
 .volver-link {
-  display: inline-block;
-  margin-top: 25px;
-  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+
+  padding: 10px 18px;
+  border-radius: 999px;
+
+  background: #e7edf8;
+  color: #0F294C;
+  font-weight: 600;
+  font-size: 14px;
   text-decoration: none;
-  font-weight: 500;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d0d9f0;
+  transition: 0.2s ease;
 }
+
+.volver-link::before {
+  content: "←";
+  font-size: 15px;
+}
+
 .volver-link:hover {
-  text-decoration: underline;
-}
-
-/* --- 7. "Perfil" --- */
-.perfil-container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-.perfil-header {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  margin-bottom: 25px;
-  overflow: hidden;
-}
-.perfil-banner {
-  height: 130px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  border-radius: 0;
-}
-.perfil-avatar {
-  text-align: center;
-  margin-top: -50px;
-  padding-bottom: 20px;
-}
-.avatar-circle {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: var(--color-light);
-  border: 4px solid #fff;
-  color: var(--color-primary);
-  font-weight: 700;
-  font-size: 1.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-.perfil-nombre {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0;
-}
-.perfil-sub {
-  color: #777;
-  font-size: 0.9rem;
-  margin: 0;
-}
-.perfil-body {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 25px 30px;
-}
-.perfil-info-box h3 {
-  color: var(--color-primary);
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.perfil-info-box table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.perfil-info-box td {
-  padding: 12px 5px;
-  font-size: 0.95rem;
-  color: #333;
-  border-bottom: 1px solid #f9f9f9;
-}
-.perfil-info-box tr:last-child td {
-  border-bottom: none;
-}
-.perfil-info-box td:first-child {
-  font-weight: 600;
-  color: #000;
-  width: 30%;
-}
-
-/* ===========================================
-   --- 8. Formularios (Crear Eval, Ingresar Notas) --- 
-============================================== */
-
-.eval-card, .ingresar-card {
-  max-width: 800px;
-  margin: 0 auto 30px;
-  /* Sombra más suave */
-  box-shadow: 0 10px 30px rgba(15, 41, 76, 0.07);
-}
-
-/* --- DIFERENCIACIÓN DE TARJETAS --- */
-.eval-card {
-  border-top: 4px solid var(--color-primary); /* Azul para "Crear" */
-}
-.ingresar-card {
-  border-top: 4px solid var(--color-secondary); /* Dorado para "Ingresar" */
-}
-
-/* Título con ícono */
-.eval-card .card-title::before,
-.ingresar-card .card-title::before {
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  color: var(--color-secondary);
-  margin-right: 12px;
-  font-size: 20px;
-}
-.eval-card .card-title::before {
-  content: "\f49d"; /* ícono: fa-file-circle-plus */
-}
-.ingresar-card .card-title::before {
-  content: "\f304"; /* ícono: fa-pen-to-square */
-}
-
-.eval-subtitle {
-  font-size: 16px;
-  color: #555;
-  margin-top: -10px;
-  margin-bottom: 25px;
-}
-
-.eval-form-grid, .ingresar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px 20px;
-  margin-top: 20px;
-}
-
-.eval-label, .ingresar-label {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--color-primary);
-  margin-bottom: 6px;
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Estilo "Soft Box" para inputs */
-.input-field, .eval-select, .ingresar-select {
-  width: 100%;
-  padding: 12px 15px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  background-color: #f8f9fb;
-  border: 2px solid #f0f3f7;
-  border-radius: 8px;
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.eval-select, .ingresar-select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230F294C'%3E%3Cpath fill-rule='evenodd' d='M8 11.293l-4.146-4.147a.5.5 0 0 1 .708-.708L8 9.879l3.438-3.438a.5.5 0 0 1 .708.708L8 11.293z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 1.5em 1.5em;
-  padding-right: 40px;
-}
-
-.input-field:focus, .eval-select:focus, .ingresar-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(15, 41, 76, 0.1);
-}
-
-.btn-full {
-  grid-column: 1 / -1;
-  padding: 15px;
-  font-size: 16px;
-}
-
-/* Botón "Crear Evaluación" (DORADO con ÍCONO) */
-.eval-card .btn-academic.blue {
-  background-color: var(--color-secondary);
-  color: var(--color-primary);
-  box-shadow: 0 4px 15px rgba(205, 167, 88, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.eval-card .btn-academic.blue:hover {
-  background-color: #b8964e;
-  box-shadow: 0 6px 20px rgba(205, 167, 88, 0.3);
-}
-.eval-card .btn-academic.blue::before {
-  content: "\f067"; /* fa-plus */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900; 
-  font-size: 16px;
-  color: var(--color-primary);
-}
-
-/* Estilo para campos deshabilitados */
-.input-field:disabled, 
-.eval-select:disabled, 
-.ingresar-select:disabled {
-  background-color: #f0f3f7;
-  color: #999;
-  border-color: #f0f3f7;
-  cursor: not-allowed;
-  background-image: none;
-}
-
-/* ===========================================
-   --- 9. Tablas (Ingresar Notas, Mis Notas) --- 
-============================================== */
-
-/* --- NUEVO: Animación para la tabla de notas --- */
-.ingresar-card .tabla-card {
-  animation: fadeInTable 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.tabla-card {
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  background: #fff;
-  margin-top: 25px;
-}
-
-.tabla-body {
-  overflow-x: auto;
-}
-
-.tabla-notas, .tabla-alumnos {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-/* --- CABECERA DE TABLA MEJORADA --- */
-.tabla-notas th, .tabla-alumnos th {
-  background: var(--color-primary); /* FONDO AZUL */
-  color: #fff; /* TEXTO BLANCO */
-  padding: 14px 18px;
-  font-weight: 600;
-  font-size: 14px;
-  border-bottom: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tabla-notas td, .tabla-alumnos td {
-  padding: 12px 18px;
-  border-bottom: 1px solid #eef2f7;
-  font-size: 15px;
-  color: #333;
-  vertical-align: middle;
-}
-.tabla-notas tr:last-child td, .tabla-alumnos tr:last-child td {
-  border-bottom: none;
-}
-/* Celdas con zebra para mejor lectura */
-.tabla-notas tbody tr:nth-child(even),
-.tabla-alumnos tbody tr:nth-child(even) {
-  background-color: #fcfdff;
-}
-
-/* Centrar la última celda (input de nota) */
-.tabla-notas th:last-child {
-  text-align: center;
-}
-.tabla-notas td:last-child {
-  text-align: center;
-}
-
-/* --- INPUT DE NOTA MEJORADO --- */
-.tabla-notas input[type="number"] {
-  width: 90px;
-  padding: 12px 10px;
-  text-align: center;
-  border: 2px solid #e0e6ec; /* Borde suave */
-  border-radius: 8px; /* Redondeado */
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-primary);
-  transition: all 0.2s ease;
-}
-.tabla-notas input[type="number"]:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(15, 41, 76, 0.1);
-  outline: none;
-  background-color: #fff;
-}
-
-/* Botón genérico (usado en guardar notas) */
-.btn {
-  padding: 12px 20px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: var(--transition);
-  background: var(--color-secondary); /* DORADO */
-  color: var(--color-primary);
-  transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(205, 167, 88, 0.2);
-}
-.btn:hover {
-  background: #b8964e;
-  box-shadow: 0 6px 20px rgba(205, 167, 88, 0.3);
-  transform: translateY(-3px);
-}
-
-/* --- NUEVO: Botón "Guardar Notas" con ícono --- */
-#form-notas .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%; /* Full-width */
-  padding: 15px;
-  font-size: 16px;
-  margin-top: 20px;
-}
-#form-notas .btn::before {
-  content: "\f0c7"; /* fa-save (guardar) */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900; 
-  font-size: 16px;
-  color: var(--color-primary);
-}
-
-
-/* --- 10. Acordeón (Mis Notas) --- */
-.acordeon-item {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  margin-bottom: 15px;
-  overflow: hidden;
-  transition: var(--transition);
-  border: 1px solid #eef2f7;
-}
-.acordeon-item.opened {
-  box-shadow: var(--shadow-hover);
-  border-color: var(--color-primary);
-}
-.acordeon-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 25px;
-  cursor: pointer;
-}
-.acordeon-header:hover {
-  background-color: #fcfdff;
-}
-
-.acc-title {
-  font-weight: 600;
-  font-size: 18px;
-  color: var(--color-primary);
-}
-.acc-sub {
-  font-size: 14px;
-  color: #555;
-}
-
-.acordeon-arrow {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-primary);
-  transition: transform 0.3s ease;
-}
-
-.acordeon-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-out;
-}
-.acordeon-body.open {
-  max-height: 2500px;
-  transition: max-height 0.6s ease-in;
-}
-
-/* Tabla DENTRO del acordeón */
-.acordeon-body .tabla-alumnos {
-  border: none;
-  box-shadow: none;
-}
-.acordeon-body .tabla-alumnos th {
-  padding-left: 25px;
-  padding-right: 25px;
-  background: #f8f9fb; /* Fondo claro para cabecera interna */
-  color: var(--color-primary); /* Texto azul */
-}
-.acordeon-body .tabla-alumnos td {
-  padding-left: 25px;
-  padding-right: 25px;
-}
-
-/* --- 11. Overlay y Responsive --- */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: none;
-  z-index: 900;
-}
-
-@media (max-width: 992px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  .main {
-    margin-left: 0;
-  }
-  .toggle {
-    display: block;
-  }
-  .eval-form-grid, .ingresar-grid {
-    grid-template-columns: 1fr;
-  }
-  .cursos-grid, .alumnos-grid {
-    grid-template-columns: 1fr;
-  }
-  .topbar {
-    padding: 0 20px;
-  }
-  .content {
-    padding: 20px;
-  }
-  .perfil-info-box td {
-    display: block;
-    width: 100%;
-    padding-bottom: 0;
-  }
-  .perfil-info-box td:first-child {
-    font-weight: 600;
-    padding-top: 15px;
-  }
+  background: #d7e4ff;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
 }
