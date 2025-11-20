@@ -1,102 +1,109 @@
 {% load static %}
+
 <!doctype html>
-<html lang="es" class="theme-auto">
+<html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Intranet | Alumno</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel Alumno</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<!-- Fuentes e íconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="icon" href="{% static 'img/logo.png' %}" />
-  <link rel="stylesheet" href="{% static 'student_css/studentStyle.css' %}" />
-
-  <script>window.STATIC_URL="{{ STATIC_URL|default:'/static/' }}";</script>
+<!-- Estilos principales -->
+<link rel="stylesheet" href="{% static 'student_css/studentstyle.css' %}">
 </head>
+
 <body>
-  <div class="layout">
-    <!-- SIDEBAR (off-canvas en móvil) -->
-    <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
-      <a class="brand" href="/" aria-label="Inicio">
-        <img class="brand-logo" src="{% static 'img/logo.png' %}" alt="Logo Colegio" />
-        <div class="brand-text">
-          <span class="brand-title">Intranet</span>
-          <small class="brand-subtitle">Portal Alumno</small>
-        </div>
-      </a>
-
-      <div class="profile">
-        <div class="avatar" aria-hidden="true">
-          <img class="avatar-photo" src="{% static 'img/student.jpg' %}" alt="" onerror="this.style.display='none'" />
-          <span class="avatar-initials">FH</span>
-        </div>
-        <div>
-          <div class="profile-name">Felipe Huencho</div>
-          <div class="profile-role">Alumno</div>
-        </div>
+<div class="layout">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <div class="avatar">
+        {{ request.user.first_name|default:"U"|slice:":1" }}{{ request.user.last_name|default:"S"|slice:":1" }}
       </div>
-
-      <nav class="menu" role="navigation">
-        <a href="#" class="active" data-section="dashboard" aria-current="page"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
-        <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i><span>Mis Clases</span></a>
-        <a href="#" data-section="notas"><i class="fa-solid fa-list-check"></i><span>Notas</span></a>
-        <a href="#" data-section="calendario"><i class="fa-solid fa-calendar"></i><span>Calendario</span></a>
-        <a href="#" data-section="perfil"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
-        <a href="#" data-section="pagos"><i class="fa-solid fa-wallet"></i><span>Pagos</span></a>
-      </nav>
-    </aside>
-
-    <!-- Backdrop para el drawer en móvil -->
-    <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
-
-    <section class="main">
-      <header class="topbar">
-        <!-- botón hamburguesa (solo visible en móvil) -->
-        <button id="btn-hamburger" class="btn-icon hamburger"
-                aria-label="Abrir menú"
-                aria-controls="sidebar"
-                aria-expanded="false">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-
-        <h1 id="topbar-t" class="topbar-t">Portal alumnos</h1>
-        <div class="spacer"></div>
-
-        <button id="btn-theme" class="btn-icon" aria-label="Cambiar tema (claro/oscuro)" title="Tema">
-          <i class="fa-solid fa-circle-half-stroke"></i>
-        </button>
-
-        <div class="user-mini" aria-label="Usuario">
-          <span class="user-name">Felipe Huencho</span>
-          <div class="avatar-mini" aria-hidden="true">FH</div>
+      <div class="profile-info">
+        <div>{{ request.user.first_name }}</div>
+        <div class="role">
+          {% if request.user.role == "student" %} Alumno
+          {% elif request.user.role == "teacher" %} Profesor
+          {% elif request.user.role == "finance_admin" %} Finanzas
+          {% elif request.user.role == "admin" %} Administrador
+          {% else %} Usuario {% endif %}
         </div>
-      </header>
-
-      <main class="content">
-        <div id="main-card" class="card" aria-live="polite"></div>
-      </main>
-
-      <footer class="footer">© Colegio San Agustín de Hipona — 2025</footer>
-    </section>
-  </div>
-
-  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Diálogo">
-    <div class="modal-backdrop"></div>
-    <div class="modal-card" role="document">
-      <div class="modal-head">
-        <h3 id="modal-title" class="modal-title">Título</h3>
-        <button class="btn-icon" id="modal-close" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div id="modal-body" class="modal-body"></div>
-      <div class="modal-foot">
-        <button class="btn btn-secondary" id="modal-ok">Cerrar</button>
       </div>
     </div>
-  </div>
 
-  <script src="{% static 'js/studentApp.js' %}"></script>
+    <nav class="menu">
+      <a href="#" data-section="dashboard" class="active"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+      <a href="#" data-section="mis-clases"><i class="fa-solid fa-book"></i> <span>Mis Clases</span></a>
+      <a href="#" data-section="tareas"><i class="fa-solid fa-file-pen"></i> <span>Tareas/Notas</span></a>
+      <a href="#" data-section="calendario"><i class="fa-solid fa-calendar"></i> <span>Calendario</span></a>
+      <a href="#" data-section="perfil"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+      <a href="#" data-section="pagos"><i class="fa-solid fa-wallet"></i> <span>Portal de Pagos</span></a>
+      <a href="{% url 'inicioSesion:logout' %}" class="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar sesión</span></a>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <section class="main">
+    <header class="topbar">
+      <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="spacer"></div>
+      <div class="user-mini">
+        <span>{{ request.user.first_name }}</span>
+        <div class="avatar-mini">{{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}</div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO DINÁMICO -->
+    <main class="content" id="content-area">
+      <div class="card">
+        <h2 class="card-title">Bienvenido, {{ request.user.first_name }} {{ request.user.last_name }} - {{ curso }}</h2>
+        <p>Este es tu panel personal de estudiante.</p>
+
+        <div class="stat-cards-container">
+          <div class="stat-card" style="--card-color: var(--color-primary);">
+            <i class="fa-solid fa-book card-icon"></i>
+            <div class="card-info">
+              <div class="card-num">6</div>
+              <div class="card-label">Tus asignaturas</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--card-color: var(--color-secondary);">
+            <i class="fa-solid fa-list-check card-icon"></i>
+            <div class="card-info">
+              <div class="card-num">4.8</div>
+              <div class="card-label">Promedio general</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      Copyright © Colegio San Agustín de Hipona 2025
+    </footer>
+  </section>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+  // Pasar variables Django a JS (opcional)
+  const alumno = {
+    nombre: "{{ request.user.first_name }} {{ request.user.last_name }}",
+    curso: "{{ curso }}"
+  };
+</script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
+<script type="module" src="{% static 'student_js/ui_student.js' %}"></script>
+
+
+
+
+
 </body>
 </html>
