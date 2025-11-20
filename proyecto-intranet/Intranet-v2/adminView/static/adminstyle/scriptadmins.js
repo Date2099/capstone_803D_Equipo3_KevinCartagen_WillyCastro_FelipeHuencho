@@ -928,103 +928,192 @@ links.forEach(link => {
 
       //DASHBOARD
 
+       // ======================================================
+      // 🟦 TABLERO (DASHBOARD FINAL - 4 ARRIBA / 2 ABAJO)
+      // ======================================================
       case "tablero":
         title.textContent = "Panel de Control";
+
+        // --- 1. Estructura HTML ---
         mainContent.innerHTML = `
           <h1>Bienvenido</h1>
-          <p>Resumen general del sistema:</p>
+          <p>Resumen general del ecosistema escolar.</p>
 
           <div class="tarjetas-resumen">
-            <div class="tarjeta" id="card-estudiantes">Estudiantes: —</div>
-            <div class="tarjeta" id="card-profesores">Profesores: —</div>
-            <div class="tarjeta" id="card-apoderados">Apoderados: —</div>
-            <div class="tarjeta" id="card-admins">Administrativos: —</div>
+            <div class="tarjeta" id="card-estudiantes">Estudiantes: ...</div>
+            <div class="tarjeta" id="card-profesores">Profesores: ...</div>
+            <div class="tarjeta" id="card-apoderados">Apoderados: ...</div>
+            <div class="tarjeta" id="card-admins">Administrativos: ...</div>
           </div>
 
           <div class="dashboard-charts">
+            
             <div class="chart-box">
-              <div class="chart-title">Estado de Pagos</div>
-              <canvas id="graficoPagos"></canvas>
+              <div class="chart-title">Distribución de Usuarios</div>
+              <div class="chart-container"><canvas id="graficoUsuarios"></canvas></div>
             </div>
 
             <div class="chart-box">
-              <div class="chart-title">Distribución de Usuarios</div>
-              <canvas id="graficoUsuarios"></canvas>
+              <div class="chart-title">Estado General de Pagos</div>
+              <div class="chart-container"><canvas id="graficoPagos"></canvas></div>
             </div>
+
+            <div class="chart-box">
+              <div class="chart-title">Proporción Alumnos / Personal</div>
+              <div class="chart-container"><canvas id="graficoRelacion"></canvas></div>
+            </div>
+
+            <div class="chart-box">
+              <div class="chart-title">Desglose de Cobranza</div>
+              <div class="chart-container"><canvas id="graficoDeuda"></canvas></div>
+            </div>
+
+            <div class="chart-box" style="grid-column: span 2; height: 450px;">
+              <div class="chart-title">Detalle de Matrícula por Curso</div>
+              <div class="chart-container"><canvas id="graficoAlumnosNivel"></canvas></div>
+            </div>
+
+            <div class="chart-box" style="grid-column: span 2; height: 450px;">
+              <div class="chart-title">Población Estudiantil por Ciclo</div>
+              <div class="chart-container"><canvas id="graficoCiclos"></canvas></div>
+            </div>
+
           </div>
         `;
 
-        // Cargar datos desde backend 
+        // --- 2. Configuración Global ---
+        Chart.defaults.font.family = "'Poppins', sans-serif";
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.scale.grid.color = '#f1f5f9';
+        
+        const tooltipTheme = {
+          backgroundColor: '#ffffff', titleColor: '#1c3162', bodyColor: '#64748b',
+          borderColor: '#e2e8f0', borderWidth: 1, padding: 12, usePointStyle: true,
+          titleFont: { size: 14, family: "'Poppins', sans-serif" }, displayColors: true
+        };
+
+        function createGradient(ctx, c1, c2) {
+            const g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, c1); g.addColorStop(1, c2); return g;
+        }
+
         try {
           const resp = await fetch("/adminview/api/dashboard/stats/");
           const stats = await resp.json();
 
-          // Actualizar tarjetas
+          // Cards
           document.getElementById("card-estudiantes").textContent = `Estudiantes: ${stats.total_students}`;
           document.getElementById("card-profesores").textContent  = `Profesores: ${stats.total_teachers}`;
           document.getElementById("card-apoderados").textContent  = `Apoderados: ${stats.total_guardians}`;
           document.getElementById("card-admins").textContent      = `Administrativos: ${stats.total_admins}`;
 
+          // --- GRÁFICOS SUPERIORES ---
 
-          // GRÁFICO: PAGOS 
-          new Chart(document.getElementById("graficoPagos"), {
-            type: "bar",
-            data: {
-              labels: ["Pendientes", "Pagados", "Fallidos"],
-              datasets: [{
-                label: "Pagos",
-                data: [
-                  stats.pagos_pendientes,
-                  stats.pagos_pagados,
-                  stats.pagos_fallidos
-                ],
-                backgroundColor: ["#F4C542", "#21C29D", "#E74C3C"],
-                borderRadius: 6
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { display: false }
-              }
-            }
-          });
-
-
-          //  GRÁFICO: USUARIOS 
-
+          // 1. Usuarios
           new Chart(document.getElementById("graficoUsuarios"), {
             type: "doughnut",
             data: {
-              labels: ["Estudiantes", "Profesores", "Apoderados", "Administrativos"],
+              labels: ["Alumnos", "Profesores", "Apoderados", "Admin"],
+              datasets: [{ data: [stats.total_students, stats.total_teachers, stats.total_guardians, stats.total_admins], backgroundColor: ["#1c3162", "#CDA758", "#60a5fa", "#94a3b8"], borderWidth: 4, borderColor: '#ffffff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: tooltipTheme } }
+          });
+
+          // 2. Pagos
+          new Chart(document.getElementById("graficoPagos"), {
+            type: "pie",
+            data: {
+              labels: ["Pagados", "Pendientes", "Fallidos"],
+              datasets: [{ data: [stats.pagos_pagados, stats.pagos_pendientes, stats.pagos_fallidos], backgroundColor: ["#10b981", "#f59e0b", "#ef4444"], borderWidth: 4, borderColor: '#ffffff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: tooltipTheme } }
+          });
+
+          // 3. Relación
+          const personalTotal = stats.total_teachers + stats.total_admins;
+          new Chart(document.getElementById("graficoRelacion"), {
+            type: "bar",
+            data: {
+              labels: ["Alumnos", "Personal"],
+              datasets: [{ label: "Personas", data: [stats.total_students, personalTotal], backgroundColor: ["#1c3162", "#CDA758"], borderRadius: 6, barThickness: 40 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipTheme }, scales: { x: { display: false }, y: { grid: { display: false } } } }
+          });
+
+          // 4. Deuda
+          new Chart(document.getElementById("graficoDeuda"), {
+            type: "polarArea",
+            data: {
+              labels: ["Pagado", "Pendiente", "Fallido"],
+              datasets: [{ data: [stats.pagos_pagados, stats.pagos_pendientes, stats.pagos_fallidos], backgroundColor: ["rgba(16, 185, 129, 0.7)", "rgba(245, 158, 11, 0.7)", "rgba(239, 68, 68, 0.7)"], borderWidth: 1, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: '#f0f0f0' }, ticks: { display: false } } }, plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: tooltipTheme } }
+          });
+
+          // --- GRÁFICOS INFERIORES (ANCHOS) ---
+
+          // 5. MATRÍCULA POR NIVEL (Izquierda)
+          const ctxNivel = document.getElementById("graficoAlumnosNivel").getContext('2d');
+          const gradNivel = createGradient(ctxNivel, '#CDA758', '#fae8b9');
+          
+          // Validamos datos
+          const nivelesLabels = (stats.niveles_labels && stats.niveles_labels.length) ? stats.niveles_labels : ["Sin datos"];
+          const nivelesData = (stats.niveles_data && stats.niveles_data.length) ? stats.niveles_data : [0];
+
+          new Chart(ctxNivel, {
+            type: "bar",
+            data: {
+              labels: nivelesLabels,
               datasets: [{
-                data: [
-                  stats.total_students,
-                  stats.total_teachers,
-                  stats.total_guardians,
-                  stats.total_admins
-                ],
-                backgroundColor: ["#4A68FF", "#34D399", "#2DC8D2", "#F4B400"],
-                borderWidth: 2
+                label: "Alumnos",
+                data: nivelesData,
+                backgroundColor: gradNivel,
+                borderRadius: 6,
+                barThickness: 30
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipTheme }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } }
+          });
+
+
+          // 6. DISTRIBUCIÓN POR CICLO (Derecha)
+          let preEscolar = 0, basica = 0, media = 0;
+          
+          // Usamos los mismos datos de niveles para calcular ciclos
+          nivelesLabels.forEach((label, i) => {
+             const l = label.toLowerCase();
+             const count = nivelesData[i];
+             if (l.includes('med')) media += count;
+             else if (l.includes('bás') || l.match(/\d/)) basica += count;
+             else preEscolar += count;
+          });
+
+          const ctxCiclos = document.getElementById("graficoCiclos").getContext('2d');
+          new Chart(ctxCiclos, {
+            type: 'doughnut',
+            data: {
+              labels: ["Pre-Escolar", "Básica", "Media"],
+              datasets: [{
+                data: [preEscolar, basica, media],
+                backgroundColor: ["#60a5fa", "#1c3162", "#CDA758"], // Celeste, Azul, Dorado
+                borderWidth: 0,
+                hoverOffset: 15
               }]
             },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: "55%"
+              responsive: true, maintainAspectRatio: false, cutout: "60%",
+              plugins: {
+                legend: { position: 'right', labels: { usePointStyle: true, padding: 20, font: {size: 13} } },
+                tooltip: tooltipTheme
+              },
+              layout: { padding: 10 }
             }
           });
 
         } catch (error) {
-          console.error("Error cargando dashboard:", error);
-          mainContent.innerHTML += `
-            <div class="error-msg">
-              No se pudieron cargar los gráficos del tablero.
-            </div>
-          `;
+          console.error(error);
+          mainContent.innerHTML += `<div class="error-msg">Error cargando gráficos.</div>`;
         }
-
         break;
 
 

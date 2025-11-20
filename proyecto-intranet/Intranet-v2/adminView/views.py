@@ -577,8 +577,15 @@ def api_listar_horarios(request):
 
     return JsonResponse({"profesores": list(profesores.values())})
 
-@login_required
+@@login_required
 def api_dashboard_stats(request):
+    # 1. Configuración regional para meses en español (opcional)
+    try:
+        locale.setlocale(locale.LC_TIME, '') 
+    except:
+        pass
+
+    # --- DATOS EXISTENTES (No se tocan) ---
     stats = {
         "total_students": User.objects.filter(role="student").count(),
         "total_teachers": User.objects.filter(role="teacher").count(),
@@ -587,5 +594,53 @@ def api_dashboard_stats(request):
         "pagos_pendientes": Payment.objects.filter(status="pending").count(),
         "pagos_pagados": Payment.objects.filter(status="paid").count(),
         "pagos_fallidos": Payment.objects.filter(status="failed").count(),
+        "pagos_reembolsados": Payment.objects.filter(status="refunded").count(),
     }
+
+    # --- NUEVO: Datos para Gráfico de Flujo de Ingresos ---
+    # Agrupa pagos 'paid' por mes y suma los montos
+    ingresos_query = (
+        Payment.objects.filter(status='paid')
+        .annotate(month=TruncMonth('issue_date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    ingresos_labels = []
+    ingresos_data = []
+
+    for entry in ingresos_query:
+        if entry['month']:
+            # Formato ej: "Noviembre"
+            mes_nombre = entry['month'].strftime('%B').capitalize()
+            ingresos_labels.append(mes_nombre)
+            ingresos_data.append(entry['total'])
+
+    # --- NUEVO: Datos para Gráfico de Matrícula por Nivel ---
+    # Cuenta alumnos activos agrupados por curso
+    alumnos_nivel_query = (
+        Enrollment.objects.filter(active_status='active')
+        .values('class_group__grade__curso_nombre')
+        .annotate(total=Count('student'))
+        .order_by('class_group__grade__curso_id') # Orden lógico (1B, 2B...)
+    )
+
+    niveles_labels = []
+    niveles_data = []
+
+    for entry in alumnos_nivel_query:
+        nombre = entry['class_group__grade__curso_nombre']
+        if nombre:
+            # Abreviar nombres largos para el gráfico
+            nombre_corto = nombre.replace("Básico", "Bás").replace("Medio", "Med")
+            niveles_labels.append(nombre_corto)
+            niveles_data.append(entry['total'])
+
+    # Agregar los nuevos datos al diccionario de respuesta
+    stats["ingresos_labels"] = ingresos_labels
+    stats["ingresos_data"] = ingresos_data
+    stats["niveles_labels"] = niveles_labels
+    stats["niveles_data"] = niveles_data
+
     return JsonResponse(stats)
