@@ -1,4 +1,5 @@
 from django.contrib import admin
+<<<<<<< HEAD
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import (
@@ -77,3 +78,7 @@ admin.site.register(EvaluationType)
 admin.site.register(Evaluation)
 admin.site.register(GradeResult)
 admin.site.register(Attendance)
+=======
+
+# Register your models here.
+>>>>>>> feature/admin-view

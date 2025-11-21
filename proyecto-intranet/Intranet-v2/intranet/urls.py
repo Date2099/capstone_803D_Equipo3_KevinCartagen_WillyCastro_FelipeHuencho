@@ -10,5 +10,11 @@ urlpatterns = [
     path('studentView/', include('studentView.urls')),
     path('adminview/', include('adminView.urls')), # tu portal administrador
     path('profesorView/', include('profesorView.urls')),
+<<<<<<< HEAD
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
 ]
+=======
+    path('core/', include('core.urls')),
+
+]
+>>>>>>> feature/admin-view

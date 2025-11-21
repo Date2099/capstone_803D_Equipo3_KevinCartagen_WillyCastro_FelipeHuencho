@@ -44,7 +44,11 @@ INSTALLED_APPS = [
     'studentView',
     'adminView',
     'profesorView',
+<<<<<<< HEAD
     
+=======
+    'core',
+>>>>>>> feature/admin-view
 
 ]
 AUTH_USER_MODEL = 'core.User'
@@ -91,12 +95,16 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> feature/admin-view
         'NAME': 'intranet_db',
         'USER': 'admin',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
 
+<<<<<<< HEAD
 =======
         'NAME': 'intranet_escolar2',
         'USER': 'postgres',
@@ -104,6 +112,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
 >>>>>>> 63bafe06f858cbe0751fd22ad3630360f6980b9c
+=======
+>>>>>>> feature/admin-view
     }
 }
 
@@ -125,6 +135,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+AUTH_USER_MODEL = "core.User"
+
 
 
 # Internationalization

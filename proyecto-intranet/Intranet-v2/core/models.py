@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
@@ -39,6 +40,18 @@ class CustomUserManager(DjangoUserManager):
 # ==========================
 #  Usuario
 # ==========================
+=======
+from django.db import models
+
+# Create your models here.
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+# ---------------------------
+# Modelo de Usuario
+# ---------------------------
+
+>>>>>>> feature/admin-view
 class User(AbstractUser):
     STUDENT = "student"
     GUARDIAN = "guardian"
@@ -53,6 +66,7 @@ class User(AbstractUser):
         (ADMIN, "Administrador"),
         (FINANCE_ADMIN, "Administrador de Finanzas"),
     ]
+<<<<<<< HEAD
 
     username = None
     rut = models.CharField(max_length=15, unique=True)
@@ -61,6 +75,11 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(null=True, blank=True)
+=======
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    
+    rut = models.CharField(max_length=15, unique=True, null=True, blank=True)
+>>>>>>> feature/admin-view
     phone = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -71,6 +90,7 @@ class User(AbstractUser):
         choices=[("active", "Activo"), ("inactive", "Inactivo")],
         default="active"
     )
+<<<<<<< HEAD
 
     department = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=150, null=True, blank=True)
@@ -105,6 +125,21 @@ class User(AbstractUser):
 # ==========================
 #  Managers por rol (opcionales)
 # ==========================
+=======
+    # Campos específicos por rol
+    department = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(max_length=150, null=True, blank=True)
+    subject = models.CharField(max_length=150, null=True, blank=True)
+    position = models.CharField(max_length=150, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
+
+
+# ---------------------------
+# Managers por rol
+# ---------------------------
+>>>>>>> feature/admin-view
 class StudentManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(role=User.STUDENT)
@@ -118,6 +153,7 @@ class GuardianManager(models.Manager):
         return super().get_queryset().filter(role=User.GUARDIAN)
 
 
+<<<<<<< HEAD
 # ==========================
 #  Grados y Clases
 # ==========================
@@ -127,6 +163,17 @@ class Grade(models.Model):
 
     def __str__(self):
         return f"{self.curso_id} - {self.curso_nombre}"
+=======
+# ---------------------------
+# Grados y Clases
+# ---------------------------
+class Grade(models.Model):
+    name = models.CharField(max_length=100, unique=True)  
+    # Ej: "Prekínder", "1° Básico", "4° Medio"
+
+    def __str__(self):
+        return self.name
+>>>>>>> feature/admin-view
 
 
 class Class(models.Model):
@@ -138,13 +185,18 @@ class Class(models.Model):
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["grade", "year"], name="unique_class_per_year")
+=======
+            models.UniqueConstraint(fields=['grade', 'year'], name='unique_class_per_year')
+>>>>>>> feature/admin-view
         ]
 
     def __str__(self):
         return f"{self.grade} - {self.year}"
 
 
+<<<<<<< HEAD
 # ==========================
 #  Asignaturas
 # ==========================
@@ -248,12 +300,21 @@ class SubjectSchedule(models.Model):
 # ==========================
 #  Matrículas
 # ==========================
+=======
+# ---------------------------
+# Matrículas (Enrollment)
+# ---------------------------
+>>>>>>> feature/admin-view
 class Enrollment(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
     )
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE)
+<<<<<<< HEAD
     date = models.DateField(null=True, blank=True)
+=======
+    date = models.DateField()
+>>>>>>> feature/admin-view
     active_status = models.CharField(
         max_length=20,
         choices=[("active", "Activo"), ("inactive", "Inactivo")],
@@ -264,16 +325,26 @@ class Enrollment(models.Model):
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["student", "class_group"], name="unique_enrollment")
+=======
+            models.UniqueConstraint(fields=['student', 'class_group'], name='unique_enrollment')
+>>>>>>> feature/admin-view
         ]
 
     def __str__(self):
         return f"{self.student} en {self.class_group}"
 
 
+<<<<<<< HEAD
 # ==========================
 #  Relación Apoderado - Alumno
 # ==========================
+=======
+# ---------------------------
+# Relación Apoderado - Alumno
+# ---------------------------
+>>>>>>> feature/admin-view
 class GuardianRelation(models.Model):
     guardian = models.ForeignKey(
         User,
@@ -290,16 +361,26 @@ class GuardianRelation(models.Model):
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["guardian", "student"], name="unique_guardian_student")
+=======
+            models.UniqueConstraint(fields=['guardian', 'student'], name='unique_guardian_student')
+>>>>>>> feature/admin-view
         ]
 
     def __str__(self):
         return f"{self.guardian} -> {self.student}"
 
 
+<<<<<<< HEAD
 # ==========================
 #  Evaluaciones y Resultados
 # ==========================
+=======
+# ---------------------------
+# Evaluaciones y Resultados
+# ---------------------------
+>>>>>>> feature/admin-view
 class EvaluationType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -310,20 +391,31 @@ class EvaluationType(models.Model):
 
 class Evaluation(models.Model):
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE)
+<<<<<<< HEAD
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+=======
+>>>>>>> feature/admin-view
     teacher = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.TEACHER}
     )
     evaluation_type = models.ForeignKey(EvaluationType, on_delete=models.CASCADE)
     date = models.DateField()
     description = models.TextField()
+<<<<<<< HEAD
     weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
+=======
+    weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)  # peso evaluación
+>>>>>>> feature/admin-view
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+<<<<<<< HEAD
         return f"{self.subject} - {self.evaluation_type} ({self.date})"
+=======
+        return f"{self.class_group} - {self.evaluation_type} ({self.date})"
+>>>>>>> feature/admin-view
 
 
 class GradeResult(models.Model):
@@ -337,6 +429,7 @@ class GradeResult(models.Model):
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["evaluation", "student"], name="unique_grade_result")
         ]
 
@@ -347,6 +440,18 @@ class GradeResult(models.Model):
 # ==========================
 #  Asistencia
 # ==========================
+=======
+            models.UniqueConstraint(fields=['evaluation', 'student'], name='unique_grade_result')
+        ]
+
+    def __str__(self):
+        return f"{self.student} - {self.score}"
+
+
+# ---------------------------
+# Asistencia
+# ---------------------------
+>>>>>>> feature/admin-view
 class Attendance(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
@@ -361,13 +466,18 @@ class Attendance(models.Model):
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["student", "class_group", "date"], name="unique_attendance")
+=======
+            models.UniqueConstraint(fields=['student', 'class_group', 'date'], name='unique_attendance')
+>>>>>>> feature/admin-view
         ]
 
     def __str__(self):
         return f"{self.student} - {self.date}: {'Presente' if self.present else 'Ausente'}"
 
 
+<<<<<<< HEAD
 # ==========================
 #  Pagos (Versión Fusionada)
 # ==========================
@@ -406,10 +516,26 @@ class Payment(models.Model):
     accounting_date = models.CharField(max_length=20, blank=True, null=True)
 
     cuotas_ids = models.TextField(blank=True, null=True, help_text="IDs de mensualidades pagadas (separados por coma)")
+=======
+# ---------------------------
+# Pagos
+# ---------------------------
+class Payment(models.Model):
+    student = models.ForeignKey(
+        User, on_delete=models.CASCADE, limit_choices_to={"role": User.STUDENT}
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    concept = models.CharField(max_length=100, default="Mensualidad")  # nuevo campo
+    date = models.DateField()
+    status = models.CharField(
+        max_length=20, choices=[("paid", "Pagado"), ("pending", "Pendiente")]
+    )
+>>>>>>> feature/admin-view
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+<<<<<<< HEAD
     # Propiedades útiles
     @property
     def is_overdue(self):
@@ -501,3 +627,7 @@ class Comunicado(models.Model):
 
     def __str__(self):
         return f"{self.asunto} - {self.fecha_envio.strftime('%d/%m/%Y %H:%M')}"
+=======
+    def __str__(self):
+        return f"{self.student} - {self.amount} ({self.status})"
+>>>>>>> feature/admin-view
