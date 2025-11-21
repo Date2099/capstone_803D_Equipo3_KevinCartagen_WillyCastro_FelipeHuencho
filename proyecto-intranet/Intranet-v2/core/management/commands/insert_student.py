@@ -44,7 +44,11 @@ class Command(BaseCommand):
         parser.add_argument(
             "csv_file",
             nargs="?",
+<<<<<<< HEAD
+            default=r"C:\Users\Softer\Desktop\CARGA DE ARCHIVOS GOD\matriz de carga.csv",
+=======
             default=r"C:\Users\Carta\Downloads\excels_de_carga\Nueva carpeta\matriz de carga.csv",
+>>>>>>> 63bafe06f858cbe0751fd22ad3630360f6980b9c
             help="Ruta del CSV. Si no se indica, usa la ruta por defecto."
         )
         parser.add_argument(

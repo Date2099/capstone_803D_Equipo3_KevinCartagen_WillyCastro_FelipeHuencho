@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserMa
 # ==========================
 #  User Manager (usa RUT)
 # ==========================
-from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
+
 
 class CustomUserManager(DjangoUserManager):
     use_in_migrations = True
@@ -15,9 +15,6 @@ class CustomUserManager(DjangoUserManager):
         if not rut:
             raise ValueError("El RUT es obligatorio")
         email = self.normalize_email(email)
-
-        # ❌ NO seteamos 'username' porque NO existe en tu modelo
-        # extra_fields.setdefault("username", str(rut))
 
         user = self.model(rut=str(rut).strip(), email=email, **extra_fields)
         user.set_password(password)
@@ -165,6 +162,48 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.class_group})"
+    
+
+
+
+class SubjectSchedule(models.Model):
+   
+    MON, TUE, WED, THU, FRI = range(5)
+    DOW_CHOICES = [
+        (MON, "Lunes"),
+        (TUE, "Martes"),
+        (WED, "Miércoles"),
+        (THU, "Jueves"),
+        (FRI, "Viernes"),
+    ]
+
+    subject = models.ForeignKey(
+        "core.Subject",  
+        on_delete=models.CASCADE,
+        related_name="schedules",
+    )
+    day_of_week = models.PositiveSmallIntegerField(choices=DOW_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        ordering = ["day_of_week", "start_time"]
+        constraints = [
+            # Asegura que la hora de término sea mayor a la de inicio
+            models.CheckConstraint(
+                check=models.Q(end_time__gt=models.F("start_time")),
+                name="sched_end_after_start",
+            ),
+            # (Opcional) evita duplicar exactamente el mismo bloque para una asignatura
+            models.UniqueConstraint(
+                fields=["subject", "day_of_week", "start_time", "end_time"],
+                name="uniq_subject_timeslot",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.subject} • {self.get_day_of_week_display()} {self.start_time}-{self.end_time}"
+
 
 
 class SubjectSchedule(models.Model):

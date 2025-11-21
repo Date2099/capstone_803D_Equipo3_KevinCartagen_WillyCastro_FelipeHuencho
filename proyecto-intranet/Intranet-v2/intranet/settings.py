@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-from dotenv import load_dotenv
+
 from pathlib import Path
 from pathlib import Path
 
@@ -90,11 +90,20 @@ WSGI_APPLICATION = 'intranet.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+<<<<<<< HEAD
+        'NAME': 'intranet_db',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+
+=======
         'NAME': 'intranet_escolar2',
         'USER': 'postgres',
         'PASSWORD': '31demayo2004',
         'HOST': 'localhost',
         'PORT': '5432',
+>>>>>>> 63bafe06f858cbe0751fd22ad3630360f6980b9c
     }
 }
 

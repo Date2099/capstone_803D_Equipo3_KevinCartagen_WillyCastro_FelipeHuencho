@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand
-from studentView.models import User
+from core.models import User
 
 
 class Command(BaseCommand):
