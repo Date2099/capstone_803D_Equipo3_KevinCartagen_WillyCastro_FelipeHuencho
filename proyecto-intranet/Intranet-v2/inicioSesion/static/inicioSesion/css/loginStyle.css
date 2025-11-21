@@ -529,12 +529,34 @@ body::before {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
+<<<<<<< HEAD
   color: var(--color-placeholder);
   transition: color var(--transition-main);
 }
 .eye-icon:hover {
   color: var(--color-primary);
+=======
+
+  /* Arreglos visuales */
+  background: none;
+  border: none;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+>>>>>>> feature/inicio-sesion
 }
+.eye-icon svg {
+  stroke: #eae8e8; /* color inicial */
+
+}
+
+.eye-icon:hover svg {
+  stroke: rgb(0, 0, 0);
+}
+
 
 /**
  * Grupo para el Checkbox y el enlace "Olvidé Contraseña".
@@ -653,6 +675,7 @@ body::before {
 
 .form-btn--social:hover {
   border-color: var(--color-primary);
+<<<<<<< HEAD
   background-color: var(--color-primary); /* Fondo Azul en hover */
   transform: translateY(-3px);
 }
@@ -664,6 +687,13 @@ body::before {
 .form-btn--social:hover .icon-invertible {
   filter: brightness(0) invert(1);
 }
+=======
+  background-color: var(--color-primary); 
+  transform: translateY(-3px);
+}
+
+
+>>>>>>> feature/inicio-sesion
 
 .btn-icon {
   width: 24px;
@@ -876,6 +906,7 @@ body::before {
     height: auto;
     margin: 0 auto 20px;
   }
+<<<<<<< HEAD
   
   /* Ajustes para el contenedor de mensajes flotantes en móvil */
   .message-container {
@@ -886,6 +917,100 @@ body::before {
   .alert {
     font-size: 0.85rem;
     padding: 8px 12px;
+=======
+}
+
+.form-error-box {
+  background-color: rgba(255, 0, 0, 0.08);
+  border: 1px solid #e74c3c;
+  color: #c0392b;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+
+
+
+/* ============================
+   MENSAJES DE LOGIN (FLOTANTES)
+=============================== */
+
+.message-container {
+  position: absolute;
+  top: 10px;
+  left: 72%; /* Aumenta para moverlo a la derecha */
+  transform: translateX(-50%);
+  z-index: 999;
+  text-align: center;
+  width: 100%;
+  max-width: 350px;
+  pointer-events: none;
+}
+
+
+
+/* Caja del mensaje */
+.alert {
+  background-color: #ffe6e6;
+  border: 1px solid #e57373;
+  color: #b71c1c;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 300;
+  display: inline-block;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  opacity: 0;
+  
+  /* Animaciones */
+  animation: fadeIn 0.35s ease forwards,
+             fadeOut 0.6s ease forwards 3.5s;
+  
+  font-size: 0.95rem;
+  text-align: center;
+  line-height: 1.25rem;
+  max-width: 260px;
+}
+
+/* Animación entrada */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -6px); }
+  to   { opacity: 1; transform: translate(-50%, 0px); }
+}
+
+/* Animación salida */
+@keyframes fadeOut {
+  from { opacity: 1; transform: translate(-50%, 0px); }
+  to   { opacity: 0; transform: translate(-50%, -8px); }
+}
+
+/* Variantes (por si después agregas otros tipos) */
+.alert.success {
+  background-color: #e8f5e9;
+  border-color: #81c784;
+  color: #2e7d32;
+}
+
+.alert.warning {
+  background-color: #fff8e1;
+  border-color: #fbc02d;
+  color: #8a6d00;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .alert {
+    max-width: 90%;
+    font-size: 0.88rem;
+    padding: 10px 16px;
+  }
+
+  .message-container {
+    top: 10px;
+    left: 90%; /* centrado en móviles */
+>>>>>>> feature/inicio-sesion
   }
 }
 

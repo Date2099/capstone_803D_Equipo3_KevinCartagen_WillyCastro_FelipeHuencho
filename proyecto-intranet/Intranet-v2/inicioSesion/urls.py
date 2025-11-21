@@ -3,8 +3,20 @@ from . import views
 
 app_name = "inicioSesion"
 
+# ----------------------------------------------------
+# Rutas del módulo de inicio de sesión
+# ----------------------------------------------------
 urlpatterns = [
-    path("", views.login_view, name="login"),
+    # Ruta raíz de la app /inicioSesion/
+    # Decide si enviar al login o al dashboard según estado de sesión
+    path("", views.root_redirect, name="root_redirect"),
+
+    # Página de login
+    path("login/", views.login_view, name="login"),
+
+    # Redirección después de iniciar sesión
     path("post_login/", views.post_login, name="post_login"),
+
+    # Cerrar sesión
     path("logout/", views.logout_view, name="logout"),
 ]
