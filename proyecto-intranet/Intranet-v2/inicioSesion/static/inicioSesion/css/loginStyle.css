@@ -10,9 +10,18 @@
 |   DESCRIPCIÓN GENERAL:                                                       |
 |   Este archivo define la apariencia de la página de inicio de sesión         |
 |   de la rama 'main' de Kev182-pixel. Ha sido refactorizado profesionalmente  |
+<<<<<<< HEAD
 |   para utilizar un sistema centralizado de Variables CSS (:root).            |
 |                                                                              |
 |   ARQUITECTURA DEL ARCHIVO:                                                  |
+=======
+|   para utilizar un sistema centralizado de Variables CSS (:root),            |
+|   unificar la paleta de colores a la institucional (Azul/Dorado),            |
+|   corregir bugs de posicionamiento de la etiqueta flotante e                 |
+|   implementar nuevas animaciones para una experiencia de usuario premium.    |
+|                                                                              |
+|   ESTRUCTURA DEL ARCHIVO:                                                  |
+>>>>>>> feature/inicio-sesion
 |   1.  @import (Fuentes) - Carga la tipografía 'Poppins'.                     |
 |   2.  :root (Variables Globales) - Define TODA la paleta de colores,         |
 |       tipografía y tamaños estándar para el login.                           |
@@ -22,6 +31,7 @@
 |   5.  Panel Izquierdo (Branding) - El panel con la bienvenida y el logo.     |
 |   6.  Panel Derecho (Formulario) - El panel con el formulario de login.      |
 |   7.  Formulario - Estilos detallados para inputs, botones y enlaces.        |
+<<<<<<< HEAD
 |       ¡AQUÍ SE ARREGLA EL BUG VISUAL!                                        |
 |   8.  Componente de Alerta/Error - Estilos para mensajes de feedback.        |
 |   9.  Responsive (Media Queries) - Ajustes para móviles.                     |
@@ -30,6 +40,11 @@
 |   ¡IMPORTANTE! Este CSS está diseñado para funcionar con el HTML que       |
 |   utiliza el renderizado de formularios de Django (ej: {{ form.rut }})      |
 |   y el framework de mensajes (`{% if messages %}`).                          |
+=======
+|   8.  Componente de Alerta/Error - Estilos para mensajes de feedback.        |
+|   9.  Responsive (Media Queries) - Ajustes para móviles.                     |
+|   10. Animaciones (Keyframes) - Define todas las animaciones.                |
+>>>>>>> feature/inicio-sesion
 |                                                                              |
 ================================================================================
 */
@@ -58,7 +73,11 @@
 |   *** ¡ACTUALIZACIÓN DE REFACTORIZACIÓN! ***
 |   Se ha unificado la paleta de colores para que coincida con la
 |   del panel de Administrador y Profesor (Azul Marino y Dorado).
+<<<<<<< HEAD
 |   El --color-primary original (#2a2979) ha sido REEMPLAZADO.
+=======
+|   Tu --color-primary original (#2a2979) ha sido REEMPLAZADO.
+>>>>>>> feature/inicio-sesion
 |
 */
 :root {
@@ -118,6 +137,11 @@
   --radius-lg: 15px;                /* Radio grande (contenedor principal) */
   --radius-round: 50%;              /* Círculo perfecto (avatares sociales) */
   --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.2); /* Sombra principal del contenedor */
+<<<<<<< HEAD
+=======
+  --shadow-btn: 0 4px 15px rgba(var(--color-primary-rgb), 0.2); /* Sombra para botones */
+  --shadow-btn-hover: 0 6px 20px rgba(var(--color-secondary-rgb), 0.3); /* Sombra para hover de botón */
+>>>>>>> feature/inicio-sesion
 
   /* * ========================================
    * Transiciones (Animación)
@@ -175,7 +199,7 @@ body {
   
   /* Para el efecto blur */
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* Oculta el desbordamiento del blur */
 }
 
 /**
@@ -213,6 +237,10 @@ body::before {
  * - 'box-shadow' y 'border-radius' le dan la apariencia de "tarjeta".
  * - 'overflow: hidden' es crucial para que los paneles internos
  * respeten el borde redondeado.
+<<<<<<< HEAD
+=======
+ * - 'animation: fadeIn' añade una sutil animación de entrada.
+>>>>>>> feature/inicio-sesion
  */
 .main-wrapper {
   display: flex;
@@ -222,6 +250,7 @@ body::before {
   box-shadow: var(--shadow-main);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  animation: fadeIn 0.6s ease-out;
 }
 
 
@@ -234,6 +263,7 @@ body::before {
 /**
  * Panel izquierdo (Branding).
  * - 'flex: 1' hace que ocupe la mitad del espacio.
+<<<<<<< HEAD
  * - Usa la imagen de fondo con un overlay de color primario
  * para crear un efecto de tinte oscuro y legible.
  * - Usa Flexbox para centrar vertical y horizontalmente su contenido.
@@ -249,6 +279,15 @@ body::before {
   background-position: center;
   background-repeat: no-repeat;
   
+=======
+ * - Usa la imagen de fondo con un overlay de color primario.
+ * - 'position: relative' y 'overflow: hidden' para la animación de fondo.
+ */
+.left-panel {
+  flex: 1;
+  position: relative; /* Necesario para el pseudo-elemento de fondo */
+  overflow: hidden; /* Oculta el desbordamiento de la animación de fondo */
+>>>>>>> feature/inicio-sesion
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -259,6 +298,7 @@ body::before {
 }
 
 /**
+<<<<<<< HEAD
  * Contenedor para el contenido del panel izquierdo.
  */
 .left-panel-content {
@@ -266,6 +306,40 @@ body::before {
 }
 
 /**
+=======
+ * ¡NUEVA ANIMACIÓN DE FONDO!
+ * Creamos un pseudo-elemento ::before que contiene la imagen de fondo
+ * y el overlay.
+ * Aplicamos una animación 'zoomIn' que dura 20 segundos y se repite.
+ */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: linear-gradient(rgba(var(--color-primary-rgb), 0.65), rgba(var(--color-primary-rgb), 0.65)), url('DJI_0535.jpg');
+  background-size: cover;
+  background-position: center;
+  
+  /* Animación de zoom sutil */
+  animation: zoomIn 20s ease-in-out infinite alternate;
+}
+
+/**
+ * Contenedor para el contenido del panel izquierdo.
+ * 'position: relative' para que esté por encima del fondo animado.
+ */
+.left-panel-content {
+  max-width: 400px;
+  position: relative; /* Asegura que el contenido esté sobre el ::before */
+  z-index: 2;
+}
+
+/**
+>>>>>>> feature/inicio-sesion
  * Logo grande del colegio.
  * 'filter: drop-shadow' añade una sombra suave al logo
  * para que resalte sobre el fondo.
@@ -346,8 +420,11 @@ body::before {
 
 /**
  * Logo pequeño, solo visible en móviles (ver Media Queries).
+<<<<<<< HEAD
  * El estilo en línea 'style="width: 260px;"' del HTML
  * será SOBRESCRITO por el CSS en la media query.
+=======
+>>>>>>> feature/inicio-sesion
  */
 .school-logo-small {
   display: none; /* Oculto en desktop */
@@ -531,11 +608,33 @@ body::before {
   cursor: pointer;
   color: var(--color-placeholder);
   transition: color var(--transition-main);
+<<<<<<< HEAD
 }
 .eye-icon:hover {
   color: var(--color-primary);
 }
 
+=======
+  /* Arreglos visuales (de tu código) */
+  background: none;
+  border: none;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.eye-icon svg {
+  stroke: var(--color-placeholder); /* Usamos variable */
+  transition: stroke var(--transition-main);
+}
+.eye-icon:hover svg {
+  stroke: var(--color-primary); /* Usamos variable */
+}
+
+
+>>>>>>> feature/inicio-sesion
 /**
  * Grupo para el Checkbox y el enlace "Olvidé Contraseña".
  */
@@ -573,6 +672,13 @@ body::before {
 /**
  * Botón de Submit (Iniciar Sesión).
  * Usa la paleta Azul/Dorado.
+<<<<<<< HEAD
+=======
+ *
+ * ¡NUEVA ANIMACIÓN!
+ * Se añade un 'overflow: hidden' y un pseudo-elemento ::after
+ * para crear una animación de "brillo" (shimmer).
+>>>>>>> feature/inicio-sesion
  */
 .form-btn--submit {
   background-color: var(--color-primary); /* Fondo Azul */
@@ -584,15 +690,47 @@ body::before {
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-main);
+<<<<<<< HEAD
+=======
+  position: relative; /* Necesario para la animación de brillo */
+  overflow: hidden; /* Oculta el brillo fuera del botón */
+  box-shadow: var(--shadow-btn);
+>>>>>>> feature/inicio-sesion
 }
 
 .form-btn--submit:hover {
   background-color: var(--color-secondary); /* Fondo Dorado en hover */
   color: var(--color-primary-text); /* Texto Oscuro en hover */
   transform: translateY(-3px); /* Efecto de elevación */
+<<<<<<< HEAD
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+=======
+  box-shadow: var(--shadow-btn-hover);
+}
+
+/* Animación de "Brillo" (Shimmer) */
+.form-btn--submit::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right, 
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  /* La animación 'shimmer' está definida en SECCIÓN 10 */
+  animation: shimmer 3s infinite linear; 
+}
+
+
+>>>>>>> feature/inicio-sesion
 /**
  * Divisor "O más sobre nosotros".
  */
@@ -639,6 +777,8 @@ body::before {
   gap: 15px;
 }
 
+/* ... tu código CSS anterior ... */
+
 .form-btn--social {
   display: inline-flex;
   justify-content: center;
@@ -659,14 +799,26 @@ body::before {
 
 /* * Icono dentro del botón social.
  * 'filter: brightness(0) invert(1)' es un truco para
+<<<<<<< HEAD
  * convertir un icono PNG/SVG negro a blanco.
  */
 .form-btn--social:hover .icon-invertible {
   filter: brightness(0) invert(1);
+=======
+ * convertir un icono PNG/SVG negro (o de color oscuro) a blanco.
+ *
+ * NOTA: Tus iconos SVG de Instagram y Google deberían tener
+ * un color inicial oscuro para que esto funcione bien.
+ */
+.form-btn--social:hover .btn-icon {
+  filter: brightness(0) invert(1); /* Convierte el icono a blanco */
+>>>>>>> feature/inicio-sesion
 }
 
 .btn-icon {
   width: 24px;
+  height: 24px; /* Añadimos altura para mejor control */
+  transition: filter var(--transition-main); /* Animamos la transición del filtro */
 }
 
 .contact-text {
@@ -675,6 +827,10 @@ body::before {
   margin-top: 10px;
 }
 
+<<<<<<< HEAD
+=======
+/* ... el resto de tu código CSS ... */
+>>>>>>> feature/inicio-sesion
 
 /*
 ================================================================================
@@ -881,11 +1037,22 @@ body::before {
   .message-container {
     top: 10px;
     max-width: 90%;
+<<<<<<< HEAD
+=======
+    left: 50%; /* Asegura el centrado en móvil */
+    margin-left: 0; /* Resetea el margen de desktop */
+    transform: translateX(-50%);
+>>>>>>> feature/inicio-sesion
   }
 
   .alert {
     font-size: 0.85rem;
     padding: 8px 12px;
+<<<<<<< HEAD
+=======
+    max-width: 100%;
+    margin-left: 0; /* Resetea el margen de desktop */
+>>>>>>> feature/inicio-sesion
   }
 }
 
@@ -931,4 +1098,31 @@ body::before {
   }
 }
 
+<<<<<<< HEAD
+=======
+/* * Animación de "Zoom In" para el fondo del panel izquierdo.
+ * Crea un efecto "Ken Burns" muy sutil.
+ */
+@keyframes zoomIn {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+/* * Animación de "Shimmer" (brillo) para el botón de login.
+ * Mueve un gradiente blanco de izquierda a derecha.
+ */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(25deg);
+  }
+}
+
+>>>>>>> feature/inicio-sesion
 /* --- FIN DEL ARCHIVO CSS --- */
