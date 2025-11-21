@@ -1,11 +1,31 @@
+# profesorView/urls.py
+from django.urls import path
+from . import views
 
-from django.contrib import admin
-from django.urls import path, include
-from .views import profesor_dashboard
-
+app_name = "profesorView"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('teacher/', profesor_dashboard, name='teacher'),
+    path("", views.dashboard, name="dashboard"),
+    path("perfil-data/", views.perfil_data, name="perfil-data"),
+    path("cursos/", views.cursos_docente, name="cursos"),
+    path("curso/<int:class_id>/alumnos/", views.alumnos_por_curso, name="alumnos-curso"),
+
+    
+    path("curso/<int:class_id>/asignaturas/", views.asignaturas_por_curso, name="asignaturas-curso"),
+
+    
+    path("evaluation-types/", views.evaluation_types, name="evaluation-types"),
+
+   
+    path("crear-evaluacion/", views.crear_evaluacion, name="crear-evaluacion"),
+
+    
+    path("evaluacion/<int:eval_id>/notas/guardar/", views.guardar_notas, name="guardar-notas"),
+
+    path("curso/<int:class_id>/evaluaciones/", views.evaluaciones_por_curso, name="evaluaciones-curso"),
+
+    
+    path("mis-cursos-notas/", views.mis_cursos_y_notas, name="mis_cursos_notas"),
+     
 
 ]

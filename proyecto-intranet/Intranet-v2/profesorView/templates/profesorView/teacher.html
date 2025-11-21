@@ -4,18 +4,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
   <title>INTRANET | Panel Profesor</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
+=======
+  <title>Panel Profesor</title>
+
+  <!-- Iconos y Fuentes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+>>>>>>> feature/profesor-view
   <link rel="stylesheet" href="{% static 'css/teacher_style.css' %}">
 </head>
 
 <body>
 
 <div class="layout">
+<<<<<<< HEAD
   
   <aside class="sidebar" id="sidebar">
     
@@ -23,8 +34,13 @@
       <i class="fa-solid fa-chalkboard-user"></i>
       <span>Profesor</span>
     </div>
+=======
+>>>>>>> feature/profesor-view
 
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
     <div class="profile">
+<<<<<<< HEAD
       <div class="avatar">JP</div>
       <div class="profile-info">
         <div class="profile-name">Juan Pérez</div>
@@ -39,6 +55,46 @@
       <a href="anuncios"><i class="fa-solid fa-bullhorn"></i> <span>Anuncios</span></a>
       <a href="calendario"><i class="fa-solid fa-calendar"></i> <span>Calendario</span></a>
       <a href="perfil"><i class="fa-solid fa-user-gear"></i> <span>Perfil</span></a>
+=======
+      <div class="avatar">
+        {{ request.user.first_name|slice:":1" }}
+      </div>
+      <div class="profile-info">
+        <div>{{ request.user.first_name }} {{ request.user.last_name }}</div>
+        <div class="role">Profesor</div>
+      </div>
+    </div>
+
+    <!-- 👇 IMPORTANTE: id="menu" -->
+    <nav class="menu" id="menu">
+      <a href="#" data-section="dashboard" class="active">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+
+      <a href="#" data-section="mis-cursos">
+        <i class="fa-solid fa-chalkboard"></i> <span>Mis Cursos</span>
+      </a>
+
+      <a href="#" data-section="crear-evaluacion">
+        <i class="fa-solid fa-file-circle-plus"></i> <span>Crear Evaluación</span>
+      </a>
+
+      <a href="#" data-section="ingresar-notas">
+        <i class="fa-solid fa-pen-to-square"></i> <span>Ingresar Notas</span>
+      </a>
+
+      <a href="#" data-section="mis-notas">
+        <i class="fa-solid fa-list-check"></i> <span>Notas del Curso</span>
+      </a>
+
+      <a href="#" data-section="perfil">
+        <i class="fa-solid fa-user"></i> <span>Perfil</span>
+      </a>
+
+      <a href="{% url 'inicioSesion:logout' %}" class="logout">
+        <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar sesión</span>
+      </a>
+>>>>>>> feature/profesor-view
     </nav>
     
     <footer class="side-footer">
@@ -49,6 +105,7 @@
     </footer>
   </aside>
 
+<<<<<<< HEAD
   <main class="main">
     
     <header class="topbar">
@@ -65,9 +122,17 @@
       
       <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
       
+=======
+  <!-- Main -->
+  <section class="main">
+    <header class="topbar">
+      <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+>>>>>>> feature/profesor-view
       <div class="spacer"></div>
       
       <div class="user-mini">
+<<<<<<< HEAD
         <div class="avatar-mini" title="Profesor">JP</div>
         <span class="user-mini-name">Juan Pérez</span>
       </div>
@@ -85,6 +150,39 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <script src="{% static 'js/teacher_jss.js' %}"></script>
+=======
+        <span>{{ request.user.first_name }}</span>
+        <div class="avatar-mini">
+          {{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}
+        </div>
+      </div>
+    </header>
 
+    <main class="content" id="content-area">
+      <!-- contenido inicial -->
+      <div class="card">
+        <h2 class="card-title">Bienvenido, {{ request.user.first_name }}</h2>
+        <p>Panel del profesor.</p>
+      </div>
+    </main>
+
+    <footer class="footer">© Colegio San Agustín de Hipona 2025</footer>
+  </section>
+</div>
+
+<!-- overlay para móvil -->
+<div id="overlay"></div>
+>>>>>>> feature/profesor-view
+
+<!-- Objeto que usa el JS -->
+<script>
+  const profesor = {
+    nombre: "{{ request.user.first_name }} {{ request.user.last_name }}",
+    csrf: "{{ csrf_token }}"
+  };
+</script>
+
+<!-- SOLO este JS, sin el otro arriba -->
+<script src="{% static 'js/teacher_jss.js' %}"></script>
 </body>
 </html>
