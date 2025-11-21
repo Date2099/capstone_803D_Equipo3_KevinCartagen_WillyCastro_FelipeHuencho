@@ -462,3 +462,6 @@ def api_listar_apoderados(request):
     except Exception as e:
         print("❌ Error al listar apoderados:", e)
         return JsonResponse({"error": str(e)}, status=500)
+
+
+

@@ -1,43 +1,192 @@
-/* Tipografía */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS PRINCIPAL: Página de Login (MAIN)              |
+|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
+|               AUTOR: Kev182-pixel (Refactorizado v10 por Asistente)          |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   DESCRIPCIÓN GENERAL:                                                       |
+|   Este archivo define la apariencia de la página de inicio de sesión         |
+|   de la rama 'main' de Kev182-pixel. Ha sido refactorizado profesionalmente  |
+|   para utilizar un sistema centralizado de Variables CSS (:root).            |
+|                                                                              |
+|   ARQUITECTURA DEL ARCHIVO:                                                  |
+|   1.  @import (Fuentes) - Carga la tipografía 'Poppins'.                     |
+|   2.  :root (Variables Globales) - Define TODA la paleta de colores,         |
+|       tipografía y tamaños estándar para el login.                           |
+|   3.  Reset Básico y Estilos Globales - Normaliza los estilos del navegador. |
+|   4.  Fondo y Contenedor Principal - Estilos del fondo difuminado            |
+|       y del .main-wrapper que contiene los paneles.                          |
+|   5.  Panel Izquierdo (Branding) - El panel con la bienvenida y el logo.     |
+|   6.  Panel Derecho (Formulario) - El panel con el formulario de login.      |
+|   7.  Formulario - Estilos detallados para inputs, botones y enlaces.        |
+|       ¡AQUÍ SE ARREGLA EL BUG VISUAL!                                        |
+|   8.  Componente de Alerta/Error - Estilos para mensajes de feedback.        |
+|   9.  Responsive (Media Queries) - Ajustes para móviles.                     |
+|   10. Animaciones (Keyframes) - Define las animaciones de entrada/salida.    |
+|                                                                              |
+|   ¡IMPORTANTE! Este CSS está diseñado para funcionar con el HTML que       |
+|   utiliza el renderizado de formularios de Django (ej: {{ form.rut }})      |
+|   y el framework de mensajes (`{% if messages %}`).                          |
+|                                                                              |
+================================================================================
+*/
+
+
+/*
+================================================================================
+|   SECCIÓN 1: @import (Carga de Fuentes)                                      |
+================================================================================
+|
+|   Importamos la familia de fuentes 'Poppins' desde Google Fonts.
+|   Especificamos los pesos (weights) que usaremos (300 a 700)
+|   para optimizar la carga de la página.
+|
+*/
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* Colores basados en la web del colegio */
+
+/*
+================================================================================
+|   SECCIÓN 2: :root (Variables Globales del Sistema de Diseño)                |
+================================================================================
+|
+|   Este es el "centro de control" de todo el diseño del login.
+|
+|   *** ¡ACTUALIZACIÓN DE REFACTORIZACIÓN! ***
+|   Se ha unificado la paleta de colores para que coincida con la
+|   del panel de Administrador y Profesor (Azul Marino y Dorado).
+|   El --color-primary original (#2a2979) ha sido REEMPLAZADO.
+|
+*/
 :root {
-  --color-primary: #2a2979;      /* Azul/Violeta oscuro del menú y logo */
-  --color-secondary: #cba858;   /* Dorado del logo y botón "Informativo" */
-  --color-text-dark: #333;      /* Texto principal oscuro */
-  --color-text-light: #ffffff;   /* Texto claro para el panel izquierdo */
-  --color-background-card: #ffffff;/* Fondo blanco del formulario */
-  --color-border: #d1d1d1;      /* Color de borde suave */
-  --color-placeholder: #888;    /* Color para placeholders y etiquetas */
-  --color-link-hover: #DDAA00; /* Un dorado más brillante para enlaces hover */
+  /* * ========================================
+   * Paleta de Colores Institucional (Azul y Dorado)
+   * ========================================
+   */
+  --color-primary: #0F294C;        /* Azul marino principal (Usado para botones, títulos, overlay) */
+  --color-primary-rgb: 15, 41, 76;   /* Versión RGB de --color-primary (para usar en 'rgba') */
+  --color-secondary: #CDA758;      /* Acento Dorado (Usado para hover, enlaces) */
+  --color-secondary-bright: #E9D29B; /* Dorado más brillante (para hovers sutiles) */
+  --color-primary-text: #333;      /* Texto oscuro para usar sobre fondo dorado (buen contraste) */
+
+  /* * ========================================
+   * Colores Neutros (Fondo, Texto, Bordes)
+   * ========================================
+   */
+  --color-text-dark: #333;          /* Texto principal oscuro (para formularios) */
+  --color-text-light: #ffffff;      /* Texto claro (para panel izquierdo) */
+  --color-text-muted: #666;         /* Texto secundario (gris) */
+  --color-placeholder: #888;       /* Color para placeholders y etiquetas */
+  --color-text-divider: #aaa;      /* Color para el texto del divisor "o" */
+  
+  --color-background-body: #f3f6fb;  /* Fondo (aunque será cubierto por la imagen) */
+  --color-background-card: #ffffff; /* Fondo blanco del formulario */
+  --color-background-input: #fafafa; /* Fondo para inputs */
+  --color-border: #d1d1d1;          /* Color de borde suave */
+  --color-border-divider: #e0e0e0;   /* Color para la línea divisora */
+
+  /* * ========================================
+   * Colores de Estado (Error, Éxito)
+   * ========================================
+   */
+  --color-danger-text: #b71c1c;      /* Texto rojo oscuro para errores */
+  --color-danger-border: #e57373;    /* Borde rojo claro para errores */
+  --color-danger-bg: #ffe6e6;        /* Fondo rosa pálido para errores */
+  
+  --color-success-text: #2e7d32;     /* Texto verde oscuro para éxito */
+  --color-success-border: #81c784;    /* Borde verde claro para éxito */
+  --color-success-bg: #e8f5e9;        /* Fondo verde pálido para éxito */
+  
+  --color-warning-text: #8a6d00;
+  --color-warning-border: #fbc02d;
+  --color-warning-bg: #fff8e1;
+
+  /* * ========================================
+   * Tipografía
+   * ========================================
+   */
+  --font-main: 'Poppins', sans-serif; /* Fuente principal */
+  
+  /* * ========================================
+   * Radii y Sombras
+   * ========================================
+   */
+  --radius-md: 8px;                 /* Radio medio (inputs, botones) */
+  --radius-lg: 15px;                /* Radio grande (contenedor principal) */
+  --radius-round: 50%;              /* Círculo perfecto (avatares sociales) */
+  --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.2); /* Sombra principal del contenedor */
+
+  /* * ========================================
+   * Transiciones (Animación)
+   * ========================================
+   */
+  --transition-main: 0.3s ease;     /* Transición estándar */
+  --transition-fast: 0.2s ease;     /* Transición rápida (para botones) */
 }
 
 
+/*
+================================================================================
+|   SECCIÓN 3: Reset Básico y Estilos Globales del Body                        |
+================================================================================
+|
+|   Normalizamos estilos y configuramos el fondo "blur" de la página.
+|
+*/
 
-/* Reset y Estilos Generales */
+/**
+ * Reseteo universal (Box Sizing).
+ * Asegura que 'width' y 'height' incluyan padding y border.
+ * Esencial para un layout predecible.
+ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-main); /* Aplica la fuente a todo */
 }
 
+/**
+ * Estilos del <body>
+ * - Configura la imagen de fondo a pantalla completa.
+ * - Usa Flexbox para centrar el .main-wrapper.
+ * - 'position: relative' y 'overflow: hidden' son necesarios
+ * para el efecto de fondo difuminado (::before).
+ */
 body {
+  /* * La imagen de fondo se define aquí, usando una ruta relativa.
+   * Basado en tu estructura 'inicioSesion/static/inicioSesion/css/loginStyle.css'
+   * y 'inicioSesion/static/inicioSesion/css/DJI_0535.jpg'
+   * la ruta correcta es 'DJI_0535.jpg'.
+   */
   background-image: url('DJI_0535.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   
+  /* Centrado del contenedor */
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   
+  /* Para el efecto blur */
   position: relative;
   overflow: hidden;
 }
 
+/**
+ * Pseudo-elemento ::before para el efecto de fondo difuminado.
+ * - Se posiciona absolutamente detrás de todo (z-index: -1).
+ * - Hereda el fondo del body.
+ * - 'filter: blur(10px)' crea el desenfoque.
+ * - 'brightness(0.8)' oscurece ligeramente el fondo.
+ * - Los márgenes negativos (-20px) evitan bordes "duros"
+ * causados por el blur.
+ */
 body::before {
   content: '';
   position: absolute;
@@ -45,41 +194,82 @@ body::before {
   left: -20px;
   right: -20px;
   bottom: -20px;
-  background: inherit;
+  background: inherit; /* Hereda la imagen del body */
   filter: blur(10px) brightness(0.8);
   z-index: -1;
 }
 
+
+/*
+================================================================================
+|   SECCIÓN 4: Contenedor Principal (.main-wrapper)                            |
+================================================================================
+*/
+
+/**
+ * El contenedor principal que encierra los dos paneles.
+ * - 'display: flex' para el layout de dos columnas.
+ * - 'max-width: 1200px' limita el ancho en pantallas grandes.
+ * - 'box-shadow' y 'border-radius' le dan la apariencia de "tarjeta".
+ * - 'overflow: hidden' es crucial para que los paneles internos
+ * respeten el borde redondeado.
+ */
 .main-wrapper {
   display: flex;
   width: 100%;
-  height: 100vh;
+  height: 100vh; /* Ocupa toda la altura en desktop */
   max-width: 1200px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  border-radius: 15px;
+  box-shadow: var(--shadow-main);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
-/* Panel Izquierdo (Imagen del Colegio) */
+
+/*
+================================================================================
+|   SECCIÓN 5: Panel Izquierdo (Branding y Bienvenida)                         |
+================================================================================
+*/
+
+/**
+ * Panel izquierdo (Branding).
+ * - 'flex: 1' hace que ocupe la mitad del espacio.
+ * - Usa la imagen de fondo con un overlay de color primario
+ * para crear un efecto de tinte oscuro y legible.
+ * - Usa Flexbox para centrar vertical y horizontalmente su contenido.
+ */
 .left-panel {
   flex: 1;
-  background-image: linear-gradient(rgba(36, 19, 110, 0.65), rgba(24, 26, 124, 0.65)), url('DJI_0535.jpg');
+  /* * Capa de color (usando --color-primary-rgb) sobre la imagen.
+   * Usamos la variable RGB para poder definir la opacidad (0.65).
+   * La ruta de la imagen ('DJI_0535.jpg') es la misma que la del body.
+   */
+  background-image: linear-gradient(rgba(var(--color-primary-rgb), 0.65), rgba(var(--color-primary-rgb), 0.65)), url('DJI_0535.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px;
-  color: var(--color-text-light);
+  color: var(--color-text-light); /* Texto blanco */
   text-align: center;
 }
 
+/**
+ * Contenedor para el contenido del panel izquierdo.
+ */
 .left-panel-content {
   max-width: 400px;
 }
 
+/**
+ * Logo grande del colegio.
+ * 'filter: drop-shadow' añade una sombra suave al logo
+ * para que resalte sobre el fondo.
+ */
 .school-logo-large {
   width: 260px;
   height: auto;
@@ -87,6 +277,9 @@ body::before {
   filter: drop-shadow(0 0 8px rgba(0,0,0,0.3));
 }
 
+/**
+ * Título de Bienvenida (ej: "Intranet San Agustín").
+ */
 .welcome-heading {
   font-size: 2.5rem;
   font-weight: 700;
@@ -94,21 +287,42 @@ body::before {
   line-height: 1.2;
 }
 
+/**
+ * Texto descriptivo de bienvenida.
+ */
 .welcome-text {
   font-size: 1.1rem;
   font-weight: 300;
   line-height: 1.6;
   opacity: 0.9;
-  margin-bottom: auto;
+  margin-bottom: auto; /* Empuja el copyright hacia abajo */
 }
 
+/**
+ * Texto de Copyright al pie del panel izquierdo.
+ */
 .copyright-text {
   font-size: 0.85rem;
   opacity: 0.7;
   padding-top: 40px;
+  margin-top: auto; /* Asegura que esté al fondo */
 }
 
-/* Panel Derecho (Formulario de Login) */
+
+/*
+================================================================================
+|   SECCIÓN 6: Panel Derecho (Formulario de Login)                             |
+================================================================================
+*/
+
+/**
+ * Panel derecho (Formulario).
+ * - 'flex: 1' para que ocupe la otra mitad.
+ * - 'background-color' semitransparente y 'backdrop-filter'
+ * para crear un efecto de "vidrio esmerilado" sobre el fondo.
+ * - 'overflow-y: auto' permite hacer scroll si el formulario
+ * no cabe en pantallas pequeñas.
+ */
 .right-panel {
   flex: 1;
   background-color: rgba(255, 255, 255, 0.95);
@@ -121,101 +335,194 @@ body::before {
   overflow-y: auto;
 }
 
+/**
+ * Contenedor del formulario, limita su ancho.
+ */
 .form-container {
   width: 100%;
   max-width: 380px;
   text-align: center;
 }
 
+/**
+ * Logo pequeño, solo visible en móviles (ver Media Queries).
+ * El estilo en línea 'style="width: 260px;"' del HTML
+ * será SOBRESCRITO por el CSS en la media query.
+ */
 .school-logo-small {
-  display: none;
+  display: none; /* Oculto en desktop */
+  width: 100px;
+  height: auto;
+  margin: 0 auto 20px;
 }
 
+/**
+ * Encabezado del formulario (h1, p, etc.)
+ */
 .form-header {
   margin-bottom: 30px;
 }
 
 .form-header h1 {
   font-size: 2rem;
-  color: var(--color-primary);
+  color: var(--color-primary); /* Color primario */
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .sub-header-text {
   font-size: 1rem;
-  color: #666;
+  color: var(--color-text-muted); /* Texto gris */
   margin-bottom: 15px;
 }
 
 .create-account-text {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
-.create-account-text .form-link {
-  color: var(--color-primary);
+/**
+ * Enlaces dentro del formulario (ej: "Crear Cuenta", "Olvidé Contraseña").
+ * Usa la paleta Azul/Dorado.
+ */
+.form-link {
+  color: var(--color-primary); /* Color primario */
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: color var(--transition-main);
 }
 
-.create-account-text .form-link:hover {
-  color: var(--color-secondary);
+.form-link:hover {
+  color: var(--color-secondary); /* Acento Dorado en hover */
   text-decoration: underline;
 }
 
-/* Formulario y Campos de Entrada */
+
+/*
+================================================================================
+|   SECCIÓN 7: Estilos Detallados del Formulario                               |
+================================================================================
+|
+|   Esta sección es clave, ya que da estilo a los campos
+|   que son renderizados por Django (`{{ form.rut }}`, etc.).
+|
+*/
+
+/**
+ * Contenedor de los campos del formulario.
+ * 'gap: 20px' añade espacio vertical entre cada .input-group.
+ */
 .form-box {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+/**
+ * ===================================================================
+ * |   ¡ESTA ES LA REGLA QUE ARREGLA EL BUG VISUAL! (Superposición)
+ * ===================================================================
+ *
+ * Grupo de input (Contenedor para input + label + icono).
+ *
+ * 'position: relative' es CRUCIAL. Le dice a la etiqueta
+ * .floating-label (que tiene 'position: absolute') que debe
+ * posicionarse "relativo a" este contenedor, y no a la página.
+ *
+ * Sin esto, todas las etiquetas flotantes se apilarían
+ * en el mismo lugar, como ves en tu captura de pantalla.
+ */
 .input-group {
   position: relative;
 }
 
-.input-field {
+/**
+ * El campo de texto <input>
+ *
+ * ¡IMPORTANTE!
+ * Esta regla selecciona CUALQUIER input de texto, password o email
+ * (y los IDs específicos de Django) dentro de .input-group.
+ * Esto da estilo a los campos que Django renderiza.
+ */
+.input-group input[type="text"],
+.input-group input[type="password"],
+.input-group input[type="email"],
+.input-field /* Clase de fallback */ {
+  /* Aplicamos la clase .input-field visualmente */
   width: 100%;
   height: 50px;
   padding: 0 15px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  background-color: #fafafa;
+  background-color: var(--color-background-input);
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: all var(--transition-main);
+  color: var(--color-text-dark); /* Color del texto que se escribe */
 }
 
-.input-field:focus {
+/**
+ * Estilo de foco para el input.
+ * Usa el color primario para el borde/sombra.
+ */
+.input-group input[type="text"]:focus,
+.input-group input[type="password"]:focus,
+.input-group input[type="email"]:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(74, 43, 109, 0.15);
+  /* Sombra sutil usando el color primario con opacidad */
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
 }
 
+/**
+ * La "Etiqueta Flotante".
+ * - Se posiciona 'absolutamente' DENTRO de su padre (.input-group)
+ * que ahora tiene 'position: relative'.
+ *
+ * ===================================================================
+ * |   ¡ESTA ES LA REGLA QUE ARREGLA EL BUG FUNCIONAL! (No se puede escribir)
+ * ===================================================================
+ *
+ * 'pointer-events: none' es CRUCIAL. Hace que la etiqueta
+ * sea "invisible" a los clics del ratón. El clic "atraviesa"
+ * la etiqueta y llega al <input> que está debajo.
+ *
+ * Sin esto, estás haciendo clic en la <label>, no en el <input>.
+ */
 .floating-label {
   position: absolute;
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-placeholder);
-  background-color: transparent;
+  background-color: transparent; /* Importante para el efecto */
   padding: 0;
   font-size: 1rem;
-  pointer-events: none;
-  transition: all 0.3s ease;
+  pointer-events: none; /* <-- ¡ESTA ES LA LÍNEA MÁGICA! */
+  transition: all var(--transition-main);
 }
 
-.input-field:focus ~ .floating-label,
-.input-field:not(:placeholder-shown) ~ .floating-label {
-  top: 0;
+/**
+ * Efecto de "flote" de la etiqueta.
+ * Se activa cuando el input está en foco O cuando tiene texto.
+ *
+ * NOTA: Esto depende de que tu 'forms.py' añada 'placeholder: " "'
+ * a los widgets del formulario, lo cual es vital.
+ */
+.input-group input:focus ~ .floating-label,
+.input-group input:not(:placeholder-shown) ~ .floating-label {
+  top: 0; /* Sube la etiqueta */
   font-size: 0.8rem;
   color: var(--color-primary);
-  background-color: rgba(250, 250, 250, 1);
+  /* Truco: el fondo coincide con el fondo del input para "cortar" el borde */
+  background-color: var(--color-background-input); 
   padding: 0 5px;
   left: 10px;
 }
 
+
+/**
+ * Icono del "ojo" para mostrar/ocultar contraseña.
+ */
 .eye-icon {
   position: absolute;
   right: 15px;
@@ -223,8 +530,15 @@ body::before {
   transform: translateY(-50%);
   cursor: pointer;
   color: var(--color-placeholder);
+  transition: color var(--transition-main);
+}
+.eye-icon:hover {
+  color: var(--color-primary);
 }
 
+/**
+ * Grupo para el Checkbox y el enlace "Olvidé Contraseña".
+ */
 .input-group.checkbox-group {
   display: flex;
   justify-content: space-between;
@@ -238,71 +552,81 @@ body::before {
   align-items: center;
   gap: 8px;
   color: #555;
+  cursor: pointer;
 }
-
-input.checkbox-field {
-  width: 1em;
-  height: 1em;
-  accent-color: var(--color-primary);
+/* La etiqueta del checkbox de Django */
+.remember-me label {
   cursor: pointer;
 }
 
-.form-link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+/**
+ * Checkbox personalizado con el color primario.
+ * Asignamos el estilo al input de Django `[name="remember"]`.
+ */
+.input-group input[type="checkbox"] {
+  width: 1em;
+  height: 1em;
+  accent-color: var(--color-primary); /* ¡Usa el color primario! */
+  cursor: pointer;
 }
 
-.form-link:hover {
-  color: var(--color-link-hover);
-  text-decoration: underline;
-}
-
+/**
+ * Botón de Submit (Iniciar Sesión).
+ * Usa la paleta Azul/Dorado.
+ */
 .form-btn--submit {
-  background-color: var(--color-primary);
-  color: var(--color-text-light);
+  background-color: var(--color-primary); /* Fondo Azul */
+  color: var(--color-text-light); /* Texto Blanco */
   border: none;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all var(--transition-main);
 }
 
 .form-btn--submit:hover {
-  background-color: var(--color-secondary);
-  color: var(--color-primary);
-  transform: translateY(-3px);
+  background-color: var(--color-secondary); /* Fondo Dorado en hover */
+  color: var(--color-primary-text); /* Texto Oscuro en hover */
+  transform: translateY(-3px); /* Efecto de elevación */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Divisor */
+/**
+ * Divisor "O más sobre nosotros".
+ */
 .form-divider {
   margin: 30px 0;
   position: relative;
   font-size: 0.9rem;
-  color: #aaa;
+  color: var(--color-text-divider);
 }
+/* La línea horizontal */
 .form-divider::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    background-color: #e0e0e0;
-    z-index: 1;
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background-color: var(--color-border-divider);
+  z-index: 1; /* Detrás del texto */
 }
+/* El texto "O" */
 .form-divider p {
-    background-color: transparent;
-    padding: 0 10px;
-    display: inline-block;
-    position: relative;
-    z-index: 2;
+  /* Truco para que el fondo sea el del panel (blanco)
+     y no transparente, "cortando" la línea. */
+  background-color: var(--color-background-card); 
+  padding: 0 10px;
+  display: inline-block;
+  position: relative;
+  z-index: 2; /* Encima de la línea */
 }
 
-/* Redes Sociales y Parte Inferior */
+/**
+ * Contenedor para botones de redes sociales.
+ */
 .form-bottom {
   display: flex;
   flex-direction: column;
@@ -322,26 +646,28 @@ input.checkbox-field {
   width: 48px;
   height: 48px;
   border: 1px solid var(--color-border);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background-color: rgba(253, 253, 253, 0.8);
-  transition: all 0.3s ease;
+  transition: all var(--transition-main);
 }
 
 .form-btn--social:hover {
   border-color: var(--color-primary);
-  background-color: var(--color-primary); /* Sigue cambiando el fondo del círculo */
+  background-color: var(--color-primary); /* Fondo Azul en hover */
   transform: translateY(-3px);
 }
 
-/* La regla para el filtro se ELIMINA aquí */
-/* .form-btn--social:hover .icon-invertible {
+/* * Icono dentro del botón social.
+ * 'filter: brightness(0) invert(1)' es un truco para
+ * convertir un icono PNG/SVG negro a blanco.
+ */
+.form-btn--social:hover .icon-invertible {
   filter: brightness(0) invert(1);
-} */
+}
 
 .btn-icon {
   width: 24px;
 }
-
 
 .contact-text {
   font-size: 0.9rem;
@@ -349,127 +675,260 @@ input.checkbox-field {
   margin-top: 10px;
 }
 
-/* Responsive Design */
+
+/*
+================================================================================
+|   SECCIÓN 8: Componente - Mensajes de Error y Alerta (Unificado)             |
+================================================================================
+|
+|   Estilos para los mensajes de feedback.
+|   Estos estilos se aplican al bloque de mensajes de Django
+|   que pusimos en el HTML (.message-container y .alert).
+|
+|   Se ha refactorizado para unificar '.form-error-box' y '.alert'
+|   en un solo sistema de alertas flotantes.
+|
+*/
+
+/**
+ * Contenedor para las alertas flotantes (Django Messages).
+ * - Se posiciona fijamente en la parte superior central de la ventana.
+ * - 'pointer-events: none' permite hacer clic "a través" de él.
+ * - Este es el '.message-container' de tu HTML.
+ */
+.message-container {
+  position: fixed; /* Flota sobre toda la página */
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999; /* Por encima de todo */
+  width: 100%;
+  max-width: 400px; /* Ancho máximo del mensaje */
+  pointer-events: none; /* Los clics atraviesan el contenedor */
+  display: flex;
+  flex-direction: column; /* Apila múltiples mensajes */
+  align-items: center;
+  gap: 10px; /* Espacio entre mensajes */
+  padding: 0 15px; /* Evita que pegue a los bordes en móvil */
+}
+
+/**
+ * La alerta individual.
+ * - 'pointer-events: auto' la hace clickeable (para cerrarla, etc.).
+ * - Se le aplican las animaciones de fadeIn y fadeOut.
+ */
+.alert {
+  /* Apariencia base (error) */
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  display: inline-block; /* Se ajusta al contenido */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0; /* Comienza invisible */
+  pointer-events: auto; /* Se puede hacer clic en la alerta */
+  
+  /* * Animación:
+   * 1. 'fadeIn' dura 0.3s y se queda ('forwards').
+   * 2. 'fadeOut' dura 0.5s, empieza después de 3.5s y se queda ('forwards').
+   */
+  animation: fadeIn 0.3s ease forwards, fadeOut 0.5s ease forwards 3.5s;
+  font-size: 0.95rem;
+  
+  /* Añadimos un ícono de Font Awesome antes del texto */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/**
+ * Ícono para la alerta de error (default).
+ * Se añade usando un pseudo-elemento ::before.
+ * Esto requiere que Font Awesome esté cargado en el HTML.
+ */
+.alert.error::before,
+.alert::before { /* Fallback por si no hay tag */
+  content: "\f071"; /* Icono "exclamation-triangle" de Font Awesome */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--color-danger-text);
+}
+
+/**
+ * Estilos para diferentes tipos de alertas (Django Tags).
+ * Sobrescriben el estilo de error por defecto.
+ */
+.alert.success {
+  background-color: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
+}
+.alert.success::before {
+  content: "\f058"; /* Icono "check-circle" */
+  color: var(--color-success-text);
+}
+
+.alert.warning {
+  background-color: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+.alert.warning::before {
+  content: "\f06a"; /* Icono "exclamation-circle" */
+  color: var(--color-warning-text);
+}
+
+/**
+ * Estilos para la clase .errorlist de Django (si se usa).
+ * Forzamos a que se vea EXACTAMENTE como nuestra alerta.
+ * Esto es un "fallback" por si se usa {{ form.non_field_errors }}.
+ */
+.errorlist {
+  /* Hereda todos los estilos de .alert */
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  padding: 12px 15px;
+  border-radius: var(--radius-md);
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  list-style: none; /* Oculta los puntos (bullets) de la <ul> */
+  
+  /* Añade el ícono */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.errorlist li {
+  margin: 0;
+  padding: 0;
+}
+/* El icono para el .errorlist (unificado con .alert) */
+.errorlist::before {
+  content: "\f071"; /* Icono "exclamation-triangle" */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--color-danger-text);
+  flex-shrink: 0;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 9: Responsive (Media Queries)                                      |
+================================================================================
+*/
+
+/**
+ * Punto de ruptura para tablets y móviles (850px).
+ * - Oculta el panel izquierdo.
+ * - El panel derecho ocupa toda la pantalla.
+ * - Desactiva el efecto de fondo blur.
+ */
 @media (max-width: 850px) {
+  /* El contenedor principal ya no es una tarjeta alta,
+     sino que se apila verticalmente */
   .main-wrapper {
     flex-direction: column;
-    height: auto;
+    height: auto; /* La altura se ajusta al contenido */
     max-width: 100%;
     border-radius: 0;
     box-shadow: none;
   }
   
+  /* El body ya no necesita centrar contenido en móvil */
   body {
     padding: 0;
+    align-items: flex-start; /* Alinea al inicio */
+    overflow: auto; /* Permite el scroll normal en móvil */
   }
   
+  /* Desactiva el fondo difuminado en móvil, no es necesario */
   body::before {
     display: none;
   }
 
+  /* Oculta el panel izquierdo por completo */
   .left-panel {
     display: none;
   }
 
+  /* El panel derecho ahora es la única vista */
   .right-panel {
     width: 100%;
     min-height: 100vh;
     padding: 30px;
-    background-color: var(--color-background-card);
-    backdrop-filter: none;
+    background-color: var(--color-background-card); /* Fondo blanco sólido */
+    backdrop-filter: none; /* Sin blur */
   }
 
+  /* Muestra el logo pequeño, que estaba oculto en desktop */
   .school-logo-small {
     display: block;
-    width: 70px;
+    width: 100px; /* Tamaño ajustado */
     height: auto;
     margin: 0 auto 20px;
   }
-}
-
-.form-error-box {
-  background-color: rgba(255, 0, 0, 0.08);
-  border: 1px solid #e74c3c;
-  color: #c0392b;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  text-align: center;
-}
-/* ====================== */
-/* MENSAJES FLOTANTES AJUSTADOS */
-/* ====================== */
-.message-container {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-left:100px;
-  z-index: 999;
-  text-align: center;
-  width: 100%;
-  max-width: 350px;
-  pointer-events: none;
-}
-
-.alert {
-  background-color: #ffe6e6;
-  margin-left: 40px; /* Ajusta según veas necesario */
-  border: 1px solid #e57373;
-  color: #b71c1c;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 500;
-  display: inline-block;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  opacity: 0;
-  animation: fadeIn 0.3s ease forwards, fadeOut 0.5s ease forwards 3.5s;
-  font-size: 0.95rem;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -10px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    transform: translate(-50%, -20px);
-    visibility: hidden;
-  }
-}
-
-/* ✅ Colores alternativos por tipo */
-.alert.success {
-  background-color: #e8f5e9;
-  border-color: #81c784;
-  color: #2e7d32;
-}
-
-.alert.warning {
-  background-color: #fff8e1;
-  border-color: #fbc02d;
-  color: #8a6d00;
-}
-
-/* 📱 Ajuste para pantallas móviles */
-@media (max-width: 768px) {
+  
+  /* Ajustes para el contenedor de mensajes flotantes en móvil */
   .message-container {
-    top: -5px;
-    max-width: 280px;
+    top: 10px;
+    max-width: 90%;
   }
 
   .alert {
     font-size: 0.85rem;
     padding: 8px 12px;
-    border-radius: 8px;
   }
 }
+
+
+/*
+================================================================================
+|   SECCIÓN 10: Animaciones (Keyframes)                                        |
+================================================================================
+|
+|   Define las animaciones de entrada y salida para
+|   las alertas flotantes.
+|
+*/
+
+/*
+ * Animación de entrada.
+ * La alerta aparece y baja ligeramente.
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Animación de salida.
+ * La alerta se desvanece y sube.
+ */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+    visibility: hidden; /* La oculta completamente al final */
+  }
+}
+
+/* --- FIN DEL ARCHIVO CSS --- */

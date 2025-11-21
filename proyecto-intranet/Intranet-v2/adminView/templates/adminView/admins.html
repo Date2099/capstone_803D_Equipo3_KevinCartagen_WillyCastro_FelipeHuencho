@@ -11,10 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
   <!-- Estilos -->
-  <link rel="stylesheet" href="{% static 'administrador/panel_admin.css' %}">
+  <link rel="stylesheet" href="{% static 'adminstyle/panel_admin.css' %}">
 </head>
+
 <body>
   <div class="layout">
     <!-- Sidebar -->
@@ -33,7 +35,7 @@
         <a href="#" data-section="tablero" class="active"><i class="fa-solid fa-gauge"></i> <span>Tablero</span></a>
 
         <details class="menu-group">
-          <summary><i class="fa-solid fa-user-graduate"></i> <span>Estudiantes</span></summary>
+          <summary><i class="fa-solid fa-book"></i><span>Académico</span></summary>
           <div class="sub-menu">
             <a href="#" data-section="estudiantes">Listado de Cursos</a>
             <a href="#" data-section="agregar-alumno">Agregar Alumno</a>
@@ -46,7 +48,7 @@
           <summary><i class="fa-solid fa-book"></i> <span>Académico</span></summary>
           <div class="sub-menu">
             <a href="#" data-section="asignaturas">Asignaturas</a>
-            <a href="#" data-section="horarios">Horarios</a>
+            <a href="#" data-section="asistencias">Asistencias</a>
           </div>
         </details>
 
@@ -81,7 +83,10 @@
     <!-- Contenido -->
     <section class="main">
       <header class="topbar">
-        <button class="toggle" id="toggle"><i class="fa-solid fa-bars"></i></button>
+        <button class="toggle" id="toggle" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
         <div class="topbar-title" id="topbar-title">Panel de Control</div>
         <div class="spacer"></div>
 
@@ -104,6 +109,6 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="{% static 'administrador/scriptadmins.js' %}"></script>
+  <script src="{% static 'adminstyle/scriptadmins.js' %}"></script>
 </body>
 </html>

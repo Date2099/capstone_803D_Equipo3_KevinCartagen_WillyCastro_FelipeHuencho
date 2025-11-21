@@ -1,57 +1,279 @@
-/* ================================
-   PANEL ADMINISTRADOR - SAN AGUSTÍN
-   ================================ */
+/*
+================================================================================
+|                                                                              |
+|               HOJA DE ESTILOS: Panel de Administrador (TEMA OSCURO)          |
+|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
+|               AUTOR: Kev182-pixel (Refactorizado v3 por Asistente)           |
+|                                                                              |
+================================================================================
+|                                                                              |
+|   DESCRIPCIÓN GENERAL:                                                       |
+|   Esta es la hoja de estilos principal para el panel de Administración.      |
+|   Ha sido refactorizada a un tema "Dark Mode" (Modo Oscuro) por defecto      |
+|   para mejorar el enfoque, la legibilidad en largas sesiones y               |
+|   proporcionar una identidad visual "premium" y autoritativa.                |
+|                                                                              |
+|   FILOSOFÍA DE DISEÑO:                                                       |
+|   -   Tema Oscuro ("Midnight"): El cuerpo es un azul pizarra oscuro          |
+|       (slate-900), y los paneles son ligeramente más claros (slate-800).     |
+|   -   Alto Contraste: La paleta azul/dorada se mantiene. El texto claro      |
+|       sobre fondo oscuro maximiza la legibilidad.                            |
+|   -   Variables CSS (:root): Todo el sistema de diseño está centralizado     |
+|       en variables para un mantenimiento y temado increíblemente fácil.      |
+|                                                                              |
+================================================================================
+*/
 
+
+/*
+================================================================================
+|   SECCIÓN 1: :root (Variables Globales del Sistema de Diseño)                |
+================================================================================
+|
+|   Este es el "centro de control" de todo el diseño.
+|   Aquí definimos nuestras constantes (colores, fuentes, sombras)
+|   que se usarán en todo el archivo.
+|
+|   *** ¡CAMBIO DRÁSTICO: NUEVA PALETA DARK MODE! ***
+|
+*/
+:root {
+  /* * ========================================
+   * Paleta de Colores (Azul y Dorado)
+   * ========================================
+   */
+  --primary: #1c3162;            /* Azul marino (Sidebar, Headers de Tabla) */
+  --primary-dark: #122044;       /* Azul más oscuro (Sidebar Gradient) */
+  --primary-light: #2a4699;      /* Azul más claro (Hover de Botones Primarios) */
+  
+  --accent: #CDA758;             /* Acento Dorado (Botones, Foco, Enlaces Activos) */
+  --accent-2: #E9D29B;           /* Dorado suave (para highlights sutiles) */
+
+  /* * ========================================
+   * ¡NÚCLEO DEL TEMA OSCURO!
+   * Colores de Fondo y Texto
+   * ========================================
+   */
+  --bg-body: #0f172a;            /* FONDO PRINCIPAL: Azul Pizarra Oscuro (Tailwind Slate-900) */
+  --bg-panel: #1e293b;            /* FONDO DE PANEL: Azul Pizarra más claro (Tailwind Slate-800) */
+  --bg-panel-light: #334155;     /* FONDO HOVER/ZEBRA: Azul Pizarra (Tailwind Slate-700) */
+  
+  --text-primary: #e2e8f0;         /* TEXTO PRINCIPAL: Casi blanco (Tailwind Slate-200) */
+  --text-muted: #94a3b8;          /* TEXTO SECUNDARIO: Gris/Slate (Tailwind Slate-400) */
+  
+  --border-color: #334155;       /* COLOR DE BORDE: Coincide con el fondo de hover */
+  
+  /* * ========================================
+   * Colores Específicos (Sidebar y Estado)
+   * ========================================
+   */
+  --text-light: #cfd8ef;          /* Texto principal en la sidebar (se mantiene) */
+  --text-light-muted: #b4c1dd;   /* Texto secundario en la sidebar (se mantiene) */
+  --text-white: #ffffff;
+  --text-danger: #f87171;         /* Rojo claro para peligro (visible en fondo oscuro) */
+  --text-danger-border: #b91c1c;  /* Borde rojo oscuro */
+
+  /* * ========================================
+   * Tipografía
+   * ========================================
+   */
+  --font-main: "Poppins", sans-serif; /* Fuente principal para toda la app */
+
+  /* * ========================================
+   * Radii (Radios de Borde)
+   * ========================================
+   */
+  --radius-sm: 6px;               /* Radio pequeño (botones de acción, inputs) */
+  --radius-md: 10px;              /* Radio medio (tarjetas, formularios) */
+  --radius-lg: 14px;              /* Radio grande */
+  --radius-round: 50%;            /* Círculo perfecto (avatares) */
+
+  /* * ========================================
+   * Sombras (Elevación)
+   * ========================================
+   */
+  /* Las sombras son más sutiles en modo oscuro, a menudo un brillo suave */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.25);
+  
+  /* * ========================================
+   * Layout (Dimensiones de Estructura)
+   * ========================================
+   */
+  --sidebar-width: 260px;         /* Ancho de la barra lateral en desktop */
+  --topbar-height: 100px;         /* Alto de la barra superior en desktop */
+  --topbar-height-mobile: 70px;   /* Alto de la barra superior en móvil */
+
+  /* * ========================================
+   * Transiciones (Animación)
+   * ========================================
+   */
+  --transition-main: 0.3s ease;   /* Transición estándar para efectos de hover */
+  --transition-fast: 0.2s ease;   /* Transición rápida para clics y focos */
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 2: Reset Básico y Estilos Globales                                 |
+================================================================================
+|
+|   Normalizamos los estilos por defecto del navegador.
+|
+*/
+
+/**
+ * Reseteo universal (Box Sizing).
+ * 'box-sizing: border-box' es una regla esencial que le dice al
+ * navegador que el 'width' y 'height' de un elemento deben incluir
+ * el 'padding' y el 'border', no sumarlos por fuera.
+ * Esto simplifica enormemente la creación de layouts.
+ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-main); /* Aplica la fuente principal a todo */
 }
 
+/**
+ * Estilos base para <html>.
+ * 'scroll-behavior: smooth' anima el desplazamiento al
+ * hacer clic en enlaces de ancla (ej. #top).
+ */
+html {
+  -webkit-text-size-adjust: 100%; /* Previene el zoom de texto automático en iOS */
+  scroll-behavior: smooth;
+}
+
+/**
+ * Estilos base para <body>.
+ * - 'height: 100vh' y 'overflow: hidden' establecen que el <body>
+ * ocupe toda la pantalla pero no tenga scroll. El scroll
+ * se manejará internamente en el panel de contenido (.content).
+ * - *** ¡CAMBIO DRÁSTICO! *** Aplicamos el fondo y texto del tema oscuro.
+ */
 body {
-  background: #f3f6fb;
-  color: #333;
+  background: var(--bg-body); /* Fondo oscuro */
+  color: var(--text-primary); /* Texto claro */
   height: 100vh;
   overflow: hidden;
 }
 
-/* ================================
-   ESTRUCTURA GENERAL
-================================ */
+
+/*
+================================================================================
+|   SECCIÓN 3: Layout Principal                                                |
+================================================================================
+|
+|   Define la estructura base de la aplicación:
+|   - .layout (Contenedor Flex)
+|     - .sidebar (Navegación)
+|     - .main (Contenido)
+|
+*/
+
+/**
+ * Contenedor principal de la aplicación.
+ * Usa Flexbox para poner la sidebar y el main uno al lado del otro.
+ */
 .layout {
   display: flex;
   height: 100vh;
 }
 
-/* ================================
-   SIDEBAR
-================================ */
+/**
+ * Contenedor del contenido principal (Topbar + Content + Footer).
+ * - 'flex: 1' hace que ocupe todo el espacio sobrante.
+ * - 'display: flex' y 'flex-direction: column' apila los elementos.
+ * - 'overflow: hidden' previene que el main se desborde.
+ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/**
+ * El área de contenido donde se inyectan las vistas.
+ * - 'flex: 1' hace que esta área crezca y empuje el footer hacia abajo.
+ * - 'overflow-y: auto' es CRUCIAL: esto añade el scroll
+ * SOLAMENTE a esta área, manteniendo el Topbar y Sidebar fijos.
+ */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px 40px;
+  background: var(--bg-body); /* Fondo oscuro */
+}
+
+/**
+ * Pie de página al final del .main.
+ * *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
+ */
+.footer {
+  text-align: center;
+  padding: 10px;
+  background: var(--bg-panel); /* Panel oscuro */
+  font-size: 0.85rem;
+  color: var(--text-muted); /* Texto gris claro */
+  border-top: 1px solid var(--border-color); /* Borde oscuro */
+  flex-shrink: 0;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 4: Componente - Sidebar (Barra Lateral)                            |
+================================================================================
+|
+|   La sidebar se mantiene con su fondo azul primario, creando un
+|   contraste elegante con el nuevo fondo del body.
+|
+*/
+
+/**
+ * La barra lateral de navegación.
+ * - Se mantiene oscura, usando las variables --primary.
+ */
 .sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, #122044 0%, #1c3162 100%);
-  color: white;
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: var(--text-white);
   display: flex;
   flex-direction: column;
   padding: 20px 0;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-main);
   overflow-y: auto;
+  flex-shrink: 0;
+  /* La sidebar ahora tiene un borde derecho para separarla del body oscuro */
+  border-right: 1px solid var(--border-color); 
 }
 
+/**
+ * Contenedor del perfil del admin en la sidebar.
+ */
 .profile {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color-light);
 }
 
+/**
+ * El avatar circular.
+ * Se mantiene con fondo claro para contrastar con la sidebar oscura.
+ */
 .profile .avatar {
   width: 50px;
   height: 50px;
-  background: #f5f6fa;
-  color: #1c3162;
-  border-radius: 50%;
+  background: var(--bg-panel-light); /* Fondo gris claro */
+  color: var(--primary); /* Texto azul oscuro */
+  border-radius: var(--radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,50 +281,76 @@ body {
   font-size: 1.1rem;
 }
 
+/**
+ * Contenedor para el nombre y el rol.
+ */
 .profile .profile-info div:first-child {
   font-weight: 600;
 }
 
+/**
+ * Muestra el rol (ej: "Administrador") con color silenciado.
+ */
 .profile .role {
   font-size: 0.8rem;
-  color: #b4c1dd;
+  color: var(--text-light-muted);
 }
-/* ======================
-   BOTÓN DE CERRAR SESIÓN
-======================== */
+
+/**
+ * Formulario para el botón de "Cerrar Sesión".
+ * - 'margin-top: auto' empuja este bloque al fondo de la sidebar.
+ */
 .logout-form {
   margin-top: auto;
   padding: 15px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color-light);
 }
 
+/**
+ * El botón de "Cerrar Sesión".
+ */
 .logout-btn {
   width: 100%;
   background: none;
   border: none;
-  color: #d8d8d8;
-  font-family: 'Poppins', sans-serif;
+  color: var(--text-light-muted);
+  font-family: var(--font-main);
   font-size: 15px;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-main);
 }
 
 .logout-btn i {
   font-size: 16px;
 }
 
+/**
+ * Hover del botón Logout.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .logout-btn:hover {
-  color: var(--color-secondary);
+  color: var(--accent); /* <-- Acento Dorado */
   transform: translateX(4px);
 }
 
-/* ================================
-   MENÚ
-================================ */
+
+/*
+================================================================================
+|   SECCIÓN 5: Componente - Menú de Navegación (Sidebar)                       |
+================================================================================
+|
+|   Estilos para los enlaces <a> y los desplegables <details>
+|   dentro de la barra lateral.
+|
+*/
+
+/**
+ * Contenedor de la lista de enlaces.
+ */
 .menu {
   display: flex;
   flex-direction: column;
@@ -110,40 +358,49 @@ body {
   gap: 6px;
 }
 
+/**
+ * Estilo base para enlaces <a> y encabezados de submenú <summary>.
+ */
 .menu a,
 .menu summary {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 25px;
-  color: #cfd8ef;
+  color: var(--text-light);
   text-decoration: none;
   font-size: 0.95rem;
   border-left: 4px solid transparent;
-  transition: all 0.3s ease;
+  transition: all var(--transition-main);
   cursor: pointer;
 }
 
+/**
+ * Efecto Hover para enlaces y summaries.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .menu a:hover,
 .menu summary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-left: 4px solid #4a90e2;
+  background: var(--border-color-light);
+  color: var(--text-white);
+  border-left: 4px solid var(--accent); /* <-- Acento Dorado */
 }
 
+/**
+ * Estilo para el enlace/summary ACTIVO (página actual).
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .menu a.active,
 .menu summary.active {
   background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-left: 4px solid #fff;
+  color: var(--text-white);
+  border-left: 4px solid var(--accent-2); /* <-- Dorado Suave */
   font-weight: 600;
 }
 
-/* Submenús */
-.menu details {
-  border: none;
-}
-
+/**
+ * Contenedor del submenú (dentro de <details>).
+ */
 .menu .sub-menu {
   display: flex;
   flex-direction: column;
@@ -151,76 +408,102 @@ body {
   padding: 5px 0 5px 15px;
 }
 
+/**
+ * Enlaces individuales del submenú.
+ */
 .menu .sub-menu a {
   padding: 8px 10px;
   font-size: 0.9rem;
-  color: #b6c4e1;
+  color: var(--text-light-muted);
   border-left: 3px solid transparent;
-  transition: 0.3s;
+  transition: var(--transition-main);
 }
 
+/**
+ * Hover para enlaces del submenú.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .menu .sub-menu a:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-left: 3px solid #4a90e2;
-  border-radius: 4px;
-}
-.menu summary {
-  position: relative;
-  padding-right: 35px; /* espacio para la flecha */
+  color: var(--text-white);
+  border-left: 3px solid var(--accent); /* <-- Acento Dorado */
+  border-radius: var(--radius-sm);
 }
 
-/* Flecha indicando desplegable */
+/**
+ * Estilo para el <summary> (el "botón" del desplegable).
+ */
+.menu summary {
+  position: relative;
+  padding-right: 35px;
+}
+
+/**
+ * La flecha (ícono de FontAwesome) que indica el desplegable.
+ */
 .menu summary::after {
-  content: "\f107"; /* icono FontAwesome: caret-down */
+  content: "\f107"; /* Icono FontAwesome: caret-down */
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   position: absolute;
   right: 18px;
   font-size: 0.9rem;
-  color: #cfd8ef;
-  transition: transform 0.3s ease, color 0.3s ease;
+  color: var(--text-light);
+  transition: transform var(--transition-main), color var(--transition-main);
 }
 
-/* Al pasar el mouse o estar activo */
 .menu summary:hover::after,
 .menu summary.active::after {
-  color: #fff;
+  color: var(--text-white);
 }
 
-/* Cuando está abierto, rota la flecha */
+/**
+ * Rota la flecha 180 grados cuando el <details> está abierto.
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
 .menu details[open] summary::after {
   transform: rotate(180deg);
-  color: #4a90e2;
+  color: var(--accent); /* <-- Acento Dorado */
 }
-/* ================================
-   TOPBAR
-================================ */
+
+
+/*
+================================================================================
+|   SECCIÓN 6: Componente - Topbar (Barra Superior)                            |
+================================================================================
+|
+|   Estilos para la barra superior fija.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
+|
+*/
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 18px;
-  height: 100px;
-  background: #fff;
+  height: var(--topbar-height);
+  background: var(--bg-panel); /* <-- Fondo de panel oscuro */
   padding: 0 28px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm); /* Sombra sutil */
   position: sticky;
   top: 0;
   z-index: 100;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color); /* Borde para separar */
 }
 
 .topbar-title {
   font-weight: 600;
-  font-size: 18px;
-  color: #1c3162;
+  font-size: 1.125rem;
+  color: var(--text-primary); /* <-- Texto claro */
 }
 
 .toggle {
   background: none;
   border: none;
-  font-size: 22px;
-  color: #1c3162;
+  font-size: 1.375rem;
+  color: var(--text-primary); /* <-- Texto claro */
   cursor: pointer;
 }
 
@@ -234,116 +517,374 @@ body {
 .avatar-mini {
   width: 35px;
   height: 35px;
-  background: #1c3162;
-  color: #fff;
-  border-radius: 50%;
+  background: var(--accent); /* <-- Fondo Dorado */
+  color: var(--primary-dark);  /* <-- Texto oscuro */
+  border-radius: var(--radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
 }
 
-/* ================================
-   CONTENIDO PRINCIPAL
-================================ */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
 
-.content {
-  flex: 1;
+/*
+================================================================================
+|   SECCIÓN 7: Componentes - Tablas                                            |
+================================================================================
+|
+|   Estilos genéricos y específicos para todas las tablas de datos.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
+|
+*/
+
+.tabla-wrapper {
+  max-height: 500px;
   overflow-y: auto;
-  padding: 30px 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
 }
 
-/* ================================
-   FOOTER
-================================ */
-.footer {
-  text-align: center;
-  padding: 10px;
-  background: #fff;
-  font-size: 0.85rem;
-  color: #777;
-  border-top: 1px solid #e0e0e0;
+.tabla-notas,
+.tabla-profesores,
+.tabla-pagos,
+.tabla-apoderados {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-/* ================================
-   OVERLAY Y RESPONSIVE
-================================ */
-.sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .25s ease, visibility .25s ease;
-  z-index: 150;
+.tabla-notas th, .tabla-notas td,
+.tabla-profesores th, .tabla-profesores td,
+.tabla-pagos th, .tabla-pagos td,
+.tabla-apoderados th, .tabla-apoderados td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color); /* Borde oscuro */
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary); /* Texto claro */
 }
 
-.sidebar-overlay.show {
-  opacity: 1;
-  visibility: visible;
+.tabla-notas th,
+.tabla-profesores th,
+.tabla-pagos th,
+.tabla-apoderados th {
+  background: var(--primary); /* Fondo azul oscuro */
+  color: var(--text-white);
+  font-weight: 600;
+  font-size: 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
-body.no-scroll { overflow: hidden; }
+/*
+ * Eliminamos el "zebra striping" (filas pares) para un
+ * look más limpio y minimalista en modo oscuro.
+ */
+.tabla-notas tr:nth-child(even),
+.tabla-profesores tr:nth-child(even),
+.tabla-pagos tr:nth-child(even),
+.tabla-apoderados tr:nth-child(even) {
+  background: transparent; /* Sin color de fondo */
+}
 
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 240px;
-    height: 100vh;
-    z-index: 200;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
-  }
+/**
+ * Efecto Hover para todas las filas de la tabla.
+ */
+.tabla-notas tr:hover,
+.tabla-profesores tr:hover,
+.tabla-pagos tr:hover,
+.tabla-apoderados tr:hover {
+  background: var(--bg-panel-light); /* Fondo de hover sutil */
+  transition: background var(--transition-fast);
+}
 
-  .sidebar.open {
-    transform: translateX(0);
-  }
+/**
+ * Campos editables DENTRO de una tabla.
+ */
+.tabla-profesores input {
+  width: 95%;
+  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-primary); /* Texto claro */
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
 
-  .main {
-    margin-left: 0;
-  }
-
-  .topbar {
-    height: 70px;
-    padding: 0 16px;
-  }
-
-  .topbar-title {
-    font-size: 15px;
-  }
-
-  .user-mini span { display: none; }
-  .avatar-mini { width: 32px; height: 32px; font-size: .9rem; }
+/**
+ * Input en modo de edición.
+ */
+.tabla-profesores tr.editando input {
+  background-color: var(--bg-body); /* Fondo más oscuro */
+  border: 1px solid var(--accent); /* Borde Dorado */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 
-/* ======================
-   CURSOS PLEGABLES CON DISEÑO INSTITUCIONAL
-======================== */
+/*
+================================================================================
+|   SECCIÓN 8: Componentes - Formularios                                       |
+================================================================================
+|
+|   Estilos para los formularios.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
+|
+*/
+
+/**
+ * Estilo base para un contenedor de formulario (tarjeta).
+ */
+.formulario-alumno,
+.formulario-profesor,
+.comunicados-panel,
+.comunicados-form,
+.profesores-lista {
+  background: var(--bg-panel); /* Fondo de panel oscuro */
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 25px 30px;
+  margin: 30px auto;
+  animation: fadeIn var(--transition-main);
+  border: 1px solid var(--border-color); /* Borde oscuro */
+  max-width: 950px;
+}
+
+/**
+ * Encabezado de los formularios.
+ */
+.formulario-alumno h2,
+.formulario-profesor .form-top h2,
+.comunicados-panel h2,
+.comunicados-form h2,
+.profesores-lista h2 {
+  color: var(--text-primary); /* Texto claro */
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border-color); /* Borde oscuro */
+  padding-bottom: 10px;
+}
+
+/**
+ * Estilo base para etiquetas <label>
+ */
+.form-alumno label,
+.formulario-profesor label,
+.comunicados-form label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: var(--text-muted); /* Texto gris claro */
+  font-size: 0.9rem;
+}
+
+/**
+ * Estilo base para <input> y <select>
+ */
+.form-alumno input,
+.form-alumno select,
+.formulario-profesor input,
+.formulario-profesor select,
+.comunicados-form input,
+.comunicados-form select,
+.comunicados-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-body); /* Fondo de body (más oscuro) */
+  font-size: 0.95rem;
+  color: var(--text-primary); /* Texto claro */
+  transition: all var(--transition-fast);
+}
+
+/**
+ * Estilo de Foco para inputs/selects
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
+.form-alumno input:focus,
+.form-alumno select:focus,
+.formulario-profesor input:focus,
+.formulario-profesor select:focus,
+.comunicados-form input:focus,
+.comunicados-form select:focus,
+.comunicados-form textarea:focus {
+  border-color: var(--accent); /* Borde Dorado */
+  background: var(--bg-panel); /* Fondo de panel */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+  outline: none;
+}
+
+/**
+ * Botón de "Volver"
+ */
+.btn-volver {
+  background: var(--bg-panel-light);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-volver:hover {
+  background: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+}
+
+/**
+ * Contenedor de acciones del formulario (botón de guardar)
+ */
+.form-actions {
+  grid-column: 1 / -1;
+  text-align: right;
+  margin-top: 20px;
+}
+
+/**
+ * Botón principal de "Guardar" o "Registrar"
+ * *** ¡MODIFICADO PARA USAR EL ACENTO DORADO! ***
+ */
+.btn-guardar {
+  background: var(--accent); /* <-- Acento Dorado */
+  color: var(--primary-dark); /* <-- Texto oscuro para contrastar */
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 700; /* Más bold */
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-fast);
+}
+.btn-guardar:hover {
+  background: var(--accent-2); /* Dorado suave */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+.btn-guardar:active {
+  transform: scale(0.98);
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 9: Componentes - Botones de Acción (Tabla)                         |
+================================================================================
+|
+|   Estilos para los botones pequeños de Editar, Guardar, Eliminar
+|   que aparecen dentro de las filas de la tabla.
+|   *** ¡CAMBIO DRÁSTICO! *** Adaptado al tema oscuro.
+|
+*/
+
+/**
+ * Estilo base para los botones de acción
+ */
+.btn-editar,
+.btn-guardar.btn-accion,
+.btn-eliminar {
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  height: 32px;
+  white-space: nowrap;
+}
+
+/* Botón Editar (Estilo Dorado Sutil) */
+.btn-editar {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent-2);
+}
+.btn-editar:hover {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text-white);
+}
+
+/* Botón Guardar (Estilo Dorado Fuerte) */
+.profesores-lista .btn-guardar {
+  background: var(--accent);
+  color: var(--primary-dark);
+}
+.profesores-lista .btn-guardar:hover {
+  background: var(--accent-2);
+}
+
+/* Botón Eliminar (Estilo de peligro) */
+.btn-eliminar {
+  background: transparent;
+  color: var(--text-danger);
+  border: 1px solid var(--text-danger-border);
+}
+.btn-eliminar:hover {
+  background: var(--text-danger);
+  color: var(--text-white);
+  border-color: var(--text-danger);
+}
+
+/* Botón "Nuevo" (+ redondo) */
+.btn-nuevo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-round);
+  border: none;
+  background: var(--accent); /* <-- Acento Dorado */
+  color: var(--primary-dark);
+  font-size: 1.6rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: all var(--transition-fast);
+}
+.btn-nuevo:hover {
+  background: var(--accent-2);
+  transform: scale(1.1);
+}
+.btn-nuevo:active {
+  background: var(--accent);
+  transform: scale(0.95);
+}
+.btn-nuevo:focus-visible {
+  outline: 3px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+
+/*
+================================================================================
+|   SECCIÓN 10: Componentes Específicos (Cursos, Pagos, etc.)                  |
+================================================================================
+*/
+
+/**
+ * Tarjeta de Curso Plegable (<details>)
+ */
 .curso-card {
-  background: #1c3162;
-  border-radius: 10px;
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    0 6px 16px rgba(0, 0, 0, 0.1);
+  background: var(--primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 20px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  border: 2px solid #eaeaea;
+  transition: all var(--transition-main);
+  border: 1px solid var(--border-color);
 }
-
 .curso-header {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--primary);
+  color: var(--text-white);
   padding: 14px 18px;
   display: flex;
   justify-content: space-between;
@@ -353,596 +894,51 @@ body.no-scroll { overflow: hidden; }
   font-size: 1rem;
   list-style: none;
 }
-
-.curso-header::-webkit-details-marker {
-  display: none;
-}
-
+.curso-header::-webkit-details-marker { display: none; }
 .curso-header::after {
   content: "\f078"; /* caret-down */
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   font-size: 0.9rem;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-main);
 }
-
 .curso-card[open] .curso-header::after {
   transform: rotate(180deg);
 }
-
-.curso-titulo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.curso-profesor {
-  font-size: 0.9rem;
-  color: #dce3f4;
-}
-
 .curso-body {
-  background: #fff;
+  background: var(--bg-panel); /* Fondo de panel oscuro */
   padding: 18px 20px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn var(--transition-main);
 }
 
-/* Tabla */
-.curso-body .tabla-notas {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.curso-body .tabla-notas thead {
-  border-bottom: 2px solid #eee;
-}
-
-.curso-body .tabla-notas th {
-  color: var(--color-text);
-  font-weight: 600;
-  font-size: 14px;
-  padding: 10px;
-  border-bottom: 2px solid #d4d8e0; /* más visible */
-}
-
-.curso-body .tabla-notas td {
-  font-size: 14px;
-  color: #333;
-  padding: 10px;
-  border-bottom: 1px solid #d6d9e2; /* gris intermedio */
-}
-
-
-.curso-body .tabla-notas tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.curso-body .tabla-notas tr:hover {
-  background-color: #f5f5f5;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ================================================================ */
-
-/* ================================
-   FIX FINAL DEFINITIVO - TABLA PROFESORES (v5)
-================================ */
-.profesores-lista {
-  background: #fff;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  animation: fadeIn 0.3s ease;
-}
-
-.profesores-lista h2 {
-  color: #1c3162;
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  font-weight: 600;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 5px;
-}
-
-.profesores-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 0 5px;
-}
-
-/* ================================
-   TABLA
-================================ */
-.tabla-profesores {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  table-layout: fixed; /* Evita que se deformen las columnas */
-}
-
-.tabla-profesores th,
-.tabla-profesores td {
-  padding: 8px 10px;
-  text-align: left;
-  border-bottom: 1px solid #e5e5e5;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tabla-profesores th {
-  background: #1c3162;
-  color: #fff;
-  font-weight: 600;
-}
-
-.tabla-profesores tr:nth-child(even) {
-  background: #f8f9ff;
-}
-
-.tabla-profesores tr:hover {
-  background: #eef2ff;
-  transition: 0.2s ease;
-}
-
-/* ================================
-   CAMPOS EDITABLES
-================================ */
-.tabla-profesores input {
-  width: 95%;
-  padding: 5px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background-color: transparent;
-  color: #333;
-  font-size: 0.9rem;
-}
-
-.tabla-profesores tr.editando input {
-  background-color: #fff;
-  border: 1px solid #1c3162;
-  box-shadow: 0 0 0 2px rgba(28, 49, 98, 0.1);
-}
-
-/* ================================
-   ACCIONES (CORREGIDO Y UNIVERSAL)
-================================ */
-.tabla-profesores td:last-child {
-  width: 200px;
-  text-align: right;
-  
-  vertical-align: middle; /* Asegura alineación en el centro */
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-/* ✅ Si usas un contenedor .acciones */
-.acciones {
-  justify-content: flex-end;
-  align-items: center; /* Centra verticalmente dentro de la celda */
-  gap: 8px;
-  flex-wrap: nowrap;
-  height: 100%; /* iguala la altura de la fila */
-  
-}
-
-/* Caso 2: Si los botones están sueltos */
-.tabla-profesores td:last-child > button {
-  display: inline-block;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-
-/* Botones */
-.profesores-lista .btn-editar,
-.profesores-lista .btn-guardar,
-.profesores-lista .btn-eliminar {
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 5px 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  height: 32px;
-  white-space: nowrap;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Editar */
-.profesores-lista .btn-editar {
-  background: #e8eafc;
-  color: #1c3162;
-}
-.profesores-lista .btn-editar:hover {
-  background: #d9defc;
-}
-
-/* Guardar */
-.profesores-lista .btn-guardar {
-  background: #1c3162;
-  color: #fff;
-}
-.profesores-lista .btn-guardar:hover {
-  background: #2a4699;
-}
-
-/* Eliminar */
-.profesores-lista .btn-eliminar {
-  background: #fff;
-  color: #b40000;
-  border: 1px solid #b40000;
-}
-.profesores-lista .btn-eliminar:hover {
-  background: #ff0000;
-  color: #fff;
-}
-
-.btn-nuevo {
-  --btn-bg: #1c3162;
-  --btn-bg-hover: #2a4699;
-  --btn-bg-active: #14244e;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-
-  background: var(--btn-bg);
-  color: #fff;
-  font-size: 1.6rem;
-  font-weight: 700;
-  cursor: pointer;
-
-  box-shadow: 0 3px 10px rgba(28, 49, 98, 0.25);
-  transition: all 0.2s ease;
-}
-
-/* Hover / Active */
-.btn-nuevo:hover {
-  background: var(--btn-bg-hover);
-  transform: scale(1.1);
-}
-
-.btn-nuevo:active {
-  background: var(--btn-bg-active);
-  transform: scale(0.95);
-}
-
-/* En pantallas pequeñas */
-@media (max-width: 768px) {
-  .btn-nuevo {
-    width: 34px;
-    height: 34px;
-    font-size: 1.4rem;
-  }
-}
-
-/* Accesibilidad: foco visible con teclado */
-.btn-nuevo:focus-visible {
-  outline: 3px solid #9db3ff;
-  outline-offset: 3px;
-}
-
-/* Variante compacta en pantallas pequeñas */
-@media (max-width: 640px) {
-  .btn-nuevo {
-    width: 36px;
-    height: 36px;
-    font-size: 1.2rem;
-  }
-}
-/* ================================
-   RESPONSIVE
-================================ */
-@media (max-width: 1200px) {
-  .tabla-profesores td:last-child {
-    width: 180px;
-  }
-
-  .acciones {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-}
-
-/* ================================
-   ANIMACIÓN
-================================ */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-
-
-
-/* ================================
-   FORMULARIO DE REGISTRO DE ALUMNO
-================================ */
-.formulario-alumno {
-  background: #fff;
-  padding: 20px 25px; /* 🔹 menos relleno */
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  animation: fadeIn 0.3s ease;
-  max-width: 810px; /* 🔹 reducido un 10 % */
-  margin: 35px auto;
-  position: relative;
-}
-
-/* Encabezado del formulario */
-.formulario-alumno h2 {
-  color: #1c3162;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 5px;
-  font-size: 1.2rem; /* 🔹 un poco más pequeño */
-}
-
-/* Botón volver */
-.btn-volver {
-  background: transparent;
-  border: 1px solid #1c3162;
-  color: #1c3162;
-  font-size: 0.85rem; /* 🔹 reducido */
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 15px;
-}
-
-.btn-volver:hover {
-  background: #1c3162;
-  color: #fff;
-}
-
-/* Diseño a dos columnas */
-.form-alumno {
+/**
+ * Layout del panel de Comunicados (2 columnas)
+ */
+.comunicados-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px; /* 🔹 menos espacio entre columnas */
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 30px;
+  align-items: start;
 }
-
-.form-section {
-  background: #f9f9ff;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #e2e2e2;
-}
-
-.form-section h3 {
-  color: #1c3162;
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 4px;
-}
-
-/* Campos */
-.form-alumno label {
-  display: block;
-  margin-top: 6px;
-  font-weight: 500;
-  color: #333;
-  font-size: 0.85rem;
-}
-
-.form-alumno input,
-.form-alumno select {
-  width: 100%;
-  padding: 6px 8px; /* 🔹 menos alto */
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 0.85rem;
-  margin-top: 3px;
-}
-
-/* Botón Registrar */
-.form-actions {
-  grid-column: span 2;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.btn-guardar {
-  background-color: #1c3162;
-  color: #fff;
-  border: none;
-  padding: 8px 18px; /* 🔹 un poco más chico */
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.btn-guardar:hover {
-  background-color: #2a4699;
+.filtro-extra {
+  display: none;
 }
 
 
+/*
+================================================================================
+|   SECCIÓN 11: Animaciones y Clases de Utilidad                               |
+================================================================================
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ================================
-   FORMULARIO DE REGISTRO DE PROFESOR
-================================ */
-.formulario-profesor {
-  background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  padding: 40px 50px;
-  margin: 30px auto;
-  max-width: 950px;
-  animation: fadeIn 0.25s ease-out;
-  border: 1px solid #e5e7ee;
-}
-
-/* 📌 Cabecera con título y botón volver */
-.formulario-profesor .form-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 25px;
-}
-
-.formulario-profesor .form-top h2 {
-  font-size: 1.6rem;
-  color: #1c3162;
-  font-weight: 700;
-}
-
-.formulario-profesor .btn-volver {
-  background: #e7ecf9;
-  color: #1c3162;
-  border: none;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.formulario-profesor .btn-volver:hover {
-  background: #d7dff6;
-  transform: translateX(-2px);
-}
-
-/* 📐 Form grid */
-#form-profesor {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 30px;
-}
-
-/* 🏷️ Labels */
-#form-profesor label {
-  font-weight: 600;
-  color: #2d2f3a;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-  display: block;
-}
-
-/* ✏️ Inputs y Selects */
-#form-profesor input,
-#form-profesor select {
-  width: 100%;
-  border: 1px solid #d9dce3;
-  border-radius: 10px;
-  padding: 10px 14px;
-  background: #f8faff;
-  font-size: 0.95rem;
-  color: #1c1f26;
-  transition: all 0.2s ease;
-}
-
-#form-profesor input:focus,
-#form-profesor select:focus {
-  border-color: #1c3162;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(28, 49, 98, 0.12);
-  outline: none;
-}
-
-/* 🔽 Selector con flechita */
-#form-profesor select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg fill='%231c3162' height='14' viewBox='0 0 24 24' width='14' xmlns='http://www.w3.org/2000/svg'%3E<path d='M7 10l5 5 5-5z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 14px;
-}
-
-/* 💡 Placeholder */
-#form-profesor ::placeholder {
-  color: #a0a6b4;
-}
-
-/* ✅ Botón registrar */
-.formulario-profesor .form-actions {
-  grid-column: 1 / -1;
-  text-align: right;
-  margin-top: 10px;
-}
-
-.formulario-profesor .btn-guardar {
-  background: #1c3162;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  box-shadow: 0 8px 16px rgba(28, 49, 98, 0.18);
-  transition: all 0.2s ease;
-}
-
-.formulario-profesor .btn-guardar:hover {
-  background: #273d7d;
-  box-shadow: 0 10px 20px rgba(28, 49, 98, 0.22);
-}
-
-.formulario-profesor .btn-guardar:active {
-  transform: scale(0.98);
-}
-
-/* 📱 Responsive */
-@media (max-width: 900px) {
-  #form-profesor {
-    grid-template-columns: 1fr;
-  }
-
-  .formulario-profesor {
-    padding: 25px;
-    max-width: 95%;
-  }
-
-  .formulario-profesor .form-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-}
-
-/* ✨ Animación suave */
+/**
+ * Animación de aparición (Fade In)
+ * Usada por los formularios y tarjetas al cargar la vista.
+ */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px); /* Empieza 10px abajo */
   }
   to {
     opacity: 1;
@@ -950,232 +946,152 @@ body.no-scroll { overflow: hidden; }
   }
 }
 
-
-
-
-.ver-pagos{background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.bloque-pagos{margin-bottom:25px}
-.bloque-pagos h3{font-size:1.2rem;margin-bottom:10px;border-bottom:2px solid #eee;padding-bottom:5px}
-.mes-card summary{font-weight:600;color:#1c3162;cursor:pointer;margin-bottom:5px}
-.tabla-pagos{width:100%;border-collapse:collapse;margin-top:8px}
-.tabla-pagos th,.tabla-pagos td{border:1px solid #ddd;padding:8px;font-size:.9rem}
-.tabla-pagos th{background:#f5f6fa;text-align:left}
-
-/* ================================
-   📢 FORMULARIO DE COMUNICADOS
-================================ */
-.comunicados-panel {
-  background: #fff;
-  padding: 25px 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  animation: fadeIn 0.3s ease;
-  max-width: 750px;
-  margin: 25px auto;
-  position: relative;
-  font-family: "Poppins", sans-serif;
+/**
+ * Overlay para la Sidebar Móvil
+ * Este es el fondo oscuro que aparece detrás de la
+ * sidebar cuando se abre en modo móvil.
+ */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px); /* Efecto blur añadido */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  z-index: 150;
+}
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
 }
 
-.comunicados-panel h2 {
-  color: #1c3162;
-  font-size: 1.4rem;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 6px;
-}
-
-#form-comunicado label {
-  display: block;
-  margin-top: 10px;
-  font-weight: 500;
-  color: #1c3162;
-}
-
-#form-comunicado input[type="text"],
-#form-comunicado textarea,
-#form-comunicado select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  margin-top: 5px;
-  transition: all 0.2s ease;
-}
-
-#form-comunicado input:focus,
-#form-comunicado textarea:focus,
-#form-comunicado select:focus {
-  border-color: #1c3162;
-  box-shadow: 0 0 4px rgba(28,49,98,0.3);
-  outline: none;
-}
-
-#form-comunicado textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-.filtro-extra {
-  background: #f9f9ff;
-  padding: 10px 15px;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-.btn-guardar {
-  background-color: #1c3162;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  margin-top: 15px;
-  width: 100%;
-}
-
-.btn-guardar:hover {
-  background-color: #2a4699;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/**
+ * Bloquea el scroll del <body>
+ * Esta clase se añade con JS cuando un modal o la
+ * sidebar móvil están abiertos.
+ */
+body.no-scroll {
+  overflow: hidden;
 }
 
 
-/* =============================
-   COMUNICADOS - PANEL VISUAL
-============================= */
-.comunicados-layout {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 30px;
-  align-items: start;
+/*
+================================================================================
+|   SECCIÓN 12: Responsive (Media Queries)                                     |
+================================================================================
+|
+|   Ajustes para pantallas más pequeñas (tablets y móviles).
+|
+*/
+
+/**
+ * Ajustes para pantallas de 1200px o menos
+ * (Tablets grandes)
+ */
+@media (max-width: 1200px) {
+  .tabla-profesores td:last-child {
+    width: 180px;
+  }
+  .acciones {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 
-.comunicados-form, .comunicados-lista {
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px 25px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+/**
+ * Ajustes para pantallas de 900px o menos
+ * (Formularios en una columna)
+ */
+@media (max-width: 900px) {
+  #form-profesor,
+  .form-alumno {
+    grid-template-columns: 1fr;
+  }
+  .formulario-profesor,
+  .formulario-alumno {
+    padding: 25px;
+    max-width: 95%;
+  }
+  .formulario-profesor .form-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 
-/* ======= FORMULARIO ======= */
-.comunicados-form h2 {
-  color: #1c3162;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 6px;
-  margin-bottom: 15px;
+/**
+ * Ajustes para pantallas de 768px o menos
+ * (Móviles - Cambio de layout principal)
+ */
+@media (max-width: 768px) {
+  /**
+   * En móvil, la sidebar se oculta fuera de la pantalla.
+   */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    z-index: 200;
+    transform: translateX(-100%);
+    box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main {
+    margin-left: 0; /* El main ocupa todo el ancho */
+  }
+
+  /**
+   * Topbar más pequeña en móvil.
+   */
+  .topbar {
+    height: var(--topbar-height-mobile);
+    padding: 0 16px;
+  }
+  .topbar-title {
+    font-size: 15px;
+  }
+
+  /**
+   * Oculta el nombre del usuario en la topbar,
+   * dejando solo el avatar.
+   */
+  .user-mini span {
+    display: none;
+  }
+  .avatar-mini {
+    width: 32px;
+    height: 32px;
+    font-size: .9rem;
+  }
+
+  /**
+   * Reduce el padding del contenido en móvil.
+   */
+  .content {
+    padding: 15px;
+  }
+
+  /**
+   * Botón "Nuevo" más pequeño en móvil.
+   */
+  .btn-nuevo {
+    width: 34px;
+    height: 34px;
+    font-size: 1.4rem;
+  }
+  
+  /**
+   * Layout de comunicados se apila verticalmente.
+   */
+  .comunicados-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
-.comunicados-form .form-group {
-  margin-bottom: 15px;
-}
-
-.comunicados-form label {
-  display: block;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 6px;
-}
-
-.comunicados-form input, 
-.comunicados-form select, 
-.comunicados-form textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-}
-
-.comunicados-form textarea {
-  resize: vertical;
-}
-
-.filtro-extra {
-  display: none;
-}
-
-.form-actions {
-  text-align: right;
-}
-
-.btn-guardar {
-  background-color: #1c3162;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-weight: 600;
-}
-
-.btn-guardar:hover {
-  background-color: #2a4699;
-}
-
-/* ======= LISTA DE APODERADOS ======= */
-.comunicados-lista h3 {
-  color: #1c3162;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 6px;
-}
-
-.header-lista {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.header-lista input {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 50%;
-  font-size: 0.7rem;
-}
-
-.tabla-wrapper {
-  max-height: 500px;
-  overflow-y: auto;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-
-.tabla-apoderados {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tabla-apoderados th, 
-.tabla-apoderados td {
-  border: 1px solid #eee;
-  padding: 8px 10px;
-  font-size: 0.7rem;
-  text-align: left;
-}
-
-.tabla-apoderados th {
-  background: #1c3162;
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.tabla-apoderados tr:nth-child(even) {
-  background: #f8f9ff;
-}
-
-.tabla-apoderados tr:hover {
-  background: #eef2ff;
-}
+/* --- FIN DEL ARCHIVO CSS --- */
