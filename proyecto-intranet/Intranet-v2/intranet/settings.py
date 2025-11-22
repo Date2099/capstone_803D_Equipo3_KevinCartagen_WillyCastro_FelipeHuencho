@@ -44,11 +44,7 @@ INSTALLED_APPS = [
     'studentView',
     'adminView',
     'profesorView',
-<<<<<<< HEAD
-    
-=======
     'core',
->>>>>>> feature/admin-view
 
 ]
 AUTH_USER_MODEL = 'core.User'
@@ -137,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTH_USER_MODEL = "core.User"
+AUTH_USER_MODEL = 'core.User'
 
 
 
