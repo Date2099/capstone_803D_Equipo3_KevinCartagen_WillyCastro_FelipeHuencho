@@ -1,0 +1,171 @@
+CREATE TABLE comuna (
+    id          SERIAL PRIMARY KEY,
+    nombre      VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE grade (
+    curso_id        VARCHAR(5) PRIMARY KEY,
+    curso_nombre    VARCHAR(30) UNIQUE NOT NULL
+);
+
+CREATE TABLE evaluation_type (
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE "user" (
+    id              SERIAL PRIMARY KEY,
+    rut             VARCHAR(15) UNIQUE NOT NULL,
+    role            VARCHAR(20) NOT NULL,
+    first_name      VARCHAR(100) NOT NULL,
+    last_name       VARCHAR(100) NOT NULL,
+    email           VARCHAR(255),
+    phone           VARCHAR(20),
+    address         TEXT,
+    birth_date      DATE,
+    ingreso_date    DATE,
+    active_status   VARCHAR(20) DEFAULT 'active',
+    comuna_id       INTEGER REFERENCES comuna(id) ON DELETE SET NULL
+);
+
+CREATE TABLE teacher_profile (
+    id          SERIAL PRIMARY KEY,
+    user_id     INTEGER UNIQUE NOT NULL
+                    REFERENCES "user"(id) ON DELETE CASCADE,
+    department  VARCHAR(100),
+    title       VARCHAR(150),
+    position    VARCHAR(150)
+);
+
+CREATE TABLE guardian_profile (
+    id          SERIAL PRIMARY KEY,
+    user_id     INTEGER UNIQUE NOT NULL
+                    REFERENCES "user"(id) ON DELETE CASCADE,
+    payment_pin VARCHAR(12)
+);
+
+CREATE TABLE class (
+    id          SERIAL PRIMARY KEY,
+    grade_id    VARCHAR(5) NOT NULL
+                    REFERENCES grade(curso_id) ON DELETE CASCADE,
+    year        INTEGER NOT NULL,
+    teacher_id  INTEGER
+                    REFERENCES "user"(id) ON DELETE SET NULL,
+    CONSTRAINT unique_class_per_year UNIQUE (grade_id, year)
+);
+
+CREATE TABLE subject (
+    id              SERIAL PRIMARY KEY,
+    name            VARCHAR(100) NOT NULL,
+    class_group_id  INTEGER NOT NULL
+                        REFERENCES class(id) ON DELETE CASCADE,
+    teacher_id      INTEGER
+                        REFERENCES "user"(id) ON DELETE SET NULL,
+    CONSTRAINT unique_subject_per_class UNIQUE (name, class_group_id)
+);
+
+CREATE TABLE subject_schedule (
+    id              SERIAL PRIMARY KEY,
+    subject_id      INTEGER NOT NULL
+                        REFERENCES subject(id) ON DELETE CASCADE,
+    day_of_week     SMALLINT NOT NULL,
+    start_time      TIME NOT NULL,
+    end_time        TIME NOT NULL,
+    CONSTRAINT sched_end_after_start CHECK (end_time > start_time),
+    CONSTRAINT uniq_subject_timeslot UNIQUE (subject_id, day_of_week, start_time, end_time)
+);
+
+CREATE TABLE enrollment (
+    id              SERIAL PRIMARY KEY,
+    student_id      INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    class_group_id  INTEGER NOT NULL
+                        REFERENCES class(id) ON DELETE CASCADE,
+    date            DATE,
+    active_status   VARCHAR(20) DEFAULT 'active',
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT unique_enrollment UNIQUE (student_id, class_group_id)
+);
+
+CREATE TABLE guardian_relation (
+    id              SERIAL PRIMARY KEY,
+    guardian_id     INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    student_id      INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    CONSTRAINT unique_guardian_student UNIQUE (guardian_id, student_id)
+);
+
+CREATE TABLE attendance (
+    id              SERIAL PRIMARY KEY,
+    student_id      INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    class_group_id  INTEGER NOT NULL
+                        REFERENCES class(id) ON DELETE CASCADE,
+    date            DATE NOT NULL,
+    present         BOOLEAN NOT NULL,
+    justified_absence BOOLEAN DEFAULT FALSE,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT unique_attendance UNIQUE (student_id, class_group_id, date)
+);
+
+CREATE TABLE evaluation (
+    id                  SERIAL PRIMARY KEY,
+    class_group_id      INTEGER NOT NULL
+                            REFERENCES class(id) ON DELETE CASCADE,
+    subject_id          INTEGER NOT NULL
+                            REFERENCES subject(id) ON DELETE CASCADE,
+    teacher_id          INTEGER NOT NULL
+                            REFERENCES "user"(id) ON DELETE CASCADE,
+    evaluation_type_id  INTEGER NOT NULL
+                            REFERENCES evaluation_type(id) ON DELETE CASCADE,
+    date                DATE NOT NULL,
+    description         TEXT,
+    weight              DECIMAL(5,2) DEFAULT 1.0,
+    created_at          TIMESTAMP DEFAULT NOW(),
+    updated_at          TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE grade_result (
+    id              SERIAL PRIMARY KEY,
+    evaluation_id   INTEGER NOT NULL
+                        REFERENCES evaluation(id) ON DELETE CASCADE,
+    student_id      INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    score           DECIMAL(5,2) NOT NULL,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT unique_grade_result UNIQUE (evaluation_id, student_id)
+);
+
+CREATE TABLE payment (
+    id              SERIAL PRIMARY KEY,
+    student_id      INTEGER NOT NULL
+                        REFERENCES "user"(id) ON DELETE CASCADE,
+    amount          DECIMAL(10,2) NOT NULL,
+    concept         VARCHAR(100) DEFAULT 'Mensualidad',
+    issue_date      DATE DEFAULT CURRENT_DATE,
+    due_date        DATE,
+    paid_at         DATE,
+    status          VARCHAR(20) DEFAULT 'pending',
+    getnet_request_id   VARCHAR(150) UNIQUE,
+    getnet_token        VARCHAR(120),
+    getnet_transaction_id VARCHAR(150),
+    getnet_auth_code    VARCHAR(50),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE comunicado (
+    id              SERIAL PRIMARY KEY,
+    asunto          VARCHAR(200) NOT NULL,
+    mensaje         TEXT NOT NULL,
+    destino         VARCHAR(20) NOT NULL,
+    destinatarios   TEXT,
+    enviado_por_id  INTEGER
+                        REFERENCES "user"(id) ON DELETE SET NULL,
+    fecha_envio     TIMESTAMP DEFAULT NOW()
+);
