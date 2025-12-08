@@ -96,110 +96,251 @@ document.addEventListener("DOMContentLoaded", () => {
     calendar.render();
   }
 
-  function renderDashboard(container) {
-    const nombreAlumno = (window.alumno && alumno.nombre) || "Alumno";
-    const cursoAlumno = (window.alumno && alumno.curso) || "--";
+    // DASHBOARD
+// ============================
+//  DASHBOARD (Diseño Clean / Lista)
+// ============================
+async function renderDashboard(container) {
+  
+  // 1. Preparamos el HTML base con las tarjetas de estadísticas (sin cambios aquí)
+  // Pero dejamos un placeholder para las evaluaciones
+  let dashboardHtml = `
+    <div class="card">
+      <h2 class="card-title">Bienvenido, ${alumno.nombre}</h2>
+      <p style="color: #64748b; margin-bottom: 25px;">${alumno.curso} - Panel personal de estudiante.</p>
 
-    container.innerHTML = `
-      <div class="card">
-        <h2 class="card-title">Bienvenido, ${nombreAlumno} - ${cursoAlumno}</h2>
-        <p>Este es tu panel personal de estudiante.</p>
-
-        <div class="stat-cards-container">
-          <div class="stat-card" style="--card-color: var(--color-primary);">
-            <i class="fa-solid fa-book card-icon"></i>
-            <div class="card-info">
-              <div class="card-num" id="stat-asignaturas">...</div>
-              <div class="card-label">Tus asignaturas</div>
-            </div>
+      <div class="stat-cards-container">
+        <div class="stat-card" style="--card-color: var(--color-primary);">
+          <i class="fa-solid fa-book card-icon"></i>
+          <div class="card-info">
+            <div class="card-num" id="stat-asignaturas">...</div>
+            <div class="card-label">Tus asignaturas</div>
           </div>
-          <div class="stat-card" style="--card-color: var(--color-secondary);">
-            <i class="fa-solid fa-list-check card-icon"></i>
-            <div class="card-info">
-              <div class="card-num">4.8</div>
-              <div class="card-label">Promedio general</div>
-            </div>
+        </div>
+        <div class="stat-card" style="--card-color: var(--color-secondary);">
+          <i class="fa-solid fa-list-check card-icon"></i>
+          <div class="card-info">
+            <div class="card-num" id="stat-promedio">...</div>
+            <div class="card-label">Promedio general</div>
           </div>
         </div>
       </div>
+
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 1.25rem; color: var(--color-primary); font-weight: 700; margin-bottom: 20px;">
+            Próximas Evaluaciones
+        </h3>
+        
+        <div id="lista-evaluaciones-clean">
+            <p style="color:#999;">Cargando...</p>
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  container.innerHTML = dashboardHtml;
+
+  // 2. Lógica para cargar Promedios (Igual que antes)
+  try {
+    const resp = await fetch("/studentView/api/promedio/");
+    if (resp.ok) {
+        const data = await resp.json();
+        const promedio = data.promedio ?? 0;
+        const cantAsignaturas = data.cantidad_asignaturas ?? 0;
+        
+        const nodoProm = document.getElementById("stat-promedio");
+        const nodoAsig = document.getElementById("stat-asignaturas");
+        if (nodoProm) nodoProm.textContent = promedio.toFixed(1);
+        if (nodoAsig) nodoAsig.textContent = cantAsignaturas;
+    }
+  } catch (err) { console.error("Error promedio:", err); }
+
+  // 3. LÓGICA VISUAL: LISTA DE EVALUACIONES
+  try {
+    const respEv = await fetch("/studentView/api/proximas-evaluaciones/");
+    const divLista = document.getElementById("lista-evaluaciones-clean");
+    
+    if (!respEv.ok) throw new Error("Error fetching evaluaciones");
+    const dataEv = await respEv.json();
+    const evaluaciones = dataEv.evaluaciones || [];
+
+    divLista.innerHTML = ""; // Limpiar carga
+
+    if (evaluaciones.length === 0) {
+        divLista.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px;">
+                <i class="fa-solid fa-mug-hot" style="margin-bottom: 8px;"></i> No tienes evaluaciones próximas.
+            </div>`;
+    } else {
+        evaluaciones.forEach(ev => {
+            // Lógica de texto para días restantes
+            let diasTexto = `Faltan ${ev.dias_restantes} días`;
+            let diasColor = "#64748b"; // Gris por defecto
+
+            if (ev.dias_restantes === 0) {
+                diasTexto = "¡Es hoy!";
+                diasColor = "#ef4444"; // Rojo
+            } else if (ev.dias_restantes === 1) {
+                diasTexto = "Mañana";
+                diasColor = "#f59e0b"; // Naranja
+            }
+
+            // HTML de cada fila (FLEXBOX para replicar la imagen)
+            const fila = `
+                <div style="
+                    display: flex; 
+                    justify-content: space-between; 
+                    align-items: flex-start; 
+                    padding: 18px 0; 
+                    border-bottom: 1px solid #f1f5f9;
+                ">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-weight: 600; font-size: 1rem; color: #0F294C;">
+                            ${ev.tipo}
+                        </span>
+                        <span style="font-size: 0.85rem; color: #64748b;">
+                            ${alumno.curso} — ${ev.asignatura}
+                        </span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                        <span style="font-weight: 700; font-size: 0.95rem; color: #0F294C;">
+                            ${ev.fecha}
+                        </span>
+                        <span style="font-size: 0.8rem; font-weight: 600; color: ${diasColor};">
+                            ${diasTexto}
+                        </span>
+                    </div>
+                </div>
+            `;
+            divLista.innerHTML += fila;
+        });
+    }
+
+  } catch (err) {
+    console.error("Error cargando evaluaciones:", err);
+    const divLista = document.getElementById("lista-evaluaciones-clean");
+    if(divLista) divLista.innerHTML = `<p style="color:red;">No se pudieron cargar los datos.</p>`;
+  }
+}
+
+
+
+  // ============================
+  // MIS CLASES (Formato Horario - Tabla)
+  // ============================
+  function renderClases(container) {
+    const nombreAlumno = alumno.nombre || "Estudiante";
+    const nombreCurso = alumno.curso || "Sin curso";
+
+    container.innerHTML = `
+      <div class="card horario-card-grid">
+        
+        <div style="margin-bottom: 20px;">
+            <h2 class="card-title-grid">
+                <i class="fa-solid fa-calendar-days" style="margin-right:8px; opacity:0.8;"></i>
+                Horario Semanal de ${nombreAlumno}
+            </h2>
+            <div class="horario-meta">
+                <span class="meta-label">Horario curso:</span>
+                <span class="curso-badge">${nombreCurso}</span>
+            </div>
+        </div>
+        
+        <div class="table-responsive-grid">
+          <table class="horario-table-styled">
+            <thead>
+              <tr>
+                <th class="time-header">Hora</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+              </tr>
+            </thead>
+            <tbody id="clases-grid-body">
+              <tr><td colspan="6" style="text-align:center; padding:30px;">Cargando horario...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
+
+    const tbody = container.querySelector("#clases-grid-body");
+    const daysToShow = [0, 1, 2, 3, 4]; // Lunes a Viernes
 
     fetch("/studentView/mis-asignaturas/")
       .then((r) => r.json())
       .then((data) => {
         const asignaturas = data.asignaturas || [];
-        const el = document.getElementById("stat-asignaturas");
-        if (el) el.textContent = asignaturas.length;
-      })
-      .catch(() => {
-        const el = document.getElementById("stat-asignaturas");
-        if (el) el.textContent = "0";
-      });
-  }
 
-  function renderClases(container) {
-    container.innerHTML = `
-      <div class="card">
-        <h2 class="card-title"><i class="fa-solid fa-book"></i> Mis Clases</h2>
-        <p>Aquí puedes ver las asignaturas en las que estás inscrito.</p>
-        <div class="clases-grid" id="clases-list"></div>
-      </div>
-    `;
-
-    const list = container.querySelector("#clases-list");
-    list.innerHTML = `<p>Cargando asignaturas...</p>`;
-
-    const dayNames = {
-      0: "Lunes",
-      1: "Martes",
-      2: "Miércoles",
-      3: "Jueves",
-      4: "Viernes",
-      5: "Sábado",
-      6: "Domingo",
-    };
-
-    fetch("/studentView/mis-asignaturas/")
-      .then((r) => r.json())
-      .then((data) => {
-        const clases = data.asignaturas || [];
-
-        if (!clases.length) {
-          list.innerHTML = `<p class="no-clases">No tienes asignaturas asignadas actualmente.</p>`;
+        if (!asignaturas.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color: #7f8c8d; font-style: italic;">No tienes asignaturas inscritas.</td></tr>`;
           return;
         }
 
-        list.innerHTML = "";
-        clases.forEach((c) => {
-          const item = document.createElement("div");
-          item.classList.add("clase-card");
+        const gridData = {}; 
+        const timeSlotsSet = new Set();
 
-          const horariosHtml =
-            c.horarios && c.horarios.length
-              ? `<p><i class="fa-solid fa-clock"></i> ${c.horarios
-                  .map((h) => {
-                    const raw = h.day_of_week;
-                    const nombreDia = dayNames[raw] ?? dayNames[Number(raw)] ?? raw;
-                    return `${nombreDia} ${h.start_time} - ${h.end_time}`;
-                  })
-                  .join("<br>")}</p>`
-              : "";
+        asignaturas.forEach(asig => {
+            if (asig.horarios) {
+                asig.horarios.forEach(h => {
+                    if (daysToShow.includes(h.day_of_week)) {
+                        const start = h.start_time.slice(0,5);
+                        const end = h.end_time.slice(0,5);
+                        const timeLabel = `${start} - ${end}`;
+                        
+                        timeSlotsSet.add(timeLabel);
 
-          item.innerHTML = `
-            <div class="clase-icon"><i class="fa-solid fa-book-open"></i></div>
-            <div class="clase-info">
-              <h3>${c.nombre}</h3>
-              <p><i class="fa-solid fa-chalkboard-user"></i> ${c.profesor || "--"}</p>
-              ${horariosHtml}
-            </div>
-          `;
-          list.appendChild(item);
+                        if (!gridData[timeLabel]) {
+                            gridData[timeLabel] = {};
+                        }
+                        gridData[timeLabel][h.day_of_week] = {
+                            subject: asig.nombre,
+                            teacher: asig.profesor || "--"
+                        };
+                    }
+                });
+            }
         });
+        
+
+        const sortedTimeSlots = Array.from(timeSlotsSet).sort();
+
+        if (sortedTimeSlots.length === 0) {
+             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color: #7f8c8d;">No hay horarios definidos de Lunes a Viernes.</td></tr>`;
+             return;
+        }
+
+        tbody.innerHTML = "";
+        
+        sortedTimeSlots.forEach(timeLabel => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td class="time-cell-styled">${timeLabel}</td>`;
+            
+            daysToShow.forEach(dayIdx => {
+                const cellData = gridData[timeLabel][dayIdx];
+                let cellContent = '<span class="empty-cell" style="color:#eee;">-</span>';
+                
+                if (cellData) {
+                    cellContent = `
+                        <div class="subject-name">${cellData.subject}</div>
+                        <div class="teacher-name">${cellData.teacher}</div>
+                    `;
+                }
+                row.innerHTML += `<td>${cellContent}</td>`;
+            });
+            tbody.appendChild(row);
+        });
+
       })
-      .catch(() => {
-        list.innerHTML = `<p class="no-clases">Error al cargar las asignaturas.</p>`;
+      .catch((err) => {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#e74c3c;">Error al cargar datos.</td></tr>`;
       });
-  }
+}
 
   function renderNotas(container) {
     container.innerHTML = `
@@ -310,53 +451,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function renderPerfil(container) {
-    const res = await fetch("/studentView/perfil-data/");
-    const alumnoData = await res.json();
+  const res = await fetch("/studentView/perfil-data/");
+  const alumno = await res.json();
 
-    container.innerHTML = `
-      <div class="perfil-card">
-        <div class="perfil-header">
-          <div class="perfil-banner"></div>
-          <div class="perfil-avatar">
-            <div class="avatar-circle">
-              ${alumnoData.nombre
-                .split(" ")
-                .map((p) => p[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </div>
-            <h2>${alumnoData.nombre}</h2>
-            <p class="perfil-username">${alumnoData.username || alumnoData.email || "usuario"}</p>
-            <p class="perfil-sub">${alumnoData.curso || "--"} • RUT ${alumnoData.rut || "--"}</p>
-          </div>
-        </div>
-
-        <div class="perfil-body">
-          <div class="perfil-info-box">
-            <h3>Información básica</h3>
-            <table>
-              <tr><td>Nombre completo</td><td>${alumnoData.nombre}</td></tr>
-              <tr><td>Curso</td><td>${alumnoData.curso || "--"}</td></tr>
-              <tr><td>RUT</td><td>${alumnoData.rut || "--"}</td></tr>
-              <tr><td>Correo</td><td>${alumnoData.email || "--"}</td></tr>
-              <tr><td>Teléfono</td><td>${alumnoData.telefono || "--"}</td></tr>
-            </table>
-          </div>
-
-          <div class="perfil-info-box">
-            <h3>Información del apoderado</h3>
-            <table>
-              <tr><td>Nombre</td><td>${alumnoData.apoderado_nombre || "--"}</td></tr>
-              <tr><td>Parentesco</td><td>${alumnoData.apoderado_parentesco || "--"}</td></tr>
-              <tr><td>Teléfono</td><td>${alumnoData.apoderado_telefono || "--"}</td></tr>
-              <tr><td>Correo</td><td>${alumnoData.apoderado_correo || "--"}</td></tr>
-            </table>
-          </div>
+  container.innerHTML = `
+    <div class="perfil-card">
+      <div class="perfil-header">
+        <div class="perfil-banner"></div>
+        <div class="perfil-avatar">
+          <div class="avatar-circle">${alumno.nombre.split(" ").map(p => p[0]).join("").slice(0,2).toUpperCase()}</div>
+          <h2>${alumno.nombre}</h2>
+          <p class="perfil-username">${alumno.username || alumno.email || "usuario"}</p>
+          <p class="perfil-sub">${alumno.curso || "--"} • RUT ${alumno.rut || "--"}</p>
         </div>
       </div>
-    `;
-  }
+
+      <div class="perfil-body">
+        <div class="perfil-info-box">
+          <h3>Información básica</h3>
+          <table>
+            <tr><td>Nombre completo</td><td>${alumno.nombre}</td></tr>
+            <tr><td>Curso</td><td>${alumno.curso || "--"}</td></tr>
+            <tr><td>RUT</td><td>${alumno.rut || "--"}</td></tr>
+
+          </table>
+        </div>
+
+        <div class="perfil-info-box">
+          <h3>Información del apoderado</h3>
+          <table>
+            <tr><td>Nombre</td><td>${alumno.apoderado_nombre || "--"}</td></tr>
+
+            <tr><td>Teléfono</td><td>${alumno.apoderado_telefono || "--"}</td></tr>
+            <tr><td>Correo</td><td>${alumno.apoderado_correo || "--"}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
   // ============================
   // PORTAL DE PAGOS: PIN + CUOTAS
@@ -434,15 +567,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (data.success) {
       sessionStorage.setItem("pagos_autorizado", "1");
+      
+      // 1. Quitar el Modal del PIN
       const modal = document.querySelector(".modal-pin");
       if (modal) modal.remove();
 
-      // marcar menú como activo y cargar sección pagos
-      document.querySelectorAll(".menu a").forEach((a) => a.classList.remove("active"));
+      // ====================================================
+      // ===CERRAR SIDEBAR MÓVIL AUTOMÁTICAMENTE ===
+      // ====================================================
+      if (window.innerWidth <= 992) {
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+          
+          // Quitamos la clase 'open' para que se esconda
+          if(sidebar) sidebar.classList.remove("open");
+          
+          // Quitamos el bloqueo del body
+          document.body.classList.remove("menu-open");
+          
+          // Escondemos el fondo oscuro
+          if(overlay) overlay.style.display = "none";
+      }
+      // ====================================================
+
+      // 2. Marcar menú activo
+      const menuLinks = document.querySelectorAll(".menu a[data-section]");
+      menuLinks.forEach((a) => a.classList.remove("active"));
       const pagosMenu = document.querySelector('.menu a[data-section="pagos"]');
       if (pagosMenu) pagosMenu.classList.add("active");
 
+      // 3. Cargar la sección
       loadSection("pagos");
+
     } else {
       if (errorBox) {
         errorBox.textContent = data.message || "PIN incorrecto";
@@ -451,33 +607,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function cargarPortalPagos() {
-    console.log("cargarPortalPagos() llamado");
-    const resp = await fetch("/studentView/obtener-pagos/");
-    const data = await resp.json();
+async function cargarPortalPagos() {
+  console.log("cargarPortalPagos() llamado");
 
-    console.log("Datos obtener_pagos:", data);
+  const resp = await fetch("/studentView/obtener-pagos/");
+  const data = await resp.json();
 
-    if (data.error) {
-      if (data.error.includes("Acceso no autorizado")) {
-        sessionStorage.removeItem("pagos_autorizado");
-        pedirPinApoderado();
-        return;
-      }
+  console.log("Datos obtener_pagos:", data);
 
-      content.innerHTML = `<div class="card error-card">${data.error}</div>`;
+  // ─────────────────────────────────────────────
+  // VALIDACIONES DE ERROR
+  // ─────────────────────────────────────────────
+  if (data.error) {
+    if (data.error.includes("Acceso no autorizado")) {
+      sessionStorage.removeItem("pagos_autorizado");
+      pedirPinApoderado();
       return;
     }
 
-    const apoderado = data.apoderado || "Apoderado";
-    const alumnoNombre = data.alumno || "Alumno";
-    const pagos = data.pagos || [];
+    content.innerHTML = `<div class="card error-card">${data.error}</div>`;
+    return;
+  }
 
-    const pagadas = pagos.filter((p) => p.status === "paid").length;
-    const total = pagos.length || 1;
-    const porcentaje = Math.round((pagadas / total) * 100);
+  // ─────────────────────────────────────────────
+  // VARIABLES PRINCIPALES
+  // ─────────────────────────────────────────────
+  const apoderado = data.apoderado || "Apoderado";
+  const alumnoNombre = data.alumno || "Alumno";
+  const pagos = data.pagos || [];
 
-    let html = `
+  const pagadas = pagos.filter((p) => p.status === "paid").length;
+  const total = pagos.length || 1;
+  const porcentaje = Math.round((pagadas / total) * 100);
+
+  // ─────────────────────────────────────────────
+  // ENCABEZADO DEL PORTAL
+  // ─────────────────────────────────────────────
+  let html = `
     <div class="pagos-top">
         <h2>Portal de Pagos</h2>
         <p class="sub">Bienvenid@ <strong>${apoderado}</strong></p>
@@ -489,41 +655,52 @@ document.addEventListener("DOMContentLoaded", () => {
         <p class="tiny">${pagadas} cuotas pagadas de ${total} (${porcentaje}%)</p>
     </div>
 
-    <div class="tarjetas-pagos">`;
+    <div class="tarjetas-pagos">
+  `;
 
-    pagos.forEach((p) => {
-      let estadoClase, estadoTxt, accion;
+  // ─────────────────────────────────────────────
+  // TARJETAS DE PAGOS
+  // ─────────────────────────────────────────────
+  pagos.forEach((p) => {
+    let estadoClase, estadoTxt, accion;
 
-      if (p.status === "paid") {
-        estadoClase = "ok";
-        estadoTxt = "Pagado";
-        accion = `<span class="ic-check">✔</span>`;
-      } else if (p.status === "pending_review") {
-        estadoClase = "review";
-        estadoTxt = "En revisión";
-        accion = `
-          <button class="btn-pay-card" disabled style="background:#b5b5b5; cursor:not-allowed;">
-              📄 En revisión
-          </button>`;
-      } else if (p.status === "rejected") {
-        estadoClase = "rejected";
-        estadoTxt = "Rechazado";
-        accion = `
-          <button class="btn-pay-card"
-              onclick="mostrarModalSubida(${p.id}, '${p.concept}', ${p.amount})"
-              style="background:#ffb74d; border:1px solid #e67e22;">
-              ❌ Rechazado — Subir otro
-          </button>`;
-      } else {
-        estadoClase = "pend";
-        estadoTxt = "Pendiente";
-        accion = `
-          <button class="btn-pay-card" onclick="mostrarModalSubida(${p.id}, '${p.concept}', ${p.amount})">
-              <i class="fa-solid fa-upload"></i> Subir comprobante
-          </button>`;
-      }
+    if (p.status === "paid") {
+      estadoClase = "ok";
+      estadoTxt = "Pagado";
+      accion = `<span class="ic-check">✔</span>`;
 
-      html += `
+    } else if (p.status === "pending_review") {
+      estadoClase = "review";
+      estadoTxt = "En revisión";
+      accion = `
+        <button class="btn-pay-card" disabled style="background:#b5b5b5; cursor:not-allowed;">
+            📄 En revisión
+        </button>
+      `;
+
+    } else if (p.status === "rejected") {
+      estadoClase = "rejected";
+      estadoTxt = "Rechazado";
+      accion = `
+        <button class="btn-pay-card"
+            onclick="iniciarPagoGetnet(${p.id})"
+            style="background:var(--color-secondary); border:1px solid #c8a256;">
+             Reintentar con Getnet
+        </button>
+      `;
+
+    } else {
+      estadoClase = "pend";
+      estadoTxt = "Pendiente";
+      accion = `
+        <button class="btn-pay-card" onclick="iniciarPagoGetnet(${p.id})">
+             Pagar
+        </button>
+      `;
+    }
+
+    // CARD
+    html += `
       <div class="pago-card ${estadoClase}">
           <div class="pc-mes">${p.concept}</div>
           <div class="pc-det">
@@ -534,13 +711,19 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="badge-${estadoClase}">${estadoTxt}</span>
               ${accion}
           </div>
-      </div>`;
-    });
-
-    html += `
-    </div>
-    <button id="cerrar-accesso" class="btn-cerrar-elegante">Cerrar acceso apoderado</button>
+      </div>
     `;
+  });
+
+  // ─────────────────────────────────────────────
+  // BOTÓN CERRAR ACCESO
+  // ─────────────────────────────────────────────
+  html += `
+    </div>
+    <button id="cerrar-accesso" class="btn-cerrar-elegante">
+      Cerrar acceso apoderado
+    </button>
+  `;
 
     content.innerHTML = html;
 
@@ -554,100 +737,145 @@ document.addEventListener("DOMContentLoaded", () => {
         else loadSection("dashboard");
       };
     }
-  }
+  
+}
 
-  // ---- FUNCIONES GLOBALES PARA SUBIDA DE COMPROBANTES -----
 
-  window.mostrarModalSubida = function (pagoId, mes, monto) {
-    const modal = `
-    <div class="modal-pin" id="modal-comprobante">
-        <div class="modal-pin-box" style="width:400px;">
-            <h3>Subir comprobante</h3>
-            <p><strong>${mes}</strong><br>Monto: $${monto.toLocaleString()}</p>
-            
-            <input type="file" id="file-comprobante" accept="image/*,application/pdf" class="modal-pin-input">
 
-            <button class="modal-pin-btn confirm" onclick="enviarComprobante(${pagoId})">Enviar</button>
-            <button class="modal-pin-btn cancel" onclick="document.querySelector('#modal-comprobante').remove()">Cancelar</button>
-            <div id="upload-msg" style="margin-top:10px;font-size:14px;"></div>
-        </div>
-    </div>
-    `;
-    document.body.insertAdjacentHTML("beforeend", modal);
-  };
 
-  window.enviarComprobante = async function (id) {
-    const fileInput = document.getElementById("file-comprobante");
-    const msg = document.getElementById("upload-msg");
 
-    if (!fileInput || !fileInput.files[0]) {
-      if (msg) msg.textContent = "Selecciona un archivo";
-      return;
-    }
+// ===========================
+// FUNCIONES DE UTILIDAD
+// ===========================
 
-    const file = fileInput.files[0];
-
-    let form = new FormData();
-    form.append("comprobante", file);
-
-    const csrftoken = document.cookie
-      .split("; ")
-      .find((r) => r.startsWith("csrftoken="))
-      ?.split("=")[1];
-
-    const resp = await fetch(`/studentView/subir-comprobante/${id}/`, {
-      method: "POST",
-      headers: { "X-CSRFToken": csrftoken },
-      body: form,
-    });
-
-    const data = await resp.json();
-
-    if (!msg) return;
-
-    if (data.success) {
-      msg.textContent = "✅ Enviado";
-
-      setTimeout(() => {
-        const modal = document.getElementById("modal-comprobante");
-        if (modal) modal.remove();
-
-        const card = document
-          .querySelector(`button[onclick*="${id}"]`)
-          ?.closest(".pago-card");
-
-        if (card) {
-          const badge = card.querySelector(".pc-footer .badge-pend");
-          if (badge) {
-            badge.textContent = "En revisión";
-            badge.classList.remove("badge-pend");
-            badge.classList.add("badge-review");
-          }
-
-          const actionBtn = card.querySelector(".btn-pay-card");
-          if (actionBtn) {
-            actionBtn.outerHTML = `
-              <button class="btn-pay-card" disabled style="background:#b5b5b5; cursor:not-allowed;">
-                   En revisión
-              </button>`;
-          }
+// 1. UTILIDAD: Necesaria para obtener el token CSRF para peticiones POST
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-      }, 700);
-    } else {
-      msg.textContent = "❌ " + (data.error || "Error al subir comprobante");
     }
-  };
+    return cookieValue;
+}
 
+// Implementación simple de toast/notificación para feedback
+function showToast(message, type = 'info', duration = 4000) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px;
+        `;
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    let bgColor;
+    if (type === 'success') bgColor = '#4CAF50';
+    else if (type === 'error') bgColor = '#F44336';
+    else bgColor = '#2196F3'; // info
+    
+    toast.style.cssText = `
+        background-color: ${bgColor}; color: white; padding: 15px; border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.5s, transform 0.5s;
+        transform: translateY(-20px); min-width: 250px; font-weight: 500; cursor: pointer;
+    `;
+    
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    }, 10);
+
+    const timeoutId = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 500);
+    }, duration);
+    
+    toast.onclick = () => {
+        clearTimeout(timeoutId);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 500);
+    };
+}
+
+
+window.iniciarPagoGetnet = async function(paymentId) {
+    console.log(`Iniciando pago Getnet para Payment ID: ${paymentId}`);
+
+    alert("Iniciando conexión con Getnet...");
+
+    try {
+        const csrftoken = getCookie('csrftoken');
+        
+        // Llama a la vista de Django que inicia la transacción en Getnet
+        const url = `/studentView/iniciar-pago/${paymentId}/`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken 
+            },
+            body: JSON.stringify({})
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            alert("Redirigiendo a la pasarela de pagos...");
+            
+            // Redirigir al usuario a la URL de Getnet
+            window.location.href = data.redirect_url;
+            
+        } else {
+            const errorMsg = data.error || "Error desconocido al preparar el pago.";
+            alert(`Error: ${errorMsg}`);
+            console.error("Error al iniciar pago con Getnet:", errorMsg);
+        }
+
+    } catch (e) {
+        alert("Error de red o conexión al servidor.");
+        console.error("Error en iniciarPagoGetnet:", e);
+    }
+};
   // ============================
-  // NAVEGACIÓN
+  // NAVEGACIÓN (ESTÁNDAR: SIDEBAR SIEMPRE VISIBLE EN PC)
   // ============================
   function loadSection(section) {
     console.log("loadSection:", section);
-    topbarTitle.textContent =
-      section.charAt(0).toUpperCase() + section.slice(1).replace("-", " ");
+    
+    // 1. Actualizar Título
+    if(topbarTitle) {
+        topbarTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1).replace("-", " ");
+    }
 
+    // 2. Mostrar Spinner de Carga
     content.innerHTML = "<div class='card'>Cargando...</div>";
 
+    // 3. RESTAURAR VISTA ESTÁNDAR EN ESCRITORIO
+    // Nos aseguramos de que el sidebar esté abierto y el margen correcto en TODAS las secciones
+    const sidebar = document.getElementById("sidebar");
+    const main = document.querySelector(".main");
+    const toggleBtn = document.getElementById("toggle");
+
+    if (window.innerWidth > 992) {
+        if (sidebar) sidebar.classList.remove("closed"); // Asegurar sidebar abierto
+        if (main) main.style.marginLeft = "var(--sidebar-width)"; // Asegurar margen
+        if (toggleBtn) toggleBtn.style.display = ""; // Ocultar botón toggle (lo maneja el CSS)
+    }
+
+    // 4. Renderizar el Contenido
     switch (section) {
       case "dashboard":
         renderDashboard(content);
@@ -674,37 +902,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // LISTENER DE MENÚ
   menuLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const section = link.getAttribute("data-section");
-      console.log("Click en sección:", section);
-
+      
+      // Validación PIN para pagos
       if (section === "pagos") {
         if (sessionStorage.getItem("pagos_autorizado") === "1") {
-          console.log("Pagos ya autorizado en sessionStorage");
-          menuLinks.forEach((l) => l.classList.remove("active"));
-          link.classList.add("active");
+          actualizarMenuActivo(link);
           loadSection("pagos");
         } else {
-          console.log("Pagos NO autorizado, mostrar modal PIN");
           pedirPinApoderado();
         }
         return;
       }
 
-      menuLinks.forEach((l) => l.classList.remove("active"));
-      link.classList.add("active");
+      actualizarMenuActivo(link);
       loadSection(section);
 
-      if (sidebar && sidebar.classList.contains("open")) {
+      // Cerrar menú móvil al hacer click
+      if (window.innerWidth <= 992 && sidebar.classList.contains("open")) {
         sidebar.classList.remove("open");
         document.body.classList.remove("menu-open");
         if (overlay) overlay.style.display = "none";
       }
     });
   });
+  
 
-  // vista inicial
+  function actualizarMenuActivo(linkActivo) {
+      menuLinks.forEach((l) => l.classList.remove("active"));
+      linkActivo.classList.add("active");
+  }
+
+  // Carga inicial
   loadSection("dashboard");
 });
+
+

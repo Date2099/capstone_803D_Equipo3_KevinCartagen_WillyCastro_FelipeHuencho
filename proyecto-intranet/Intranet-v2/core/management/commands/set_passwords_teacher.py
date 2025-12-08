@@ -63,7 +63,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--role",
             type=str,
-            default="teacher",  # 👈 por defecto profesores
+            default="teacher",  
             help="Rol a procesar (student, guardian, teacher, admin, finance_admin o 'all')",
         )
         parser.add_argument(
@@ -74,7 +74,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--xlsx-path",
             type=str,
-            default=r"C:\Users\wcast\Downloads\contraseñas\profesores.xlsx",
+            default=r"C:\Users\Carta\Desktop\Base de datos K\profesores.xlsx",
             help="Ruta absoluta del .xlsx a generar",
         )
         parser.add_argument(

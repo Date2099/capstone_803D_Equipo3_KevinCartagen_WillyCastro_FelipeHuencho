@@ -1,6 +1,5 @@
 /* ============================================================
-   PANEL ADMINISTRADOR - DISEÑO PRO (COLEGIO SAN AGUSTÍN)
-   Versión: 13.0 (Fix Definitivo Scroll Horarios/Profesores)
+   PANEL ADMINISTRADOR - DISEÑO (COLEGIO SAN AGUSTÍN)
    ============================================================ */
 
 :root {
@@ -97,7 +96,7 @@ body {
   font-weight: 800;
   font-size: 1.3rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: none; /* Quitamos el borde anterior */
+  border: none; 
 }
 
 /* INFO DEL USUARIO */
@@ -105,6 +104,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden; /* Evita desbordes */
 }
 
 /* Nombre */
@@ -113,6 +113,9 @@ body {
   font-size: 1rem;
   color: #ffffff;
   line-height: 1.1;
+  white-space: nowrap;      /* Evita saltos de línea raros en desktop */
+  overflow: hidden;
+  text-overflow: ellipsis;  /* Puntos suspensivos si es muy largo */
 }
 
 /* Rol (Estilo Etiqueta) */
@@ -176,7 +179,7 @@ body {
 }
 .menu details[open] summary::after { transform: rotate(180deg); }
 .menu .sub-menu {
-  background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 5px; overflow: hidden; padding: 5px;
+   border-radius: 12px; margin-top: 5px; overflow: hidden; padding: 5px;
 }
 .menu .sub-menu a { padding-left: 48px; font-size: 0.85rem; }
 
@@ -192,15 +195,42 @@ body {
 /* Main Content & Topbar */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .topbar {
-  height: var(--header-height); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
-  position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color);
+  height: var(--header-height); 
+  background: rgba(255, 255, 255, 0.8); 
+  backdrop-filter: blur(12px);
+  display: flex; 
+  align-items: center; 
+  /* CAMBIO: No usamos space-between, sino que ordenamos manualmente */
+  justify-content: flex-start; 
+  padding: 0 30px; 
+  position: sticky; top: 0; z-index: 50; 
+  border-bottom: 1px solid var(--border-color);
+  gap: 20px; /* Espacio entre elementos */
 }
-.topbar-title { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
-.toggle { display: none; background: none; border: none; font-size: 1.5rem; color: var(--primary); cursor: pointer; margin-right: 15px; }
+.topbar-title { 
+  font-size: 1.5rem; 
+  font-weight: 700; 
+  color: var(--primary);
+  margin-right: auto; 
+}
+.spacer {
+  flex-grow: 1;
+}
+
+/* BOTÓN HAMBURGUESA: OCULTO EN PC (Como pediste) */
+.toggle {
+  display: none; 
+  background: none; 
+  border: none; 
+  font-size: 1.5rem; 
+  color: var(--primary); 
+  cursor: pointer; 
+}
 .user-mini {
   display: flex; align-items: center; gap: 12px; padding: 6px 8px 6px 16px;
   background: white; border-radius: 30px; box-shadow: var(--shadow-sm); font-weight: 600; font-size: 0.9rem;
+  
+  margin-left: auto; 
 }
 .avatar-mini {
   width: 34px; height: 34px; background: var(--secondary); color: var(--primary);
@@ -261,10 +291,10 @@ input:disabled { background: #f4f7fe; color: #888; cursor: not-allowed; }
 /* ================================
    DASHBOARD (Tablero)
 ================================ */
-/* Tarjetas de Resumen (Estilo Limpio con Borde Superior) */
+/* Tarjetas de Resumen */
 .tarjetas-resumen {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Un poco más anchas */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
   gap: 25px;
   margin-bottom: 40px;
 }
@@ -273,17 +303,16 @@ input:disabled { background: #f4f7fe; color: #888; cursor: not-allowed; }
   background: #ffffff;
   padding: 25px 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Sombra muy suave */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
   border: 1px solid rgba(0,0,0,0.03);
   display: flex;
-  flex-direction: column; /* Texto arriba, número abajo */
+  flex-direction: column;
   justify-content: center;
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Barra de color superior (como en la imagen) */
 .tarjeta::before {
   content: "";
   position: absolute;
@@ -291,7 +320,7 @@ input:disabled { background: #f4f7fe; color: #888; cursor: not-allowed; }
   left: 0;
   width: 100%;
   height: 6px;
-  background: linear-gradient(90deg, var(--secondary) 0%, #f3dca6 100%); /* Dorado degradado */
+  background: linear-gradient(90deg, var(--secondary) 0%, #f3dca6 100%);
 }
 
 .tarjeta:hover {
@@ -299,14 +328,11 @@ input:disabled { background: #f4f7fe; color: #888; cursor: not-allowed; }
   box-shadow: 0 15px 30px rgba(0,0,0,0.1);
 }
 
-/* Texto dentro de la tarjeta (ajusta el JS si es necesario para que coincida) */
 .tarjeta {
   font-size: 1.1rem;
-  color: var(--text-secondary); /* Título en gris */
+  color: var(--text-secondary);
   font-weight: 600;
 }
-
-/* Si puedes modificar el JS para poner el número en un <span> o <strong> separado, usa esto: */
 .tarjeta strong {
   font-size: 2rem;
   color: var(--primary);
@@ -504,7 +530,7 @@ summary.horario-header {
   gap: 1px; /* Espacio para líneas divisorias finas */
 }
 
-.transaction-list { display: flex; flex-direction: column; gap: 10px; } /* Mantener estilos previos */
+.transaction-list { display: flex; flex-direction: column; gap: 10px; } 
 
 .schedule-item {
   display: grid;
@@ -586,6 +612,29 @@ summary.horario-header {
     padding: 0;
     font-size: 0.9rem;
   }
+  /* FIX BARRA SUPERIOR MÓVIL */
+  .topbar {
+    padding: 0 15px; 
+    height: 70px;
+    /* En móvil sí queremos el botón, luego el título */
+    justify-content: flex-start; 
+  }
+
+  /* HACER VISIBLE EL BOTÓN SOLO EN MÓVIL */
+  .toggle {
+    display: block; 
+    margin-right: 10px;
+  }
+
+  .topbar-title {
+    font-size: 1.1rem; /* Letra un poco más chica */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: auto; /* Empuja el perfil a la derecha */
+  }
+  
+  .user-mini span { display: none; } /* Ocultar nombre de usuario en móvil */
 
   /* Nombre de la etiqueta (Día, Hora, etc.) */
   .schedule-item .item-day::before { content: "DÍA: "; font-weight: 700; color: var(--text-secondary); width: 80px; flex-shrink: 0; }
@@ -618,74 +667,9 @@ tbody tr:hover { background: #fcfdff; }
 @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes shine { 100% { left: 150%; } }
 
-/* ================================
-   RESPONSIVIDAD & FIX MÓVIL (SCROLL HORIZONTAL)
-================================ */
-@media (max-width: 768px) {
-  .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); width: 260px; }
-  .sidebar.open { transform: translateX(0); }
-  .sidebar-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; visibility: hidden; transition: 0.3s;
-  }
-  .sidebar-overlay.show { opacity: 1; visibility: visible; }
-  .toggle { display: block; }
-  .topbar { padding: 0 15px; height: 70px; }
-  .user-mini span { display: none; }
-  .content { padding: 15px; }
-  .dashboard-charts, .comunicados-layout { grid-template-columns: 1fr; }
-  .cursos-grid { grid-template-columns: 1fr; }
-
-  /* --- FIX CRÍTICO: LISTAS CON SCROLL HORIZONTAL --- */
-  .profesores-lista, .ver-pagos-container, .horarios-wrapper {
-    padding: 0; box-shadow: none; background: transparent;
-  }
-  
-  /* Contenedor de Scroll para Tablas */
-  .profesores-lista, .horarios-wrapper, .ver-pagos-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 10px;
-    width: 100%;
-  }
-
-  /* Asegurar que la tabla interna tenga un ancho mínimo para forzar el scroll */
-  .tabla-profesores table,
-  .tabla-pagos table,
-  .horario-body table {
-    min-width: 650px; /* Ancho mínimo para que quepan 5 columnas */
-    margin-bottom: 20px;
-  }
-
-  /* Arreglo de Header de Horarios (Stacking) */
-  .horario-card .horario-header {
-    flex-direction: column; 
-    align-items: flex-start;
-    gap: 12px;
-    padding-right: 40px; 
-  }
-  .horario-card .horario-header strong {
-    width: 100%; /* Nombre completo */
-    font-size: 0.95rem;
-  }
-  .horario-card .horario-header span {
-    align-self: flex-start;
-  }
-  .horario-card .horario-header::after {
-    position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
-  }
-  
-  /* Ajuste de Inputs */
-  .tabla-profesores input {
-    min-width: 120px;
-    padding: 8px;
-  }
-}
-/* ===========================
-   PANEL FINANCIERO GENERAL
-   =========================== */
+/* ============================================================
+   PANEL FINANCIERO (ESTILOS ORIGINALES)
+   ============================================================ */
 .finance-dashboard {
     display: flex;
     flex-direction: column;
@@ -840,7 +824,7 @@ tbody tr:hover { background: #fcfdff; }
 
 /* Avatar por color de sección */
 .tx-avatar.warning { background: #e8b20f; }
-.tx-avatar.success { background: #1e983b; }
+.tx-avatar.success { background: #050049; }
 .tx-avatar.danger  { background: #ca2d2d; }
 .tx-avatar.neutral { background: #6c7a8a; }
 
@@ -890,7 +874,6 @@ tbody tr:hover { background: #fcfdff; }
 }
 /* ============================================================
    FIX RESPONSIVO: GRÁFICOS (DASHBOARD)
-   Pega esto al final de tu archivo CSS
    ============================================================ */
 
 @media (max-width: 768px) {
@@ -913,7 +896,6 @@ tbody tr:hover { background: #fcfdff; }
   }
 
   /* 3. Ajustar el gráfico gigante (Matrícula por nivel) */
-  /* Sobrescribimos el estilo inline que pusimos en el HTML */
   .chart-box[style*="grid-column"] {
     grid-column: auto !important; /* Anular expansión de grid */
     height: auto !important;      /* Anular altura fija de escritorio */
@@ -934,4 +916,228 @@ tbody tr:hover { background: #fcfdff; }
     text-align: center; /* Centrar título en móvil */
     margin-bottom: 10px;
   }
+}
+
+.flex-col{display:flex;flex-direction:column}
+.gap-8{gap:.8rem}
+.muted{color:var(--color-muted)}
+
+.progress{height:8px;background:var(--border-color);border-radius:999px;margin:.25rem 0 .1rem}
+.progress-bar{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:999px}
+
+.list-clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.list-clean li{display:flex;align-items:center;justify-content:space-between;font-weight:600}
+.dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:.5rem}
+.dot-paid{background:#16a34a}.dot-pending{background:#f59e0b}.dot-overdue{background:#ef4444}
+
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.6rem}
+.timeline li{position:relative;padding-left:2.2rem}
+.timeline li::before{content:"";position:absolute;left:.6rem;top:.3rem;width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.timeline .time{font-weight:700;color:var(--color-muted);margin-right:.4rem}
+
+@media (max-width:992px){ .panel-grid{grid-template-columns:1fr} }
+@media (max-width:768px){ .quick-actions{grid-template-columns:1fr 1fr} .mini-cards{grid-template-columns:1fr} }
+@media (max-width:480px){ .quick-actions{grid-template-columns:1fr} }
+
+/* Sparkline y tarjetas mini más estables */
+.card.mini canvas{width:100% !important; height:36px !important}
+.mini-cards{grid-template-columns:repeat(3, minmax(220px,1fr)); gap:.75rem}
+@media (max-width:768px){ .mini-cards{grid-template-columns:1fr} }
+
+.quick-actions{display:grid;grid-template-columns:repeat(4, minmax(220px,1fr)); gap:1rem}
+@media (max-width:992px){ .quick-actions{grid-template-columns:repeat(2, minmax(220px,1fr))} }
+@media (max-width:480px){ .quick-actions{grid-template-columns:1fr} }
+
+/* =========================================
+   OPTIMIZACIÓN FINAL PARA CELULAR
+   ========================================= */
+@media (max-width: 576px) {
+  /* Layout general más compacto */
+  .content { padding: 0.8rem; }
+  .topbar { padding: 0 0.8rem; height: 60px; }
+  
+  /* Ajuste de sidebar para móviles estrechos */
+  .sidebar { width: 85%; max-width: 300px; }
+  
+  /* Textos y títulos */
+  .topbar-title, .school-mini-name { font-size: 0.9rem; }
+  .card-title { font-size: 1rem; }
+  
+  /* Forzar columnas a 1 sola fila en todos los grids */
+  .kpi-row, .kpi-grid, 
+  .quick-actions, .mini-cards, 
+  .panel-grid, .period-body,
+  .mini-cards {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem;
+  }
+
+  /* KPIs más compactos */
+  .kpi { padding: 0.75rem; }
+  .kpi .num { font-size: 1.4rem; }
+  .kpi .kpi-icon { width: 48px; height: 48px; font-size: 1.1rem; }
+
+  /* Tablas adaptadas a cards */
+  .data-table.responsive tbody tr { margin: 0.5rem 0; padding: 0.6rem; }
+  .data-table.responsive tbody td { padding: 0.4rem 0; font-size: 0.85rem; }
+
+  /* Modales ocupan casi toda la pantalla */
+  .modal-box { width: 95vw; margin: 2vh auto; max-height: 96vh; overflow-y: auto; }
+  
+  /* Botones grandes para dedos */
+  .btn, .btn-secondary, .btn-danger { 
+    display: flex; 
+    justify-content: center; 
+    width: 100%; 
+    padding: 0.7rem; 
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Excepción para botones dentro del modal footer */
+  .modal-foot .btn, .modal-foot .btn-secondary { width: auto; margin-bottom: 0; }
+  
+  /* Gráficos */
+  .chart-container { height: 260px !important; min-height: 260px !important; }
+}
+
+/* ============================================================
+   FIXES CRÍTICOS: SIDEBAR & LISTADO DE PROFESORES
+   ============================================================ */
+
+/* 1. Estado "CERRADO" para Escritorio (Toggle) */
+.sidebar.closed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+.sidebar.closed * {
+  display: none; 
+}
+
+/* 2. Toggle siempre visible para permitir cerrar en PC */
+.toggle {
+  display: block !important; 
+}
+
+/* 3. RESPONSIVIDAD AJUSTADA (Tabletas y Móviles) */
+@media (max-width: 768px) {
+  /* El sidebar en móvil flota encima (Off-Canvas) */
+  .sidebar { 
+    position: fixed; 
+    left: 0; top: 0; height: 100%; 
+    width: 260px;
+    transform: translateX(-100%); /* Oculto por defecto */
+    opacity: 1; 
+  }
+  
+  /* Clase para ABRIR en móvil */
+  .sidebar.open { 
+    transform: translateX(0); 
+    width: 260px;
+    padding: initial;
+  }
+  
+  /* Ignoramos el estado closed de escritorio */
+  .sidebar.closed {
+    width: 260px; 
+    opacity: 1;
+  }
+
+  /* --- FIX PERFIL SIDEBAR EN MÓVIL --- */
+  /* Reducimos el padding para que el nombre largo no se corte arriba */
+  .profile {
+    padding: 20px 15px; /* Menos relleno */
+  }
+  .profile-info div:first-child {
+    font-size: 0.9rem; /* Letra un poco más chica */
+    white-space: normal; /* Permitir que el nombre baje de línea si es largo */
+    word-break: break-word;
+  }
+
+  /* --- FIX LISTADO DE PROFESORES (SCROLL HORIZONTAL) --- */
+  /* Contenedor que permite el scroll */
+  .profesores-lista, .ver-pagos-container, .horarios-wrapper {
+    padding: 0; box-shadow: none; background: transparent;
+    overflow-x: auto; /* Habilita el scroll lateral */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    width: 100%;
+    display: block; /* Asegura que sea bloque */
+  }
+
+  /* Forzamos un ancho mínimo a la tabla para que active el scroll */
+  .tabla-profesores, .tabla-pagos, .horario-body table {
+    min-width: 800px; /* Ancho forzado para que no se apriete */
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  /* Aseguramos que las celdas no se rompan */
+  .tabla-profesores th, .tabla-profesores td {
+    white-space: nowrap;
+    padding: 12px;
+  }
+}
+/* 1. Botón "Carga Horaria" (En la tabla de profesores) */
+.btn-carga-horaria {
+    background: #e0e7ff; /* Fondo Índigo suave */
+    color: #4338ca;      /* Texto Índigo oscuro */
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-right: 5px; /* Separación del siguiente botón */
+    transition: all 0.2s ease;
+}
+
+.btn-carga-horaria:hover {
+    background: #4338ca; /* Invertir colores al pasar el mouse */
+    color: #ffffff;
+    box-shadow: 0 2px 5px rgba(67, 56, 202, 0.3);
+}
+
+/* 2. Botón "Borrar" (Dentro del listado de alumnos en Cursos) */
+.btn-borrar-alumno {
+    background: #fff1f2; /* Fondo rojo muy pálido */
+    color: #e11d48;      /* Texto rojo rosado */
+    border: 1px solid #ffe4e6;
+    padding: 4px 10px;   /* Más pequeño para que quepa en la tabla */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.btn-borrar-alumno:hover {
+    background: #e11d48; /* Rojo sólido al hover */
+    color: white;
+    border-color: #e11d48;
+    box-shadow: 0 2px 5px rgba(225, 29, 72, 0.3);
+}
+/* OVERLAY PARA CERRAR EL MENÚ EN MÓVIL */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0; /* Ocupa toda la pantalla */
+  background: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+  z-index: 999; /* Justo debajo del sidebar (que es 1000) */
+  
+  /* Estado inicial: Oculto */
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  
+  /* IMPORTANTE: Cursor de mano para indicar que es clicable */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Estado Visible (Activado por JS) */
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto; 
 }

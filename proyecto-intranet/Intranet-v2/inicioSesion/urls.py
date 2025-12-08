@@ -19,4 +19,10 @@ urlpatterns = [
 
     # Cerrar sesión
     path("logout/", views.logout_view, name="logout"),
+    
+    # 1. API que usa el Modal (Fetch JavaScript)
+    path("auth/forgot/validate-family/", views.validate_family_and_send_link, name="validate_family"),
+    
+    # Página donde aterriza el link del correo (Nueva contraseña)
+    path("reset/<uidb64>/<token>/", views.password_reset_confirm, name="password_reset_confirm"),
 ]

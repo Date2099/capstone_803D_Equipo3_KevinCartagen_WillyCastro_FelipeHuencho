@@ -1,19 +1,46 @@
-# Python
-*.pyc
+# ==========================
+# PYTHON / DJANGO
+# ==========================
 __pycache__/
+*.pyc
 *.pyo
 *.pyd
-
-# Django
 *.sqlite3
-*.log
-*.pot
-*.py[cod]
+db.sqlite3
 
-# Environment
+# ==========================
+# ENVIRONMENTS / CONFIGS
+# ==========================
 .env
+*.env
+*.secret
+.env.bak
+.env.local
 
-# Static files generados
+# ==========================
+# VIRTUAL ENVIRONMENTS
+# ==========================
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+Scripts/
+Lib/
+Include/
+
+# ==========================
+# DJANGO STATIC
+# ==========================
 staticfiles/
+media/
+*.log
 
-.env
+# ==========================
+# IDE / SYSTEM FILES
+# ==========================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

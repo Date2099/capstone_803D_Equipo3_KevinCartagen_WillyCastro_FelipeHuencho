@@ -6,6 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
+from core.models import Comuna  
+
 # Modelos que pueden vivir en 'core' o 'studentView'
 def import_models():
     try:
@@ -18,11 +20,14 @@ def import_models():
 User = get_user_model()
 Class, Enrollment = import_models()
 
+
 def normalize_rut(rut: str) -> str:
-    """Quita puntos y espacios; conserva guion."""
-    rut = (rut or "").strip()
-    rut = rut.replace(".", "").replace(" ", "")
-    return rut
+    """
+    Deja el RUT tal como viene en el Excel, solo quitando espacios
+    al inicio y al final. NO elimina puntos ni guiones.
+    """
+    return (rut or "").strip()
+
 
 def parse_date_mx(s: str):
     """Intenta varios formatos comunes (CL/US/ISO). Devuelve date o None."""
@@ -36,19 +41,16 @@ def parse_date_mx(s: str):
             continue
     return None
 
+
 class Command(BaseCommand):
     help = 'Importa estudiantes desde un archivo CSV y los asocia a sus cursos.'
 
     def add_arguments(self, parser):
-        # csv_file ahora es OPCIONAL y con default a tu ruta
+        # csv_file
         parser.add_argument(
             "csv_file",
             nargs="?",
-<<<<<<< HEAD
-            default=r"C:\Users\Softer\Desktop\CARGA DE ARCHIVOS GOD\matriz de carga.csv",
-=======
             default=r"C:\Users\Carta\Downloads\excels_de_carga\Nueva carpeta\matriz de carga.csv",
->>>>>>> 63bafe06f858cbe0751fd22ad3630360f6980b9c
             help="Ruta del CSV. Si no se indica, usa la ruta por defecto."
         )
         parser.add_argument(
@@ -132,8 +134,18 @@ class Command(BaseCommand):
                 first_name = row.get("first_name", "")
                 last_name = row.get("last_name", "")
                 email = row.get("email") or None
-                role = (row.get("role") or User.STUDENT).strip().lower()
-                comuna = row.get("comuna") or None
+
+                #  para alumnos → usamos siempre STUDENT en defaults
+                role_default = User.STUDENT
+
+                # comuna texto → objeto Comuna
+                comuna_name = (row.get("comuna") or "").strip()
+                comuna_obj = None
+                if comuna_name:
+                    comuna_obj, _ = Comuna.objects.get_or_create(
+                        nombre=comuna_name.upper()
+                    )
+
                 phone = row.get("phone") or None
                 active_status = (row.get("active_status") or "active").strip().lower()
                 curso_id = row.get("curso_id") or ""
@@ -147,9 +159,9 @@ class Command(BaseCommand):
                         "first_name": first_name,
                         "last_name": last_name,
                         "email": email,
-                        "role": role,
+                        "role": role_default,   
                         "birth_date": birth_date,
-                        "comuna": comuna,
+                        "comuna": comuna_obj,
                         "ingreso_date": ingreso_date,
                         "phone": phone,
                         "active_status": active_status,
@@ -158,28 +170,32 @@ class Command(BaseCommand):
 
                 if was_created:
                     created += 1
-                    self.stdout.write(f"🟢 Creado: {first_name} {last_name} ({rut})")
+                    self.stdout.write(f"🟢 Creado: {first_name} {last_name} ({rut}) (rol={student.role})")
                 else:
-                    # Update idempotente
+                    # Update idempotente (SIN tocar el rol existente)
                     changed = False
-                    for field, value in {
+                    campos_actualizables = {
                         "first_name": first_name,
                         "last_name": last_name,
                         "email": email,
-                        "role": role,
                         "birth_date": birth_date,
-                        "comuna": comuna,
+                        "comuna": comuna_obj,
                         "ingreso_date": ingreso_date,
                         "phone": phone,
                         "active_status": active_status,
-                    }.items():
+                    }
+
+                    for field, value in campos_actualizables.items():
                         if getattr(student, field) != value:
                             setattr(student, field, value)
                             changed = True
+
                     if changed:
                         student.save()
                         updated += 1
-                        self.stdout.write(f"🟡 Actualizado: {first_name} {last_name} ({rut})")
+                        self.stdout.write(
+                            f"🟡 Actualizado: {first_name} {last_name} ({rut}) (rol={student.role})"
+                        )
 
                 # Matricular si hay curso_id
                 if curso_id:
@@ -205,5 +221,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"❌ Error en fila (rut={row.get('rut')}): {e}"))
 
         self.stdout.write(self.style.SUCCESS(
-            f"✅ Carga completa. Total filas={len(rows)} | Creados={created} | Actualizados={updated} | Matriculados={enrolled} | Omitidos={skipped} | Errores={errors}"
+            f"✅ Carga completa. Total filas={len(rows)} | "
+            f"Creados={created} | Actualizados={updated} | "
+            f"Matriculados={enrolled} | Omitidos={skipped} | Errores={errors}"
         ))

@@ -1,1138 +1,938 @@
-/*
-================================================================================
-|                                                                              |
-|               HOJA DE ESTILOS PRINCIPAL: Página de Login (MAIN)              |
-|               PROYECTO: Intranet Colegio San Agustín (v2.1)                  |
-|               AUTOR: Kev182-pixel (Refactorizado v10 por Asistente)          |
-|                                                                              |
-================================================================================
-|                                                                              |
-|   DESCRIPCIÓN GENERAL:                                                       |
-|   Este archivo define la apariencia de la página de inicio de sesión         |
-|   de la rama 'main' de Kev182-pixel. Ha sido refactorizado profesionalmente  |
-|   para utilizar un sistema centralizado de Variables CSS (:root),            |
-|   unificar la paleta de colores a la institucional (Azul/Dorado),            |
-|   corregir bugs de posicionamiento de la etiqueta flotante e                 |
-|   implementar nuevas animaciones para una experiencia de usuario premium.    |
-|                                                                              |
-|   ESTRUCTURA DEL ARCHIVO:                                                  |
-|   1.  @import (Fuentes) - Carga la tipografía 'Poppins'.                     |
-|   2.  :root (Variables Globales) - Define TODA la paleta de colores,         |
-|       tipografía y tamaños estándar para el login.                           |
-|   3.  Reset Básico y Estilos Globales - Normaliza los estilos del navegador. |
-|   4.  Fondo y Contenedor Principal - Estilos del fondo difuminado            |
-|       y del .main-wrapper que contiene los paneles.                          |
-|   5.  Panel Izquierdo (Branding) - El panel con la bienvenida y el logo.     |
-|   6.  Panel Derecho (Formulario) - El panel con el formulario de login.      |
-|   7.  Formulario - Estilos detallados para inputs, botones y enlaces.        |
-|   8.  Componente de Alerta/Error - Estilos para mensajes de feedback.        |
-|   9.  Responsive (Media Queries) - Ajustes para móviles.                     |
-|   10. Animaciones (Keyframes) - Define todas las animaciones.                |
-|                                                                              |
-================================================================================
-*/
-
-
-/*
-================================================================================
-|   SECCIÓN 1: @import (Carga de Fuentes)                                      |
-================================================================================
-|
-|   Importamos la familia de fuentes 'Poppins' desde Google Fonts.
-|   Especificamos los pesos (weights) que usaremos (300 a 700)
-|   para optimizar la carga de la página.
-|
-*/
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-
-/*
-================================================================================
-|   SECCIÓN 2: :root (Variables Globales del Sistema de Diseño)                |
-================================================================================
-|
-|   Este es el "centro de control" de todo el diseño del login.
-|
-|   *** ¡ACTUALIZACIÓN DE REFACTORIZACIÓN! ***
-|   Se ha unificado la paleta de colores para que coincida con la
-|   del panel de Administrador y Profesor (Azul Marino y Dorado).
-<<<<<<< HEAD
-|   El --color-primary original (#2a2979) ha sido REEMPLAZADO.
-=======
-|   Tu --color-primary original (#2a2979) ha sido REEMPLAZADO.
->>>>>>> feature/inicio-sesion
-|
-*/
 :root {
-  /* * ========================================
-   * Paleta de Colores Institucional (Azul y Dorado)
-   * ========================================
-   */
-  --color-primary: #0F294C;        /* Azul marino principal (Usado para botones, títulos, overlay) */
-  --color-primary-rgb: 15, 41, 76;   /* Versión RGB de --color-primary (para usar en 'rgba') */
-  --color-secondary: #CDA758;      /* Acento Dorado (Usado para hover, enlaces) */
-  --color-secondary-bright: #E9D29B; /* Dorado más brillante (para hovers sutiles) */
-  --color-primary-text: #333;      /* Texto oscuro para usar sobre fondo dorado (buen contraste) */
-
-  /* * ========================================
-   * Colores Neutros (Fondo, Texto, Bordes)
-   * ========================================
-   */
-  --color-text-dark: #333;          /* Texto principal oscuro (para formularios) */
-  --color-text-light: #ffffff;      /* Texto claro (para panel izquierdo) */
-  --color-text-muted: #666;         /* Texto secundario (gris) */
-  --color-placeholder: #888;       /* Color para placeholders y etiquetas */
-  --color-text-divider: #aaa;      /* Color para el texto del divisor "o" */
+  --color-primary: #0F294C;
+  --color-primary-rgb: 15, 41, 76;
+  --color-secondary: #CDA758;
+  --color-secondary-bright: #E9D29B;
+  --color-text-dark: #333;
+  --color-text-light: #ffffff;
+  --color-text-muted: #666;
+  --color-placeholder: #888;
+  --color-text-divider: #aaa;
+  --color-background-input: #f8fafc;
+  --color-border: #e2e8f0;
   
-  --color-background-body: #f3f6fb;  /* Fondo (aunque será cubierto por la imagen) */
-  --color-background-card: #ffffff; /* Fondo blanco del formulario */
-  --color-background-input: #fafafa; /* Fondo para inputs */
-  --color-border: #d1d1d1;          /* Color de borde suave */
-  --color-border-divider: #e0e0e0;   /* Color para la línea divisora */
-
-  /* * ========================================
-   * Colores de Estado (Error, Éxito)
-   * ========================================
-   */
-  --color-danger-text: #b71c1c;      /* Texto rojo oscuro para errores */
-  --color-danger-border: #e57373;    /* Borde rojo claro para errores */
-  --color-danger-bg: #ffe6e6;        /* Fondo rosa pálido para errores */
+  --font-main: 'Poppins', sans-serif;
+  --radius-md: 12px;
+  --radius-lg: 24px;
   
-  --color-success-text: #2e7d32;     /* Texto verde oscuro para éxito */
-  --color-success-border: #81c784;    /* Borde verde claro para éxito */
-  --color-success-bg: #e8f5e9;        /* Fondo verde pálido para éxito */
+  --shadow-main: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --shadow-btn: 0 4px 15px rgba(15, 41, 76, 0.25);
+  --shadow-btn-hover: 0 8px 25px rgba(205, 167, 88, 0.4);
   
-  --color-warning-text: #8a6d00;
-  --color-warning-border: #fbc02d;
-  --color-warning-bg: #fff8e1;
-
-  /* * ========================================
-   * Tipografía
-   * ========================================
-   */
-  --font-main: 'Poppins', sans-serif; /* Fuente principal */
-  
-  /* * ========================================
-   * Radii y Sombras
-   * ========================================
-   */
-  --radius-md: 8px;                 /* Radio medio (inputs, botones) */
-  --radius-lg: 15px;                /* Radio grande (contenedor principal) */
-  --radius-round: 50%;              /* Círculo perfecto (avatares sociales) */
-  --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.2); /* Sombra principal del contenedor */
-  --shadow-btn: 0 4px 15px rgba(var(--color-primary-rgb), 0.2); /* Sombra para botones */
-  --shadow-btn-hover: 0 6px 20px rgba(var(--color-secondary-rgb), 0.3); /* Sombra para hover de botón */
-
-  /* * ========================================
-   * Transiciones (Animación)
-   * ========================================
-   */
-  --transition-main: 0.3s ease;     /* Transición estándar */
-  --transition-fast: 0.2s ease;     /* Transición rápida (para botones) */
+  --transition-main: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-
-/*
-================================================================================
-|   SECCIÓN 3: Reset Básico y Estilos Globales del Body                        |
-================================================================================
-|
-|   Normalizamos estilos y configuramos el fondo "blur" de la página.
-|
-*/
-
-/**
- * Reseteo universal (Box Sizing).
- * Asegura que 'width' y 'height' incluyan padding y border.
- * Esencial para un layout predecible.
- */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: var(--font-main); /* Aplica la fuente a todo */
+  font-family: var(--font-main);
 }
 
-/**
- * Estilos del <body>
- * - Configura la imagen de fondo a pantalla completa.
- * - Usa Flexbox para centrar el .main-wrapper.
- * - 'position: relative' y 'overflow: hidden' son necesarios
- * para el efecto de fondo difuminado (::before).
- */
+/* =========================================
+   FONDO Y BODY (SIN SCROLL EN PC)
+   ========================================= */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Sin scroll principal */
+}
+
 body {
-  /* * La imagen de fondo se define aquí, usando una ruta relativa.
-   * Basado en tu estructura 'inicioSesion/static/inicioSesion/css/loginStyle.css'
-   * y 'inicioSesion/static/inicioSesion/css/DJI_0535.jpg'
-   * la ruta correcta es 'DJI_0535.jpg'.
-   */
-  background-image: url('DJI_0535.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  
-  /* Centrado del contenedor */
+  background-color: #0F294C;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  
-  /* Para el efecto blur */
   position: relative;
-  overflow: hidden; /* Oculta el desbordamiento del blur */
 }
 
-/**
- * Pseudo-elemento ::before para el efecto de fondo difuminado.
- * - Se posiciona absolutamente detrás de todo (z-index: -1).
- * - Hereda el fondo del body.
- * - 'filter: blur(10px)' crea el desenfoque.
- * - 'brightness(0.8)' oscurece ligeramente el fondo.
- * - Los márgenes negativos (-20px) evitan bordes "duros"
- * causados por el blur.
- */
+/* Imagen de fondo */
 body::before {
   content: '';
   position: absolute;
-  top: -20px;
-  left: -20px;
-  right: -20px;
-  bottom: -20px;
-  background: inherit; /* Hereda la imagen del body */
-  filter: blur(10px) brightness(0.8);
+  inset: 0;
+  background-image: url('../img/DJI_0535.jpg'); 
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.85) blur(4px); /* Difuminado suave */
   z-index: -1;
+  transform: scale(1.02);
 }
 
-
-/*
-================================================================================
-|   SECCIÓN 4: Contenedor Principal (.main-wrapper)                            |
-================================================================================
-*/
-
-/**
- * El contenedor principal que encierra los dos paneles.
- * - 'display: flex' para el layout de dos columnas.
- * - 'max-width: 1200px' limita el ancho en pantallas grandes.
- * - 'box-shadow' y 'border-radius' le dan la apariencia de "tarjeta".
- * - 'overflow: hidden' es crucial para que los paneles internos
- * respeten el borde redondeado.
- * - 'animation: fadeIn' añade una sutil animación de entrada.
- */
+/* =========================================
+   CONTENEDOR PRINCIPAL
+   ========================================= */
 .main-wrapper {
   display: flex;
   width: 100%;
-  height: 100vh; /* Ocupa toda la altura en desktop */
-  max-width: 1200px;
+  max-width: 1100px;
+  
+  /* Altura controlada */
+  height: 85vh; 
+  max-height: 800px;
+  min-height: 600px;
+  
+  background-color: rgba(255, 255, 255, 0.96); 
   box-shadow: var(--shadow-main);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  animation: fadeIn 0.6s ease-out;
+  position: relative;
+  backdrop-filter: blur(10px); 
+  animation: zoomIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* =========================================
+   PANEL IZQUIERDO (IMAGEN & LOGO GRANDE)
+   ========================================= */
 
-/*
-================================================================================
-|   SECCIÓN 5: Panel Izquierdo (Branding y Bienvenida)                         |
-================================================================================
-*/
-
-/**
- * Panel izquierdo (Branding).
- * - 'flex: 1' hace que ocupe la mitad del espacio.
- * - Usa la imagen de fondo con un overlay de color primario.
- * - 'position: relative' y 'overflow: hidden' para la animación de fondo.
- */
 .left-panel {
-  flex: 1;
-  position: relative; /* Necesario para el pseudo-elemento de fondo */
-  overflow: hidden; /* Oculta el desbordamiento de la animación de fondo */
+  flex: 1.2;
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  color: var(--color-text-light); /* Texto blanco */
+  
+  /* --- AJUSTE VERTICAL --- */
+  justify-content: flex-start; 
+  padding-top: 18%;    
+  align-items: center;     
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 40px;
+  
+  color: var(--color-text-light); 
   text-align: center;
 }
-
-/**
- * ¡NUEVA ANIMACIÓN DE FONDO!
- * Creamos un pseudo-elemento ::before que contiene la imagen de fondo
- * y el overlay.
- * Aplicamos una animación 'zoomIn' que dura 20 segundos y se repite.
- */
 .left-panel::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0; 
   z-index: -1;
-  background-image: linear-gradient(rgba(var(--color-primary-rgb), 0.65), rgba(var(--color-primary-rgb), 0.65)), url('DJI_0535.jpg');
+  background-image: url('../img/DJI_0535.jpg'); 
   background-size: cover;
   background-position: center;
-  
-  /* Animación de zoom sutil */
-  animation: zoomIn 20s ease-in-out infinite alternate;
+  background-attachment: fixed; 
+  box-shadow: inset 0 0 0 1000px rgba(15, 41, 76, 0.85); 
+  transition: transform 0.5s;
 }
 
-/**
- * Contenedor para el contenido del panel izquierdo.
- * 'position: relative' para que esté por encima del fondo animado.
- */
 .left-panel-content {
-  max-width: 400px;
-  position: relative; /* Asegura que el contenido esté sobre el ::before */
   z-index: 2;
+  animation: slideUp 0.8s ease-out 0.2s backwards;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
 }
 
-/**
- * Logo grande del colegio.
- * 'filter: drop-shadow' añade una sombra suave al logo
- * para que resalte sobre el fondo.
- */
+/* --- LOGO --- */
 .school-logo-large {
-  width: 260px;
+  width: 240px; 
   height: auto;
-  margin-bottom: 25px;
-  filter: drop-shadow(0 0 8px rgba(0,0,0,0.3));
+  margin-bottom: 30px;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4)); 
+  transition: transform 0.3s;
 }
+.school-logo-large:hover { transform: scale(1.05); }
 
-/**
- * Título de Bienvenida (ej: "Intranet San Agustín").
- */
 .welcome-heading {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 20px;
-  line-height: 1.2;
+  margin-bottom: 15px;
+  line-height: 1.3;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-/**
- * Texto descriptivo de bienvenida.
- */
 .welcome-text {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 300;
+  opacity: 0.95;
   line-height: 1.6;
-  opacity: 0.9;
-  margin-bottom: auto; /* Empuja el copyright hacia abajo */
 }
 
-/**
- * Texto de Copyright al pie del panel izquierdo.
- */
 .copyright-text {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  padding-top: 40px;
-  margin-top: auto; /* Asegura que esté al fondo */
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%; 
+  text-align: center; 
+  font-size: 0.75rem;
+  opacity: 0.6;
+  letter-spacing: 0.5px;
+  padding: 0 20px;
 }
 
-
-/*
-================================================================================
-|   SECCIÓN 6: Panel Derecho (Formulario de Login)                             |
-================================================================================
-*/
-
-/**
- * Panel derecho (Formulario).
- * - 'flex: 1' para que ocupe la otra mitad.
- * - 'background-color' semitransparente y 'backdrop-filter'
- * para crear un efecto de "vidrio esmerilado" sobre el fondo.
- * - 'overflow-y: auto' permite hacer scroll si el formulario
- * no cabe en pantallas pequeñas.
- */
+/* =========================================
+   PANEL DERECHO 
+   ========================================= */
 .right-panel {
   flex: 1;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(5px);
-  
+  background-color: #fff;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  overflow-y: auto;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: center;         
+  padding-top: 15%;            
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 40px;
+  position: relative;
+  overflow-y: auto; 
+  scrollbar-width: none;
 }
 
-/**
- * Contenedor del formulario, limita su ancho.
- */
+/* Ocultar barra de scroll */
+.right-panel::-webkit-scrollbar {
+  display: none;
+}
+
 .form-container {
   width: 100%;
-  max-width: 380px;
+  max-width: 380px; 
   text-align: center;
+  animation: fadeIn 0.8s ease-out 0.4s backwards;
+  margin: 0 auto;
 }
 
-/**
- * Logo pequeño, solo visible en móviles (ver Media Queries).
- */
+/* Logo Pequeño (Móvil) */
 .school-logo-small {
-  display: none; /* Oculto en desktop */
+  display: none;
   width: 100px;
-  height: auto;
   margin: 0 auto 20px;
 }
 
-/**
- * Encabezado del formulario (h1, p, etc.)
- */
 .form-header {
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .form-header h1 {
-  font-size: 2rem;
-  color: var(--color-primary); /* Color primario */
+  font-size: 1.8rem;
+  color: var(--color-primary);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .sub-header-text {
-  font-size: 1rem;
-  color: var(--color-text-muted); /* Texto gris */
-  margin-bottom: 15px;
-}
-
-.create-account-text {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--color-text-muted);
+  margin-bottom: 0;
 }
 
-/**
- * Enlaces dentro del formulario (ej: "Crear Cuenta", "Olvidé Contraseña").
- * Usa la paleta Azul/Dorado.
- */
-.form-link {
-  color: var(--color-primary); /* Color primario */
-  text-decoration: none;
-  font-weight: 600;
-  transition: color var(--transition-main);
-}
+/* --- INPUTS --- */
+.form-box { display: flex; flex-direction: column; gap: 20px; }
+.input-group { position: relative; }
 
-.form-link:hover {
-  color: var(--color-secondary); /* Acento Dorado en hover */
-  text-decoration: underline;
-}
-
-
-/*
-================================================================================
-|   SECCIÓN 7: Estilos Detallados del Formulario                               |
-================================================================================
-|
-|   Esta sección es clave, ya que da estilo a los campos
-|   que son renderizados por Django (`{{ form.rut }}`, etc.).
-|
-*/
-
-/**
- * Contenedor de los campos del formulario.
- * 'gap: 20px' añade espacio vertical entre cada .input-group.
- */
-.form-box {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/**
- * ===================================================================
- * |   ¡ESTA ES LA REGLA QUE ARREGLA EL BUG VISUAL! (Superposición)
- * ===================================================================
- *
- * Grupo de input (Contenedor para input + label + icono).
- *
- * 'position: relative' es CRUCIAL. Le dice a la etiqueta
- * .floating-label (que tiene 'position: absolute') que debe
- * posicionarse "relativo a" este contenedor, y no a la página.
- *
- * Sin esto, todas las etiquetas flotantes se apilarían
- * en el mismo lugar, como ves en tu captura de pantalla.
- */
-.input-group {
-  position: relative;
-}
-
-/**
- * El campo de texto <input>
- *
- * ¡IMPORTANTE!
- * Esta regla selecciona CUALQUIER input de texto, password o email
- * (y los IDs específicos de Django) dentro de .input-group.
- * Esto da estilo a los campos que Django renderiza.
- */
-.input-group input[type="text"],
-.input-group input[type="password"],
-.input-group input[type="email"],
-.input-field /* Clase de fallback */ {
-  /* Aplicamos la clase .input-field visualmente */
+.input-group input {
   width: 100%;
-  height: 50px;
-  padding: 0 15px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
+  height: 54px; 
+  padding: 0 15px 0 12px;
+  border: 2px solid transparent;
   background-color: var(--color-background-input);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--color-text-dark);
   outline: none;
-  transition: all var(--transition-main);
-  color: var(--color-text-dark); /* Color del texto que se escribe */
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 1px var(--color-border);
 }
 
-/**
- * Estilo de foco para el input.
- * Usa el color primario para el borde/sombra.
- */
-.input-group input[type="text"]:focus,
-.input-group input[type="password"]:focus,
-.input-group input[type="email"]:focus {
-  border-color: var(--color-primary);
-  /* Sombra sutil usando el color primario con opacidad */
-  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+.input-group input:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 2px var(--color-secondary);
+  transform: translateY(-2px);
 }
 
-/**
- * La "Etiqueta Flotante".
- * - Se posiciona 'absolutamente' DENTRO de su padre (.input-group)
- * que ahora tiene 'position: relative'.
- *
- * ===================================================================
- * |   ¡ESTA ES LA REGLA QUE ARREGLA EL BUG FUNCIONAL! (No se puede escribir)
- * ===================================================================
- *
- * 'pointer-events: none' es CRUCIAL. Hace que la etiqueta
- * sea "invisible" a los clics del ratón. El clic "atraviesa"
- * la etiqueta y llega al <input> que está debajo.
- *
- * Sin esto, estás haciendo clic en la <label>, no en el <input>.
- */
 .floating-label {
   position: absolute;
-  left: 15px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-placeholder);
-  background-color: transparent; /* Importante para el efecto */
-  padding: 0;
-  font-size: 1rem;
-  pointer-events: none; /* <-- ¡ESTA ES LA LÍNEA MÁGICA! */
-  transition: all var(--transition-main);
+  pointer-events: none;
+  transition: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-size: 0.95rem;
+  padding: 0 4px;
+  background-color: transparent;
 }
 
-/**
- * Efecto de "flote" de la etiqueta.
- * Se activa cuando el input está en foco O cuando tiene texto.
- *
- * NOTA: Esto depende de que tu 'forms.py' añada 'placeholder: " "'
- * a los widgets del formulario, lo cual es vital.
- */
 .input-group input:focus ~ .floating-label,
 .input-group input:not(:placeholder-shown) ~ .floating-label {
-  top: 0; /* Sube la etiqueta */
-  font-size: 0.8rem;
+  top: -9px; 
+  font-size: 0.75rem;
   color: var(--color-primary);
-  /* Truco: el fondo coincide con el fondo del input para "cortar" el borde */
-  background-color: var(--color-background-input); 
-  padding: 0 5px;
-  left: 10px;
-}
-
-
-/**
- * Icono del "ojo" para mostrar/ocultar contraseña.
- */
-.eye-icon {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-<<<<<<< HEAD
-  color: var(--color-placeholder);
-  transition: color var(--transition-main);
-}
-.eye-icon:hover {
-  color: var(--color-primary);
-=======
-
-  /* Arreglos visuales */
-  background: none;
-  border: none;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
->>>>>>> feature/inicio-sesion
-}
-.eye-icon svg {
-  stroke: var(--color-placeholder); /* Usamos variable */
-  transition: stroke var(--transition-main);
-}
-.eye-icon:hover svg {
-  stroke: var(--color-primary); /* Usamos variable */
-}
-
-
-/**
- * Grupo para el Checkbox y el enlace "Olvidé Contraseña".
- */
-.input-group.checkbox-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  margin-top: -5px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #555;
-  cursor: pointer;
-}
-/* La etiqueta del checkbox de Django */
-.remember-me label {
-  cursor: pointer;
-}
-
-/**
- * Checkbox personalizado con el color primario.
- * Asignamos el estilo al input de Django `[name="remember"]`.
- */
-.input-group input[type="checkbox"] {
-  width: 1em;
-  height: 1em;
-  accent-color: var(--color-primary); /* ¡Usa el color primario! */
-  cursor: pointer;
-}
-
-/**
- * Botón de Submit (Iniciar Sesión).
- * Usa la paleta Azul/Dorado.
- *
- * ¡NUEVA ANIMACIÓN!
- * Se añade un 'overflow: hidden' y un pseudo-elemento ::after
- * para crear una animación de "brillo" (shimmer).
- */
-.form-btn--submit {
-  background-color: var(--color-primary); /* Fondo Azul */
-  color: var(--color-text-light); /* Texto Blanco */
-  border: none;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  font-size: 1.1rem;
+  background-color: #fff;
   font-weight: 600;
+  border-radius: 4px;
+}
+
+.eye-icon {
+  position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; color: #aaa; transition: 0.2s;
+}
+.eye-icon:hover { color: var(--color-primary); }
+
+/* --- CHECKBOX Y LINKS --- */
+.input-group.checkbox-group {
+  display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: -5px;
+}
+.remember-me { display: flex; align-items: center; gap: 8px; color: #555; cursor: pointer; }
+.input-group input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer;
+}
+.form-link {
+  color: var(--color-primary); font-weight: 600; text-decoration: none; font-size: 0.85rem;
+  position: relative;
+}
+.form-link::after {
+  content: ''; position: absolute; width: 0; height: 2px; bottom: -2px; left: 0;
+  background-color: var(--color-secondary); transition: width 0.3s;
+}
+.form-link:hover::after { width: 100%; }
+
+/* --- BOTÓN PRINCIPAL --- */
+.form-btn--submit {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1a427a 100%);
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all var(--transition-main);
-  position: relative; /* Necesario para la animación de brillo */
-  overflow: hidden; /* Oculta el brillo fuera del botón */
+  transition: all 0.3s ease;
   box-shadow: var(--shadow-btn);
+  margin-top: 15px;
+  position: relative;
+  overflow: hidden;
 }
 
 .form-btn--submit:hover {
-  background-color: var(--color-secondary); /* Fondo Dorado en hover */
-  color: var(--color-primary-text); /* Texto Oscuro en hover */
-  transform: translateY(-3px); /* Efecto de elevación */
+  background: linear-gradient(135deg, #1a427a 0%, var(--color-primary) 100%);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-btn-hover);
 }
+.form-btn--submit:active { transform: translateY(0); }
 
-/* Animación de "Brillo" (Shimmer) */
-.form-btn--submit::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to right, 
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(25deg);
-  /* La animación 'shimmer' está definida en SECCIÓN 10 */
-  animation: shimmer 3s infinite linear; 
-}
-
-
-/**
- * Divisor "O más sobre nosotros".
- */
+/* --- FOOTER --- */
 .form-divider {
-  margin: 30px 0;
-  position: relative;
-  font-size: 0.9rem;
-  color: var(--color-text-divider);
+  margin: 35px 0 25px; 
+  position: relative; 
+  font-size: 0.8rem; 
+  color: #aaa; 
+  text-transform: uppercase; 
+  letter-spacing: 1px;
 }
-/* La línea horizontal */
 .form-divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background-color: var(--color-border-divider);
-  z-index: 1; /* Detrás del texto */
+  content: ''; 
+  position: absolute; 
+  left: 0; right: 0; 
+  top: 50%; height: 1px; 
+  background-color: #eee; 
+  z-index: 1;
 }
-/* El texto "O" */
 .form-divider p {
-  /* Truco para que el fondo sea el del panel (blanco)
-     y no transparente, "cortando" la línea. */
-  background-color: var(--color-background-card); 
-  padding: 0 10px;
-  display: inline-block;
-  position: relative;
-  z-index: 2; /* Encima de la línea */
+  background-color: #fff; 
+  padding: 0 15px; 
+  display: inline-block; 
+  position: relative; 
+  z-index: 2;
 }
 
-/**
- * Contenedor para botones de redes sociales.
- */
-.form-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-socials {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-/* ... tu código CSS anterior ... */
+.form-socials { display: flex; 
+  justify-content: center; 
+  gap: 15px; 
+  margin-bottom: 20px; }
 
 .form-btn--social {
-  display: inline-flex;
+  width: 45px; 
+  height: 45px; 
+  border-radius: 50%; 
+  border: 1px solid #eee;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: 0.3s; 
+  background: #fff;
+}
+.form-btn--social:hover {
+  border-color: var(--color-primary); 
+  transform: translateY(-3px); 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-icon { width: 20px; 
+  height: 20px; 
+}
+
+/* Mensajes de Alerta */
+.message-container {
+  position: fixed; 
+  top: 20px; left: 50%; 
+  transform: translateX(-50%); 
+  z-index: 9999; width: 90%; 
+  max-width: 400px;
+}
+.alert {
+  padding: 14px 20px; 
+  border-radius: 8px; 
+  font-weight: 500; 
+  font-size: 0.9rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+  margin-bottom: 10px; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.alert.danger { background: #fff; 
+  border-left: 5px solid #ef4444; 
+  color: #b91c1c; 
+}
+
+.alert.success { background: #fff; 
+  border-left: 5px solid #22c55e; 
+  color: #15803d;
+ }
+
+/* ============================================================
+    RESPONSIVIDAD TOTAL 
+   ============================================================ */
+@media (max-width: 850px) {
+  
+  html, body {
+    overflow-y: auto; 
+    height: auto;     
+    background: #ffffff; 
+  }
+  
+  body::before { display: none; } 
+
+  .main-wrapper {
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 100vh;
+    
+    /* SIN ESTILO DE TARJETA */
+    border-radius: 0; 
+    box-shadow: none; 
+    border: none;
+    
+    margin: 0;
+    background-color: #fff;
+    backdrop-filter: none;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .left-panel { display: none; } 
+
+  .right-panel {
+    padding: 40px 25px;
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 100%;
+    animation: none;
+  }
+
+  /* --- LOGO EN CELULAR--- */
+  .school-logo-small {
+    display: block;
+    width: 150px; /* Aumentado de 100px a 150px para celular */
+    margin: 0 auto 30px;
+  }
+
+  .form-header h1 { font-size: 1.8rem; }
+  .sub-header-text { font-size: 0.95rem; margin-bottom: 40px; }
+
+  /* Inputs Táctiles Mejorados */
+  .input-group input {
+    height: 60px;
+    font-size: 16px; 
+    border-radius: 14px;
+    background-color: #f7f9fc;
+    border: 1px solid #eef2f6;
+  }
+  
+  .input-group input:focus {
+    background-color: #fff;
+    border-color: var(--color-primary);
+  }
+
+  /* Botón Grande */
+  .form-btn--submit {
+    padding: 18px;
+    font-size: 1.1rem;
+    border-radius: 14px;
+    margin-top: 30px;
+    box-shadow: 0 10px 25px rgba(15, 41, 76, 0.15);
+  }
+
+  /* Modal Móvil */
+  .modal-box {
+    width: 95%;
+    padding: 25px;
+    border-radius: 20px;
+    position: fixed;
+    bottom: 20px;
+    margin: 0;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+  }
+  
+  .form-link { padding: 12px 0; display: inline-block; }
+}
+
+/* ============================================================
+   MODAL DE RECUPERACIÓN 
+   ============================================================ */
+
+/* 1. Fondo oscuro (Fade In) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 41, 76, 0.6); 
+  backdrop-filter: blur(4px);        
+  display: none;
   justify-content: center;
   align-items: center;
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-round);
-  background-color: rgba(253, 253, 253, 0.8);
-  transition: all var(--transition-main);
+  z-index: 9999;
+  
+  /* Estado inicial para la transición del fondo */
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.form-btn--social:hover {
-  border-color: var(--color-primary);
-<<<<<<< HEAD
-  background-color: var(--color-primary); /* Fondo Azul en hover */
-  transform: translateY(-3px);
+/* Cuando JS agrega .show, el fondo aparece suavemente */
+.modal-overlay.show {
+  display: flex;
+  opacity: 1;
 }
 
-/* * Icono dentro del botón social.
- * 'filter: brightness(0) invert(1)' es un truco para
- * convertir un icono PNG/SVG negro (o de color oscuro) a blanco.
- *
- * NOTA: Tus iconos SVG de Instagram y Google deberían tener
- * un color inicial oscuro para que esto funcione bien.
- */
-.form-btn--social:hover .btn-icon {
-  filter: brightness(0) invert(1); /* Convierte el icono a blanco */
-}
-=======
-  background-color: var(--color-primary); 
-  transform: translateY(-3px);
-}
-
-
->>>>>>> feature/inicio-sesion
-
-.btn-icon {
-  width: 24px;
-  height: 24px; /* Añadimos altura para mejor control */
-  transition: filter var(--transition-main); /* Animamos la transición del filtro */
+/* 2. Definición de la Animación "Pop Up" (Escritorio) */
+@keyframes modalPopUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-10px); /* Rebote */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-.contact-text {
+/* 3. La Tarjeta Principal */
+.modal-box {
+  background: #ffffff;
+  width: 90%;
+  max-width: 400px;
+  padding: 35px 30px;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); 
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--color-secondary);
+  
+  /* ESTADO INICIAL: Invisible y desplazado */
+  opacity: 0; 
+  transform: scale(0.8) translateY(30px);
+}
+
+/* 4. EJECUTAR ANIMACIÓN AL ABRIR */
+.modal-overlay.show .modal-box {
+  /* 'forwards' asegura que se quede visible al terminar */
+  animation: modalPopUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- RESTO DE ESTILOS (IGUAL QUE ANTES) --- */
+
+.modal-box h2 {
+  color: var(--color-primary);
+  margin-bottom: 8px;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.modal-box p {
+  color: #64748b;
   font-size: 0.9rem;
-  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* Selector Cápsula */
+.role-selector {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 50px; 
+  padding: 4px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.role-selector input[type="radio"] { display: none; }
+
+.role-selector label {
+  flex: 1;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-selector input[type="radio"]:checked + label {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 41, 76, 0.25);
+}
+
+/* Inputs */
+.modal-box label:not(.role-selector label) {
+  display: block;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 6px;
+  margin-left: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-box .input-field { 
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  color: #333;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.modal-box .input-field:focus {
+  background-color: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 41, 76, 0.1);
+}
+
+/* Botones */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 10px;
 }
 
-/* ... el resto de tu código CSS ... */
-
-/*
-================================================================================
-|   SECCIÓN 8: Componente - Mensajes de Error y Alerta (Unificado)             |
-================================================================================
-|
-|   Estilos para los mensajes de feedback.
-|   Estos estilos se aplican al bloque de mensajes de Django
-|   que pusimos en el HTML (.message-container y .alert).
-|
-|   Se ha refactorizado para unificar '.form-error-box' y '.alert'
-|   en un solo sistema de alertas flotantes.
-|
-*/
-
-/**
- * Contenedor para las alertas flotantes (Django Messages).
- * - Se posiciona fijamente en la parte superior central de la ventana.
- * - 'pointer-events: none' permite hacer clic "a través" de él.
- * - Este es el '.message-container' de tu HTML.
- */
-.message-container {
-  position: fixed; /* Flota sobre toda la página */
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999; /* Por encima de todo */
+.btn-primary {
   width: 100%;
-  max-width: 400px; /* Ancho máximo del mensaje */
-  pointer-events: none; /* Los clics atraviesan el contenedor */
-  display: flex;
-  flex-direction: column; /* Apila múltiples mensajes */
-  align-items: center;
-  gap: 10px; /* Espacio entre mensajes */
-  padding: 0 15px; /* Evita que pegue a los bordes en móvil */
-}
-
-/**
- * La alerta individual.
- * - 'pointer-events: auto' la hace clickeable (para cerrarla, etc.).
- * - Se le aplican las animaciones de fadeIn y fadeOut.
- */
-.alert {
-  /* Apariencia base (error) */
-  background-color: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
-  color: var(--color-danger-text);
-  
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  display: inline-block; /* Se ajusta al contenido */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  opacity: 0; /* Comienza invisible */
-  pointer-events: auto; /* Se puede hacer clic en la alerta */
-  
-  /* * Animación:
-   * 1. 'fadeIn' dura 0.3s y se queda ('forwards').
-   * 2. 'fadeOut' dura 0.5s, empieza después de 3.5s y se queda ('forwards').
-   */
-  animation: fadeIn 0.3s ease forwards, fadeOut 0.5s ease forwards 3.5s;
-  font-size: 0.95rem;
-  
-  /* Añadimos un ícono de Font Awesome antes del texto */
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/**
- * Ícono para la alerta de error (default).
- * Se añade usando un pseudo-elemento ::before.
- * Esto requiere que Font Awesome esté cargado en el HTML.
- */
-.alert.error::before,
-.alert::before { /* Fallback por si no hay tag */
-  content: "\f071"; /* Icono "exclamation-triangle" de Font Awesome */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  font-size: 1.1rem;
-  color: var(--color-danger-text);
-}
-
-/**
- * Estilos para diferentes tipos de alertas (Django Tags).
- * Sobrescriben el estilo de error por defecto.
- */
-.alert.success {
-  background-color: var(--color-success-bg);
-  border-color: var(--color-success-border);
-  color: var(--color-success-text);
-}
-.alert.success::before {
-  content: "\f058"; /* Icono "check-circle" */
-  color: var(--color-success-text);
-}
-
-.alert.warning {
-  background-color: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-  color: var(--color-warning-text);
-}
-.alert.warning::before {
-  content: "\f06a"; /* Icono "exclamation-circle" */
-  color: var(--color-warning-text);
-}
-
-/**
- * Estilos para la clase .errorlist de Django (si se usa).
- * Forzamos a que se vea EXACTAMENTE como nuestra alerta.
- * Esto es un "fallback" por si se usa {{ form.non_field_errors }}.
- */
-.errorlist {
-  /* Hereda todos los estilos de .alert */
-  background-color: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
-  color: var(--color-danger-text);
-  padding: 12px 15px;
-  border-radius: var(--radius-md);
-  margin: 0 0 20px 0;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: left;
-  list-style: none; /* Oculta los puntos (bullets) de la <ul> */
-  
-  /* Añade el ícono */
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.errorlist li {
-  margin: 0;
-  padding: 0;
-}
-/* El icono para el .errorlist (unificado con .alert) */
-.errorlist::before {
-  content: "\f071"; /* Icono "exclamation-triangle" */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  font-size: 1.1rem;
-  color: var(--color-danger-text);
-  flex-shrink: 0;
-}
-
-
-/*
-================================================================================
-|   SECCIÓN 9: Responsive (Media Queries)                                      |
-================================================================================
-*/
-
-/**
- * Punto de ruptura para tablets y móviles (850px).
- * - Oculta el panel izquierdo.
- * - El panel derecho ocupa toda la pantalla.
- * - Desactiva el efecto de fondo blur.
- */
-@media (max-width: 850px) {
-  /* El contenedor principal ya no es una tarjeta alta,
-     sino que se apila verticalmente */
-  .main-wrapper {
-    flex-direction: column;
-    height: auto; /* La altura se ajusta al contenido */
-    max-width: 100%;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  
-  /* El body ya no necesita centrar contenido en móvil */
-  body {
-    padding: 0;
-    align-items: flex-start; /* Alinea al inicio */
-    overflow: auto; /* Permite el scroll normal en móvil */
-  }
-  
-  /* Desactiva el fondo difuminado en móvil, no es necesario */
-  body::before {
-    display: none;
-  }
-
-  /* Oculta el panel izquierdo por completo */
-  .left-panel {
-    display: none;
-  }
-
-  /* El panel derecho ahora es la única vista */
-  .right-panel {
-    width: 100%;
-    min-height: 100vh;
-    padding: 30px;
-    background-color: var(--color-background-card); /* Fondo blanco sólido */
-    backdrop-filter: none; /* Sin blur */
-  }
-
-  /* Muestra el logo pequeño, que estaba oculto en desktop */
-  .school-logo-small {
-    display: block;
-    width: 100px; /* Tamaño ajustado */
-    height: auto;
-    margin: 0 auto 20px;
-  }
-<<<<<<< HEAD
-  
-  /* Ajustes para el contenedor de mensajes flotantes en móvil */
-  .message-container {
-    top: 10px;
-    max-width: 90%;
-  }
-
-  .alert {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-=======
-}
-
-.form-error-box {
-  background-color: rgba(255, 0, 0, 0.08);
-  border: 1px solid #e74c3c;
-  color: #c0392b;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-
-
-
-/* ============================
-   MENSAJES DE LOGIN (FLOTANTES)
-=============================== */
-
-.message-container {
-  position: absolute;
-  top: 10px;
-  left: 72%; /* Aumenta para moverlo a la derecha */
-  transform: translateX(-50%);
-  z-index: 999;
-  text-align: center;
-  width: 100%;
-  max-width: 350px;
-  pointer-events: none;
-}
-
-
-
-/* Caja del mensaje */
-.alert {
-  background-color: #ffe6e6;
-  border: 1px solid #e57373;
-  color: #b71c1c;
-  padding: 12px 20px;
+  padding: 14px;
   border-radius: 10px;
-  font-weight: 300;
-  display: inline-block;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  opacity: 0;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1a427a 100%);
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(15, 41, 76, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 41, 76, 0.3);
+}
+
+.btn-cancel {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-cancel:hover { color: var(--color-danger-text); }
+
+.estado {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 20px;
+  color: var(--color-danger-text);
+}
+
+/* --- 5. AJUSTES Y ANIMACIÓN PARA CELULAR --- */
+@media (max-width: 480px) {
   
-  /* Animaciones */
-  animation: fadeIn 0.35s ease forwards,
-             fadeOut 0.6s ease forwards 3.5s;
-  
-  font-size: 0.95rem;
-  text-align: center;
-  line-height: 1.25rem;
-  max-width: 260px;
-}
-
-/* Animación entrada */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -6px); }
-  to   { opacity: 1; transform: translate(-50%, 0px); }
-}
-
-/* Animación salida */
-@keyframes fadeOut {
-  from { opacity: 1; transform: translate(-50%, 0px); }
-  to   { opacity: 0; transform: translate(-50%, -8px); }
-}
-
-/* Variantes (por si después agregas otros tipos) */
-.alert.success {
-  background-color: #e8f5e9;
-  border-color: #81c784;
-  color: #2e7d32;
-}
-
-.alert.warning {
-  background-color: #fff8e1;
-  border-color: #fbc02d;
-  color: #8a6d00;
-}
-
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 768px) {
-  .alert {
-    max-width: 90%;
-    font-size: 0.88rem;
-    padding: 10px 16px;
+  /* Animación Deslizar desde abajo */
+  @keyframes slideUpMobile {
+    0% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .message-container {
-    top: 10px;
-    left: 90%; /* centrado en móviles */
->>>>>>> feature/inicio-sesion
-  }
-}
-
-
-/*
-================================================================================
-|   SECCIÓN 10: Animaciones (Keyframes)                                        |
-================================================================================
-|
-|   Define las animaciones de entrada y salida para
-|   las alertas flotantes.
-|
-*/
-
-/*
- * Animación de entrada.
- * La alerta aparece y baja ligeramente.
- */
-@keyframes fadeIn {
-  from {
+  .modal-box {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 24px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    
+    /* Posición inicial: Escondido abajo */
+    position: fixed;
+    bottom: 0;
+    margin: 0;
+    padding: 30px 25px;
+    
+    /* Estado inicial móvil */
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(100%);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .modal-overlay.show .modal-box {
+    /* Ejecuta la animación de deslizar */
+    animation: slideUpMobile 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    
+    /* Quitamos las propiedades de la animación de escritorio */
+    transform: none; 
   }
 }
+/* ============================================================
+   ANIMACIONES DE SALIDA (CERRAR MODAL)
+   ============================================================ */
 
-/*
- * Animación de salida.
- * La alerta se desvanece y sube.
- */
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
-    visibility: hidden; /* La oculta completamente al final */
-  }
+/* 1. Animación para el Fondo Oscuro (Fade Out) */
+.modal-overlay.closing {
+  animation: fadeOutOverlay 0.3s forwards;
+  /* Mantenemos display flex mientras se anima */
+  display: flex !important; 
 }
 
-/* * Animación de "Zoom In" para el fondo del panel izquierdo.
- * Crea un efecto "Ken Burns" muy sutil.
- */
-@keyframes zoomIn {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.1);
-  }
+@keyframes fadeOutOverlay {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-/* * Animación de "Shimmer" (brillo) para el botón de login.
- * Mueve un gradiente blanco de izquierda a derecha.
- */
-@keyframes shimmer {
+/* 2. Animación Salida ESCRITORIO (Pop Down) */
+.modal-overlay.closing .modal-box {
+  animation: modalPopDown 0.3s forwards;
+}
+
+@keyframes modalPopDown {
   0% {
-    transform: translateX(-100%) rotate(25deg);
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
   100% {
-    transform: translateX(100%) rotate(25deg);
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
   }
 }
 
-/* --- FIN DEL ARCHIVO CSS --- */
+/* 3. Animación Salida CELULAR (Deslizar hacia abajo) */
+@media (max-width: 480px) {
+  .modal-overlay.closing .modal-box {
+    animation: slideDownMobile 0.3s forwards;
+  }
+
+  @keyframes slideDownMobile {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+}
+
+/* Animaciones */
+@keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* ============================================================
+   ANIMACIONES DE SALIDA 
+   ============================================================ */
+
+/* 1. El Fondo Oscuro se desvanece */
+.modal-overlay.closing {
+  animation: fadeOutOverlay 0.3s forwards;
+  /* Es vital mantener display:flex para que no desaparezca antes de animar */
+  display: flex !important; 
+}
+
+@keyframes fadeOutOverlay {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* 2. La Tarjeta se va hacia abajo (Escritorio) */
+.modal-overlay.closing .modal-box {
+  animation: modalPopDown 0.3s forwards;
+}
+
+@keyframes modalPopDown {
+  from { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+  to { 
+    opacity: 0; 
+    transform: scale(0.9) translateY(20px); 
+  }
+}
+
+/* 3. La Tarjeta se desliza hacia abajo (Celular) */
+@media (max-width: 480px) {
+  .modal-overlay.closing .modal-box {
+    animation: slideDownMobile 0.3s forwards;
+  }
+
+  @keyframes slideDownMobile {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+  }
+}
+/* ============================================================
+   ALERTAS RÁPIDAS (3 SEGUNDOS)
+   ============================================================ */
+
+.message-container {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: auto;
+  min-width: 320px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none; 
+}
+
+.alert {
+  background-color: #fff;
+  border-left: 6px solid #ef4444; /* Rojo Error */
+  color: #b91c1c;
+  padding: 16px 25px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+
+  /* --- CONFIGURACIÓN DE TIEMPO: 3 SEGUNDOS --- */
+  opacity: 0; 
+  animation: autoDismiss 3s ease forwards;
+}
+
+/* --- LÍNEA DE TIEMPO DE 3 SEGUNDOS --- */
+@keyframes autoDismiss {
+  /* 1. ENTRADA (0s a 0.5s aprox) */
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 2. LECTURA (0.5s a 2.5s aprox) - Se queda quieta */
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 3. SALIDA (2.5s a 3s) - Se va */
+  100% {
+    opacity: 0;
+    transform: translateY(-50px);
+    visibility: hidden;
+  }
+}
+/* ============================================================
+   ESTILO PARA ALERTA DE ÉXITO (LOGOUT / REGISTRO)
+   ============================================================ */
+
+/* Cuando el mensaje es success (verde) */
+.alert.success {
+  background-color: #ffffff;
+  border-left: 6px solid #10b981; /* Verde Esmeralda */
+  color: #065f46;                 /* Texto verde oscuro */
+  border: 1px solid #d1fae5;      /* Borde sutil */
+}
+
+/* Icono específico para éxito (Check) */
+.alert.success::before {
+  content: '✔'; /* Icono simple con CSS */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #d1fae5;
+  color: #10b981;
+  border-radius: 50%;
+  font-size: 14px;
+  margin-right: 8px;
+  font-weight: 800;
+}
+
+/* Animación de rebote suave para el éxito */
+.alert.success {
+  animation: slideInSuccess 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes slideInSuccess {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

@@ -86,7 +86,7 @@ class Command(BaseCommand):
                 u.save(update_fields=["password"])
             count += 1
 
-        # Exporta CSV si lo pidieron
+        # Exporta CSV
         if export_csv:
             with open(export_csv, "w", newline="", encoding="utf-8") as f:
                 w = csv.writer(f)

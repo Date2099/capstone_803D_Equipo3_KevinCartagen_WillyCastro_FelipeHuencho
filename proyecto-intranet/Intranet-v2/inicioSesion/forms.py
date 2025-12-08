@@ -21,6 +21,8 @@ class LoginForm(forms.Form):
 
     password = forms.CharField(
         label="",
+        required=True,
+        min_length=1,
         widget=forms.PasswordInput(attrs={
             "autocomplete": "new-password",
             "class": "input-field",

@@ -2,10 +2,9 @@ from django.shortcuts import redirect
 from django.urls import reverse, resolve
 from django.conf import settings
 
-
 class LoginRequiredMiddleware:
     """
-    Middleware proteje a la pagina.
+    Middleware que protege el sitio completo.
     
     Funciones principales:
     - Obliga a autenticarse para acceder a cualquier vista protegida.
@@ -19,20 +18,26 @@ class LoginRequiredMiddleware:
 
         # Rutas que pueden ser accedidas sin autenticación por prefijo
         self.exempt_prefixes = (
-            "/admin/",        # ✅ Admin de Django (libre totalmente)
+            "/admin/",
             "/static/",
             "/media/",
             "/favicon.ico",
+            "/inicioSesion/reset/",
+            "/inicioSesion/auth/", # Libera todas las rutas de autenticación/API
         )
 
+        # Nombres de rutas que NO requieren sesión
+        # (importante: deben existir en urls.py)
         self.exempt_names = {
             "inicioSesion:login",
             "inicioSesion:post_login",
             "inicioSesion:logout",
-            "inicioSesion:diag_login",  # ruta de testeo
+            "inicioSesion:diag_login",
             "admin:login",
+            "inicioSesion:validate_family"
         }
 
+        # Convertir nombres de rutas en paths para comparación directa
         self.exempt_paths = set()
         for name in self.exempt_names:
             try:
@@ -58,7 +63,7 @@ class LoginRequiredMiddleware:
             response = self.get_response(request)
             return self._no_cache(response)
 
-        # 2) Acceso libre a archivos estáticos / media
+        # 2) Acceso libre a archivos estáticos / media / Prefijos exentos
         if any(path.startswith(p) for p in self.exempt_prefixes):
             return self.get_response(request)
 
@@ -67,7 +72,7 @@ class LoginRequiredMiddleware:
             response = self.get_response(request)
             return self._no_cache(response)
 
-        # 4) Detectar vista por nombre 
+        # 4) Detectar vista por nombre (namespace:url_name)
         try:
             resolved = resolve(path)
             urlname = (
@@ -110,7 +115,7 @@ class LoginRequiredMiddleware:
             response = self.get_response(request)
             return self._no_cache(response)
 
-        # 6) Usuario NO autenticado → mandar a login
+        # 6) Usuario NO autenticado -> mandar a login
         try:
             login_url = reverse(settings.LOGIN_URL)
         except Exception:
